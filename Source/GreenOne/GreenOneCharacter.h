@@ -4,15 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
 #include "GreenOneCharacter.generated.h"
 
 class UInputAction;
 
 UCLASS(config=Game)
-class AGreenOneCharacter : public ACharacter
+class AGreenOneCharacter : public ACharacter, public IEntityGame
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamage);
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -38,9 +41,41 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
+	/**
+	 * Give if the player is attacking or not.
+	 */
+	UFUNCTION(BlueprintCallable)
+	bool IsAttacking();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void EntityTakeDamage(float damage);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
+	float Health = 100.f;
+
+	/**
+	 * Return une valeur entre 0 et 1 correspondant au percentage de la vie du joueur.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetHealthPercent();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTakeDamage OnTakeDamage;
+
+	UFUNCTION(BlueprintCallable)
+	void Shoot();
+
+	UPROPERTY(EditAnywhere)
+	float DamagePlayer = 10.f;
+
 protected:
 
 	void Move(const FInputActionValue& Value);
+
+	float MaxHealth = 0;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool IsAtk;
 
 	/** 
 	 * Called via input to turn at a given rate. 

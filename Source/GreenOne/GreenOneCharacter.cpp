@@ -9,6 +9,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
@@ -71,9 +73,8 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn Right / Left Mouse", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("Turn Right / Left Gamepad", this, &AGreenOneCharacter::TurnAtRate);
+
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("Look Up / Down Gamepad", this, &AGreenOneCharacter::LookUpAtRate);
 
 }
 
@@ -88,6 +89,7 @@ void AGreenOneCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	MaxHealth = Health;
 }
 
 void AGreenOneCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -110,6 +112,38 @@ void AGreenOneCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+}
+
+bool AGreenOneCharacter::IsAttacking()
+{
+	return IsAtk;
+}
+
+void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage)
+{
+	Health -= damage;
+	if(Health <= 0) { Health = 0.f; }
+	OnTakeDamage.Broadcast();
+}
+
+float AGreenOneCharacter::GetHealthPercent()
+{
+	return Health/MaxHealth;
+}
+
+void AGreenOneCharacter::Shoot()
+{
+	APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	FHitResult OutHit;
+	GetWorld()->LineTraceSingleByChannel(OutHit, CameraRef->GetCameraLocation(), CameraRef->GetCameraLocation() + CameraRef->GetActorForwardVector()* 5000.f, ECC_WorldDynamic);
+	if (OutHit.GetActor())
+	{
+		if (OutHit.GetActor()->Implements<UEntityGame>())
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *OutHit.GetActor()->GetFName().ToString());
+			IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer);
+		}
+	}
 }
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
