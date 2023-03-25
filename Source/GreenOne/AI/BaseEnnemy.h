@@ -40,7 +40,7 @@ public:
 	FOnTakeDamage OnTakeDamage;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Custom|Damage")
-	void EntityTakeDamage(float DamageApply);
+	void EntityTakeDamage(float DamageApply, FName BoneNameHit);
 
 protected:
 
@@ -57,8 +57,33 @@ protected:
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = DrawLifeBar), Category = "Debug|Life")
 	TSubclassOf<UUserWidget> LifeBarClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
+	TArray<FName> ListWeakPoint;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
+	float CritMultiplyer = 2.f;
+
+	/**
+	 * List de différent palier de vie.
+	 * En lien avec la liste de matérial. lors que la vie de l'index 0 sera atteint.
+	 * Le material dans la list MatTreshold à l'index 0 sera appliquer au mesh.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
+	TArray<int32> LifeTreshold;
+
+	/**
+	 * List des mat qui seront appliquer à la mesh lors des différents palier de vie
+	 * La liste doit être de la même longueur que celle de Lifetreshold sinon EXPLOSION!!!
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
+	TArray<UMaterialInterface*> MatTreshold;
+
 private:
 
 	float MaxHealth = 0;
+
+	void ChangeTextureBaseHealth();
+
+	void DeadEntity();
 
 };

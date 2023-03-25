@@ -40,7 +40,7 @@ EBTNodeResult::Type UBTT_GetRandPoint::ExecuteTask(UBehaviorTreeComponent& Owner
 	FHitResult Outhit;
 	if(GetWorld()->LineTraceSingleByChannel(Outhit, SelfRef->GetPawn()->GetActorLocation(), TargetPoint, ECC_Visibility))
 	{
-		UE_LOG(LogTemp,Warning, TEXT("failed Ici"));
+		UE_LOG(LogTemp,Warning, TEXT("Faild in the get random Points there is a collision in the path."));
 		return EBTNodeResult::Failed;
 	}
 

@@ -13,6 +13,10 @@ class AGreenOneGameMode : public AGameModeBase
 
 public:
 	AGreenOneGameMode();
+
+	UFUNCTION(BlueprintCallable)
+	void LoadOneLevel(TSoftObjectPtr<UWorld> LevelToUnload, TSoftObjectPtr<UWorld> Level1Ref);
+
 };
 
 

@@ -5,6 +5,8 @@
 #include "GreenOne/Widget/Debug/Debug_W_LifeBar.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "AIController.h"
+#include "BrainComponent.h"
 
 // Sets default values
 ABaseEnnemy::ABaseEnnemy()
@@ -42,12 +44,51 @@ float ABaseEnnemy::GetPercentHealth()
 	return Health/MaxHealth;
 }
 
-void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply)
+void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneNameHit)
 {
 	//UE_LOG(LogTemp, Error, TEXT("Damage On Ennemy"));
-	Health -= DamageApply;
-	if (Health <= 0.f )	{ Health = 0.f; }
+	float CurrentDamageMulti = 1.f;
+	if (!ListWeakPoint.IsEmpty())
+	{
+		for(FName& var : ListWeakPoint)
+		{
+			if (BoneNameHit == var)
+			{
+				CurrentDamageMulti = CritMultiplyer;
+				break;
+			}
+		}
+	}
+	Health -= DamageApply * CurrentDamageMulti;
+	if (LifeTreshold.Num() == MatTreshold.Num())
+	{
+		ChangeTextureBaseHealth();
+	}
+	if (Health <= 0.f )
+	{
+		Health = 0.f;
+		DeadEntity();
+	}
 	OnTakeDamage.Broadcast();
 }
 
+void ABaseEnnemy::ChangeTextureBaseHealth()
+{
+	if (!LifeTreshold.IsEmpty())
+	{
+		for (int32 i = 0; i < LifeTreshold.Num(); ++i)
+		{
+			if (Health <= LifeTreshold[i])
+			{
+				this->GetMesh()->SetMaterial(0, MatTreshold[i]);
+			}
+		}
+	}
+}
+
+void ABaseEnnemy::DeadEntity()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	Cast<AAIController>(GetController())->GetBrainComponent()->StopLogic("Because");
+}
 

@@ -33,6 +33,8 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PauseAction;
+
+	void PlayerDead();
 	
 public:
 	AGreenOneCharacter();
@@ -48,7 +50,7 @@ public:
 	bool IsAttacking();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void EntityTakeDamage(float damage);
+	void EntityTakeDamage(float damage, FName BoneNameHit);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 	float Health = 100.f;

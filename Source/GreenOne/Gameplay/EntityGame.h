@@ -16,5 +16,5 @@ class GREENONE_API IEntityGame
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void EntityTakeDamage(float damage);
+	void EntityTakeDamage(float damage, FName BoneNameHit);
 };

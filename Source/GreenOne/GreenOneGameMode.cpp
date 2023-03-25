@@ -3,6 +3,7 @@
 #include "GreenOneGameMode.h"
 #include "GreenOneCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 AGreenOneGameMode::AGreenOneGameMode()
 {
@@ -12,4 +13,11 @@ AGreenOneGameMode::AGreenOneGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+}
+
+void AGreenOneGameMode::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToUnload, TSoftObjectPtr<UWorld> LevelToLoad)
+{
+	FLatentActionInfo LatentInfo;
+	UGameplayStatics::UnloadStreamLevelBySoftObjectPtr(GetWorld(), LevelToUnload, LatentInfo, false);
+	UGameplayStatics::LoadStreamLevelBySoftObjectPtr(GetWorld(), LevelToLoad, true, true, LatentInfo);
 }

@@ -60,14 +60,14 @@ void UBTT_Dodge::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	{
 		
 		AIRef->GetMovementComponent()->AddInputVector(DodgeVelocity);
-		UE_LOG(LogTemp,Warning, TEXT("Vector Dodge : %s"), *DodgeVelocity.ToString());
+		//UE_LOG(LogTemp,Warning, TEXT("Vector Dodge : %s"), *DodgeVelocity.ToString());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Le Owner de la task Dodge n'est pas un character est du coup fail l'appel pour le move."));
 	}
 	const float DotPro = FVector::DotProduct(ControllerRef->GetPawn()->GetActorForwardVector(), PlayerRef->GetActorForwardVector());
-	UE_LOG(LogTemp, Warning, TEXT("Dot : %f"), DotPro);
+	//UE_LOG(LogTemp, Warning, TEXT("Dot : %f"), DotPro);
 	if ( DotPro >= DodgeDistance || DotPro >= DodgeDistance*-1)
 	{
 		CharaMovementComp->MaxFlySpeed = FlyingSpeedInit;

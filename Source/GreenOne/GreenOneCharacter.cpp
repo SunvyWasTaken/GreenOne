@@ -78,6 +78,12 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 }
 
+void AGreenOneCharacter::PlayerDead()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	GetMovementComponent()->SetActive(false);
+}
+
 void AGreenOneCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -119,10 +125,14 @@ bool AGreenOneCharacter::IsAttacking()
 	return IsAtk;
 }
 
-void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage)
+void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit)
 {
 	Health -= damage;
-	if(Health <= 0) { Health = 0.f; }
+	if(Health <= 0)
+	{
+		PlayerDead();
+		Health = 0.f;
+	}
 	OnTakeDamage.Broadcast();
 }
 
@@ -135,13 +145,13 @@ void AGreenOneCharacter::Shoot()
 {
 	APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FHitResult OutHit;
-	GetWorld()->LineTraceSingleByChannel(OutHit, CameraRef->GetCameraLocation(), CameraRef->GetCameraLocation() + CameraRef->GetActorForwardVector()* 5000.f, ECC_WorldDynamic);
+	GetWorld()->LineTraceSingleByChannel(OutHit, CameraRef->GetCameraLocation(), CameraRef->GetCameraLocation() + CameraRef->GetActorForwardVector()* 5000.f, ECC_Camera);
 	if (OutHit.GetActor())
 	{
 		if (OutHit.GetActor()->Implements<UEntityGame>())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *OutHit.GetActor()->GetFName().ToString());
-			IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer);
+			UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *OutHit.BoneName.ToString());
+			IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName);
 		}
 	}
 }
