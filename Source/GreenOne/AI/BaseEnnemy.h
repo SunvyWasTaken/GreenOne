@@ -40,7 +40,7 @@ public:
 	FOnTakeDamage OnTakeDamage;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Custom|Damage")
-	void EntityTakeDamage(float DamageApply, FName BoneNameHit);
+	void EntityTakeDamage(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr);
 
 protected:
 

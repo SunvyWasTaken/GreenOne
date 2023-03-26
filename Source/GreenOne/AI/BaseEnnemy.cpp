@@ -44,7 +44,7 @@ float ABaseEnnemy::GetPercentHealth()
 	return Health/MaxHealth;
 }
 
-void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneNameHit)
+void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr)
 {
 	//UE_LOG(LogTemp, Error, TEXT("Damage On Ennemy"));
 	float CurrentDamageMulti = 1.f;

@@ -77,7 +77,7 @@ void AFlyingAICharacter::TimerShoot()
 		else if (Outhit.GetActor()->Implements<UEntityGame>())
 		{
 			ActiveCooldown();
-			IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName);
+			IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
 	}

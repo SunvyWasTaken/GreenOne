@@ -50,7 +50,7 @@ public:
 	bool IsAttacking();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void EntityTakeDamage(float damage, FName BoneNameHit);
+	void EntityTakeDamage(float damage, FName BoneNameHit, AActor* DamageSource = nullptr);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 	float Health = 100.f;

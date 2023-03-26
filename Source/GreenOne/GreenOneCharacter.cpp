@@ -125,7 +125,7 @@ bool AGreenOneCharacter::IsAttacking()
 	return IsAtk;
 }
 
-void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit)
+void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit, AActor* DamageSource = nullptr)
 {
 	Health -= damage;
 	if(Health <= 0)
@@ -151,7 +151,7 @@ void AGreenOneCharacter::Shoot()
 		if (OutHit.GetActor()->Implements<UEntityGame>())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *OutHit.BoneName.ToString());
-			IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName);
+			IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName, this);
 		}
 	}
 }
