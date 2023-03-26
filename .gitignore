@@ -51,7 +51,7 @@ SourceArt/**/*.png
 SourceArt/**/*.tga
 
 # Binary Files
-Binaries/*
+Binaries/*/*.pdb
 Plugins/*/Binaries/*
 
 # Builds
