@@ -15,6 +15,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
+#include "Gameplay/Common/AttackMelee.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
@@ -75,6 +76,13 @@ void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	{
 		MaxHealth = Health;
 	}
+
+	// Add AttackMeleeComponent
+	AttackMeleeComponent = CreateDefaultSubobject<UAttackMelee>(TEXT("AttackMelee"));
+	if(!AttackMeleeComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -86,6 +94,7 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
+		EnhancedInputComponent->BindAction(AttackMeleeAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::AttackMelee);
 	}
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
@@ -316,6 +325,11 @@ void AGreenOneCharacter::TogglePauseGame()
 		ControllerRef->SetShowMouseCursor(true);
 		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(ControllerRef, PauseWidgetRef);
 	}
+}
+
+void AGreenOneCharacter::AttackMelee()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Attack Melee"));
 }
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)

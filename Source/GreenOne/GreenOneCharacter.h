@@ -9,7 +9,6 @@
 #include "GreenOneCharacter.generated.h"
 
 class UInputAction;
-
 UCLASS(config=Game)
 class AGreenOneCharacter : public ACharacter, public IEntityGame
 {
@@ -41,6 +40,12 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AttackMeleeAction;
+
+	UPROPERTY(EditAnywhere)
+	class UAttackMelee* AttackMeleeComponent;
+	
 	void PlayerDead();
 
 	virtual void Tick( float DeltaSeconds );
@@ -93,11 +98,15 @@ public:
 	void StopShoot();
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
+	UFUNCTION(BlueprintCallable)
+	void AttackMelee();
+
+	UPROPERTY(EditAnywhere)
 	float DamagePlayer = 10.f;
 
 	/**
-	 * Cooldown entre chaque tire par défault c'est 1/3;
-	 * c'est à dire 1 tire toutes les 3 secondes.
+	 * Cooldown entre chaque tire par dï¿½fault c'est 1/3;
+	 * c'est ï¿½ dire 1 tire toutes les 3 secondes.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Custom|Combat")
 	float ShootCooldown;
@@ -110,8 +119,8 @@ public:
 
 	/**
 	 * Taux de dispertion du tire.
-	 * Allant de 0 à 1.
-	 * 0 quand il n'y a pas de bloom et 1 les tires fuse à 360° autour du joueur.
+	 * Allant de 0 ï¿½ 1.
+	 * 0 quand il n'y a pas de bloom et 1 les tires fuse ï¿½ 360ï¿½ autour du joueur.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0, ClampMax = 1, UIMin = 0, UIMax = 1, DisplayName = "Bloom du Tire"), Category = "Custom|Combat")
 	float ShootBloom;
@@ -154,12 +163,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
 	float DashDistance;
 
-	// Le temps que va prendre le dash pour attendre ça destination.
+	// Le temps que va prendre le dash pour attendre ï¿½a destination.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
 	float DashTime;
 
-	// Temps que va prendre le dash à revenir après utilisation.
+	// Temps que va prendre le dash ï¿½ revenir aprï¿½s utilisation.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
 	float DashCooldown;
