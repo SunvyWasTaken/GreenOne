@@ -19,4 +19,4 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run build CI
         run: |
-          RunUAT\Build.bat GreenOneEditor Win64 Development -project="C:\Users\SERV-ADMIN\Desktop\GreenOneProject\GreenOneGit\GreenOne.uproject" -WaitMutex -FromMsBuild
+          U:\UE_5.1\Engine\Build\BatchFiles\Build.bat GreenOneEditor Win64 Development -project="C:\Users\SERV-ADMIN\Desktop\GreenOneProject\GreenOneGit\GreenOne.uproject" -WaitMutex -FromMsBuild
