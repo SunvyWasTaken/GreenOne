@@ -51,6 +51,9 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	virtual void Tick( float DeltaSeconds );
 
 	void InputJump(const FInputActionValue& Value);
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool Invisible = false;
 	
 public:
 

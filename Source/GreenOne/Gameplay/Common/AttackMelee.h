@@ -25,16 +25,19 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Fight")
-	void Attack(AActor* HitActor, float Damage);
+	void Attack();
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee")
 	float ImpulseForce = 0.f;
 
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee")
+	float Damage = 5.f;
+	
 	UPROPERTY(EditAnywhere, Category = "Fight|Detection")
-	float RangeDetection = 150.f;
+	float DetectionOffset = 50.f;
 
 	UPROPERTY(EditAnywhere, Category = "Fight|Detection")
-	float RadiusDetection = 25.f;
+	float DetectionRadius = 80.f;
 	
 };
