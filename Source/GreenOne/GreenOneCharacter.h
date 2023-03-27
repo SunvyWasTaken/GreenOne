@@ -70,6 +70,29 @@ public:
 	UPROPERTY(EditAnywhere)
 	float DamagePlayer = 10.f;
 
+#pragma region Dash
+
+	// Dash dans la direction de l'input mouvement.
+	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
+	void Dash();
+
+	// Vitesse du dash en m/s
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
+	float DashSpeed;
+
+	// Le temps que le dash sera actif.
+	// Le temps est en secondes.
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
+	float DashTime;
+
+	// Temps que va prendre le dash à revenir après utilisation.
+	// Le temps est en secondes.
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash") Category = "Custom|Dash")
+	float DashCooldown;
+
+#pragma endregion
+
+
 protected:
 
 	void Move(const FInputActionValue& Value);

@@ -156,6 +156,11 @@ void AGreenOneCharacter::Shoot()
 	}
 }
 
+void AGreenOneCharacter::Dash()
+{
+	
+}
+
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
