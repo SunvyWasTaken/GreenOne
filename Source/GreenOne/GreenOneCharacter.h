@@ -87,7 +87,7 @@ public:
 
 	// Temps que va prendre le dash à revenir après utilisation.
 	// Le temps est en secondes.
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash") Category = "Custom|Dash")
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
 	float DashCooldown;
 
 #pragma endregion
