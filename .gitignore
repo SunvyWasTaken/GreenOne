@@ -18,8 +18,7 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-# Need for Precompiled / ART
-# *.dll
+*.dll
 
 # Fortran module files
 *.mod
@@ -53,11 +52,10 @@
 SourceArt/**/*.png
 SourceArt/**/*.tga
 
-# Binary Files
-
-# Need for Precompiled / ART 
-# Binaries/*/*.pdb
-# Plugins/*/Binaries/*
+# Binary Files  don't ignore for Precompiled 
+!Binaries/Win64/*.dll
+!Binaries/Win64/*
+Binaries/Win64/*.pdb
 
 # Builds
 Build/*
