@@ -22,6 +22,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
 	FVector PlayerLocation = FVector();
 
+	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
+	FRotator PlayerRotation = FRotator();
+
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|World")
 	FString MapName;
 
