@@ -176,6 +176,8 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName Bon
 {
 	Health -= damage;
 	if (Health <= 0)
+	if(!Invisible) Health -= damage;
+	if(Health <= 0)
 	{
 		PlayerDead();
 		Health = 0.f;
@@ -330,6 +332,9 @@ void AGreenOneCharacter::TogglePauseGame()
 void AGreenOneCharacter::AttackMelee()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack Melee"));
+	if(!AttackMeleeComponent) return;
+
+	AttackMeleeComponent->Attack();
 }
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
