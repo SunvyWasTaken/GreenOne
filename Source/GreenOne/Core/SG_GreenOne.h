@@ -36,5 +36,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|World")
 	float SunLocation = 0.f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Custom|Engine")
+	bool bIsFirstTime = true;
 	
 };

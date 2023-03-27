@@ -22,6 +22,7 @@ void UGI_GreenOne::SaveGame()
 	UpdateSaveData();
 	if (UGameplayStatics::DoesSaveGameExist(SaveName, SaveIndex))
 	{
+		CurrentSave->bIsFirstTime = false;
 		UGameplayStatics::SaveGameToSlot(CurrentSave, SaveName, SaveIndex);
 	}
 	else
@@ -56,7 +57,7 @@ void UGI_GreenOne::DeleteSave()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Delete de la sauvegarde rate."));
+		UE_LOG(LogTemp, Warning, TEXT("Delete de la sauvegarde failed."));
 	}
 }
 
@@ -81,6 +82,7 @@ USG_GreenOne* UGI_GreenOne::CreateSave()
 void UGI_GreenOne::ApplySaveData()
 {
 	if (!CurrentSave) { return; }
+	if (CurrentSave->bIsFirstTime) { return; }
 	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (!PlayerRef)
 	{
