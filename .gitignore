@@ -34,6 +34,7 @@
 *.out
 *.app
 *.ipa
+#.exp
 # Add for Precompiled
 *.pdb
 
@@ -58,6 +59,7 @@ SourceArt/**/*.tga
 Binaries/Win64/*.lib
 Binaries/Win64/*.exe
 Binaries/Win64/*.pdb
+Binaries/Win64/*.exp
 Binaries/Win64/*.dll
 
 # Builds
