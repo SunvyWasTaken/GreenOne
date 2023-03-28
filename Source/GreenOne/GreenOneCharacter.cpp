@@ -203,8 +203,8 @@ void AGreenOneCharacter::ShootRafale()
 		{
 			if (OutHit.GetActor()->Implements<UEntityGame>())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *OutHit.BoneName.ToString());
 				IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName, this);
+				OnHitEnnemy.Broadcast();
 			}
 		}
 	}

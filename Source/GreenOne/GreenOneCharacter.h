@@ -19,6 +19,8 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHitEnnemy);
+
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -66,6 +68,9 @@ public:
 	FOnPlayerDeath OnPlayerDeath;
 
 #pragma region Tire
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHitEnnemy OnHitEnnemy;
 
 	/**
 	 * Give if the player is attacking or not.
