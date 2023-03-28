@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Kismet/KismetMathLibrary.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
@@ -54,6 +55,8 @@ AGreenOneCharacter::AGreenOneCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
+	ShootCooldown = 1.f/3.f;
+	ShootBloom = 0.f;
 	CanShoot = false;
 }
 
@@ -169,16 +172,40 @@ void AGreenOneCharacter::Shoot()
 	if (!CanShoot) { return; }
 
 	CanShoot = true;
+	GetWorld()->GetTimerManager().SetTimer(ShootHandler, this, &AGreenOneCharacter::ShootRafale, ShootCooldown, true);
+	ShootRafale();
+}
 
+void AGreenOneCharacter::StopShoot()
+{
+	if (ShootHandler.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
+	}
+}
+
+void AGreenOneCharacter::ShootRafale()
+{
 	APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FHitResult OutHit;
-	GetWorld()->LineTraceSingleByChannel(OutHit, CameraRef->GetCameraLocation(), CameraRef->GetCameraLocation() + CameraRef->GetActorForwardVector()* 5000.f, ECC_Camera);
-	if (OutHit.GetActor())
+
+	float DegreeRotation = UKismetMathLibrary::Lerp(0.f, 360.f, ShootBloom);
+	FVector StartLocation = CameraRef->GetCameraLocation();
+	FVector EndLocation = StartLocation + UKismetMathLibrary::RandomUnitVectorInConeInDegrees(CameraRef->GetActorForwardVector(), DegreeRotation) * ShootDistance;
+
+	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera))
 	{
-		if (OutHit.GetActor()->Implements<UEntityGame>())
+		if (DotDecal)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *OutHit.BoneName.ToString());
-			IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName, this);
+			GetWorld()->SpawnActor<AActor>(DotDecal, OutHit.Location, OutHit.Normal.Rotation());
+		}
+		if (OutHit.GetActor())
+		{
+			if (OutHit.GetActor()->Implements<UEntityGame>())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *OutHit.BoneName.ToString());
+				IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName, this);
+			}
 		}
 	}
 }

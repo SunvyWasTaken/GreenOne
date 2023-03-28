@@ -76,11 +76,35 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
 	void Shoot();
 
+	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
+	void StopShoot();
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
 	float DamagePlayer = 10.f;
 
+	/**
+	 * Cooldown entre chaque tire par défault c'est 1/3;
+	 * c'est à dire 1 tire toutes les 3 secondes.
+	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Custom|Combat")
-	float ShootCooldown = 0.5f;
+	float ShootCooldown;
+
+	/**
+	 * Distance que le tire va atteindre depuis l'avant du gun.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0, DisplayName = "Distance de Tire"), Category = "Custom|Combat")
+	float ShootDistance = 400.f;
+
+	/**
+	 * Taux de dispertion du tire.
+	 * Allant de 0 à 1.
+	 * 0 quand il n'y a pas de bloom et 1 les tires fuse à 360° autour du joueur.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0, ClampMax = 1, UIMin = 0, UIMax = 1, DisplayName = "Bloom du Tire"), Category = "Custom|Combat")
+	float ShootBloom;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Decal dot ref d'impact"), Category = "Custom|Combat")
+	TSubclassOf<AActor> DotDecal;
 
 protected:
 
@@ -90,6 +114,12 @@ protected:
 private:
 
 	bool CanShoot;
+
+	FTimerHandle ShootHandler;
+
+	void ShootRafale();
+
+	void DotImpact();
 
 #pragma endregion
 
