@@ -54,7 +54,7 @@ void AFlyingAICharacter::SelfDestruction()
 	TArray<FHitResult> Outhits;
 	TArray<AActor*> ActorToIgnore;
 	ActorToIgnore.Add(this);
-	if (UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), GetActorLocation(), ExploRadius, UCollisionProfile::Get()->ConvertToTraceType(ECC_Camera), false, ActorToIgnore, EDrawDebugTrace::Persistent, Outhits, true))
+	if (UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), GetActorLocation(), ExploRadius, UCollisionProfile::Get()->ConvertToTraceType(ECC_Camera), false, ActorToIgnore, EDrawDebugTrace::None, Outhits, true))
 	{
 		for (FHitResult Outhit : Outhits)
 		{
