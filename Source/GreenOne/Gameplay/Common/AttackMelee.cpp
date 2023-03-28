@@ -2,6 +2,7 @@
 
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/PrimitiveComponent.h"
 #include "AttackMelee.h"
 
 // Sets default values for this component's properties
@@ -44,15 +45,34 @@ void UAttackMelee::Attack()
 	
 	FCollisionShape DetectionConeShape = FCollisionShape::MakeSphere(DetectionRadius);
 	
-	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), End, End,
-		DetectionRadius, UEngineTypes::ConvertToTraceType(ECC_), false,
+	/*UKismetSystemLibrary::SphereTraceMulti(GetWorld(), End, End,
+		DetectionRadius, UEngineTypes::ConvertToTraceType(ECC_Pawn), false,
 		ActorsIgnores, EDrawDebugTrace::ForDuration,
-		ActorsHit, true, FLinearColor::Red, FLinearColor::Green, 3);
+		ActorsHit, true, FLinearColor::Red, FLinearColor::Green, 3);*/
 
-	UE_LOG(LogTemp, Warning, TEXT("Numbers of actors hit : %d, %s"), ActorsHit.Num(), *ActorsHit[0].GetActor()->GetName());
+	GetWorld()->SweepMultiByChannel(ActorsHit, End, End, FQuat::Identity, ECC_GameTraceChannel1, DetectionConeShape);
+	DrawDebugSphere(GetWorld(), End, DetectionRadius, 8, FColor::Red, false, 2);
 	
-	//DrawDebugSphere(GetWorld(), Start, DetectionRadius, 8, FColor::Red, false, 2);
-	//DrawDebugCone(GetWorld(),Start, GetOwner()->GetActorForwardVector() * DetectionRadius, DetectionRadius, 2/PI, 2/PI, 12, FColor::Red, false, 2);
+	ApplyImpulseForce(ActorsHit);
+	
+	UE_LOG(LogTemp, Warning, TEXT("Numbers of actors hit : %d"), ActorsHit.Num());
+	
 	UE_LOG(LogTemp, Warning, TEXT("Attack in component"));
+}
+
+void UAttackMelee::ApplyImpulseForce(TArray<FHitResult>& ActorsHit)
+{
+	for (auto& Actor: ActorsHit)
+	{
+		if(Actor.GetActor() == GetOwner()) continue;
+		
+		UE_LOG(LogTemp, Warning, TEXT("Actor to impulse : %s"), *Actor.GetActor()->GetName());
+		if(UPrimitiveComponent* Comp = Cast<UPrimitiveComponent>(Actor.GetActor()->GetRootComponent()))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Impulse %s"), *Actor.GetActor()->GetName());a
+			//MeshComp->AddImpulse(FVector::UpVector * ImpulseForce * MeshComp->GetMass(), "NAME_None", true);
+			Comp->AddImpulse(GetOwner()->GetActorForwardVector() * ImpulseForce, "NAME_None", true);
+		}
+	}
 }
 

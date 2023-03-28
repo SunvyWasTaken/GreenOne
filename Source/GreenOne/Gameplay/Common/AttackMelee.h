@@ -39,5 +39,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Fight|Detection")
 	float DetectionRadius = 80.f;
-	
+
+	void ApplyImpulseForce(TArray<FHitResult>& ActorsHit);
 };
