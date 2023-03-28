@@ -17,6 +17,8 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamage);
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
+
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -35,6 +37,8 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	UInputAction* PauseAction;
 
 	void PlayerDead();
+
+	virtual void Tick( float DeltaSeconds );
 	
 public:
 	AGreenOneCharacter();
@@ -42,12 +46,6 @@ public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
-
-	/**
-	 * Give if the player is attacking or not.
-	 */
-	UFUNCTION(BlueprintCallable)
-	bool IsAttacking();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void EntityTakeDamage(float damage, FName BoneNameHit, AActor* DamageSource = nullptr);
@@ -64,13 +62,44 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnTakeDamage OnTakeDamage;
 
-	UFUNCTION(BlueprintCallable)
+	UPROPERTY(BlueprintReadWrite, BlueprintAssignable)
+	FOnPlayerDeath OnPlayerDeath;
+
+#pragma region Tire
+
+	/**
+	 * Give if the player is attacking or not.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
+	bool IsAttacking();
+
+	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
 	void Shoot();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
 	float DamagePlayer = 10.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Custom|Combat")
+	float ShootCooldown = 0.5f;
+
+protected:
+
+	UPROPERTY(BlueprintReadOnly, Category = "Custom|Combat")
+	float ShootCooldownRemaining;
+
+private:
+
+	bool CanShoot;
+
+#pragma endregion
+
+private:
+
+	bool bIsDead = false;
+
 #pragma region Dash
+
+public:
 
 	// Dash dans la direction de l'input mouvement.
 	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")

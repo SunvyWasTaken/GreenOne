@@ -53,6 +53,8 @@ AGreenOneCharacter::AGreenOneCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	CanShoot = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -80,8 +82,13 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 void AGreenOneCharacter::PlayerDead()
 {
-	GetMesh()->SetSimulatePhysics(true);
-	GetMovementComponent()->SetActive(false);
+	if (!bIsDead)
+	{
+		bIsDead = true;
+		GetMesh()->SetSimulatePhysics(true);
+		GetMovementComponent()->SetActive(false);
+		OnPlayerDeath.Broadcast();
+	}
 }
 
 void AGreenOneCharacter::BeginPlay()
@@ -96,6 +103,21 @@ void AGreenOneCharacter::BeginPlay()
 		}
 	}
 	MaxHealth = Health;
+	ShootCooldownRemaining = ShootCooldown;
+}
+
+void AGreenOneCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (!CanShoot)
+	{
+		ShootCooldownRemaining -= DeltaSeconds;
+		if (ShootCooldownRemaining <= 0.f)
+		{
+			ShootCooldownRemaining = ShootCooldown;
+			CanShoot = true;
+		}
+	}
 }
 
 void AGreenOneCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -143,6 +165,11 @@ float AGreenOneCharacter::GetHealthPercent()
 
 void AGreenOneCharacter::Shoot()
 {
+
+	if (!CanShoot) { return; }
+
+	CanShoot = true;
+
 	APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FHitResult OutHit;
 	GetWorld()->LineTraceSingleByChannel(OutHit, CameraRef->GetCameraLocation(), CameraRef->GetCameraLocation() + CameraRef->GetActorForwardVector()* 5000.f, ECC_Camera);
