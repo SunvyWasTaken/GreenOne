@@ -27,13 +27,6 @@ EBTNodeResult::Type UBTT_FlyingTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 		UE_LOG(LogTemp, Warning, TEXT("Aucun target n'a était assigner au flying move to."));
 		return EBTNodeResult::Aborted;
 	}
-	return EBTNodeResult::InProgress;
-}
-
-void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
-{
-	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-	FVector TargetLocation;
 	if (AActor* ActorRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
 	{
 		TargetLocation = ActorRef->GetActorLocation();
@@ -42,6 +35,13 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 	{
 		TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TargetRef.SelectedKeyName);
 	}
+	return EBTNodeResult::InProgress;
+}
+
+void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+
 	if (ACharacter* AIRef = Cast<ACharacter>(ControllerRef->GetPawn()))
 	{
 		FVector LocTo = TargetLocation - ControllerRef->GetPawn()->GetActorLocation();	
@@ -50,6 +50,7 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 			LocTo.Z = 0.f;
 		}
 		LocTo.Normalize();
+		UE_LOG(LogTemp,Warning, TEXT("Direction : %s"), *LocTo.ToString());
 		AIRef->GetMovementComponent()->AddInputVector(LocTo);
 	}
 	else
@@ -57,7 +58,12 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 		UE_LOG(LogTemp, Warning, TEXT("Le Owner de la task n'est pas un character est du coup fail l'appel pour le move."));
 		FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
 	}
-	if (TargetLocation.Equals(ControllerRef->GetPawn()->GetActorLocation(), Acceptance))
+	FVector NormTargetLocation = TargetLocation;
+	if (Zlock)
+	{
+		NormTargetLocation.Z =  ControllerRef->GetPawn()->GetActorLocation().Z;
+	}
+	if (FVector::Distance(ControllerRef->GetPawn()->GetActorLocation(), NormTargetLocation) <= Acceptance)
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}

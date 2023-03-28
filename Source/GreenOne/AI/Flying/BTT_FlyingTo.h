@@ -37,5 +37,7 @@ public:
 private:
 
 	AController* ControllerRef;
+
+	FVector TargetLocation;
 	
 };

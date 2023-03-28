@@ -37,12 +37,12 @@ EBTNodeResult::Type UBTT_GetRandPoint::ExecuteTask(UBehaviorTreeComponent& Owner
 
 	// What should I do if the target is in a wall or on the Other side?
 	// For the moment it will fail. Since it's just the patrol in the BT.
-	FHitResult Outhit;
-	if(GetWorld()->LineTraceSingleByChannel(Outhit, SelfRef->GetPawn()->GetActorLocation(), TargetPoint, ECC_Visibility))
-	{
-		UE_LOG(LogTemp,Warning, TEXT("Faild in the get random Points there is a collision in the path."));
-		return EBTNodeResult::Failed;
-	}
+	//FHitResult Outhit;
+	//if(GetWorld()->LineTraceSingleByChannel(Outhit, SelfRef->GetPawn()->GetActorLocation(), TargetPoint, ECC_Visibility))
+	//{
+	//	UE_LOG(LogTemp,Warning, TEXT("Faild in the get random Points there is a collision in the path."));
+	//	return EBTNodeResult::Failed;
+	//}
 
 	OwnerComp.GetBlackboardComponent()->SetValueAsVector(TargetLoction.SelectedKeyName, TargetPoint);
 	return EBTNodeResult::Succeeded;
