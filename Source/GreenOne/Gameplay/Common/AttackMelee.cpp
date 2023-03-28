@@ -45,7 +45,7 @@ void UAttackMelee::Attack()
 	FCollisionShape DetectionConeShape = FCollisionShape::MakeSphere(DetectionRadius);
 	
 	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), End, End,
-		DetectionRadius, UEngineTypes::ConvertToTraceType(ECC_Pawn), false,
+		DetectionRadius, UEngineTypes::ConvertToTraceType(ECC_), false,
 		ActorsIgnores, EDrawDebugTrace::ForDuration,
 		ActorsHit, true, FLinearColor::Red, FLinearColor::Green, 3);
 
