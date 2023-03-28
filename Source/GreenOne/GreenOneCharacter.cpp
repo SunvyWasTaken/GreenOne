@@ -57,7 +57,13 @@ AGreenOneCharacter::AGreenOneCharacter()
 
 	ShootCooldown = 1.f/3.f;
 	ShootBloom = 0.f;
-	CanShoot = false;
+	CanShoot = true;
+
+	DashDistance = 100.f;
+	DashTime = 0.5f;
+	DashCooldown = 3.f;
+	bDashOnCooldown = false;
+	bIsDashing = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -68,11 +74,10 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
 	}
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
@@ -112,25 +117,22 @@ void AGreenOneCharacter::BeginPlay()
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (!CanShoot)
+	ShootTick(DeltaSeconds);
+	DashTick(DeltaSeconds);
+	CooldownDash(DeltaSeconds);
+}
+
+void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
+{
+	bool bIsJumping = Value.Get<bool>();
+	if (bIsJumping)
 	{
-		ShootCooldownRemaining -= DeltaSeconds;
-		if (ShootCooldownRemaining <= 0.f)
-		{
-			ShootCooldownRemaining = ShootCooldown;
-			CanShoot = true;
-		}
+		Jump();
 	}
-}
-
-void AGreenOneCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	Jump();
-}
-
-void AGreenOneCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	StopJumping();
+	else
+	{
+		StopJumping();
+	}
 }
 
 void AGreenOneCharacter::TurnAtRate(float Rate)
@@ -171,7 +173,7 @@ void AGreenOneCharacter::Shoot()
 
 	if (!CanShoot) { return; }
 
-	CanShoot = true;
+	CanShoot = false;
 	GetWorld()->GetTimerManager().SetTimer(ShootHandler, this, &AGreenOneCharacter::ShootRafale, ShootCooldown, true);
 	ShootRafale();
 }
@@ -210,9 +212,55 @@ void AGreenOneCharacter::ShootRafale()
 	}
 }
 
+void AGreenOneCharacter::ShootTick(float deltatime)
+{
+	if (!CanShoot)
+	{
+		ShootCooldownRemaining -= deltatime;
+		if (ShootCooldownRemaining <= 0.f)
+		{
+			ShootCooldownRemaining = ShootCooldown;
+			CanShoot = true;
+		}
+	}
+}
+
 void AGreenOneCharacter::Dash()
 {
-	
+	if(bDashOnCooldown || bIsDashing) { return; }
+	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
+	StartDashLocation = GetActorLocation();
+	TargetDashLocation = StartDashLocation + GetActorForwardVector() * DashDistance;
+	CurrentDashAlpha = 0.f;
+	bIsDashing = true;
+}
+
+void AGreenOneCharacter::DashTick(float deltatime)
+{
+	if (!bIsDashing || bDashOnCooldown) { return; }
+
+	CurrentDashAlpha += (1/DashTime) * deltatime;
+	if (CurrentDashAlpha >= 1)
+	{
+		CurrentDashAlpha = 1;
+		CurrentDashCooldown = DashCooldown;
+		bIsDashing = false;
+		bDashOnCooldown = true;
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
+	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
+	SetActorLocation(TargetLocation);
+	return;
+}
+
+void AGreenOneCharacter::CooldownDash(float deltatime)
+{
+	if(!bDashOnCooldown) { return; }
+	CurrentDashCooldown -= deltatime;
+	if (CurrentDashCooldown <= 0.f)
+	{
+		bDashOnCooldown = false;
+	}
 }
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)

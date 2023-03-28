@@ -38,9 +38,14 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PauseAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* JumpAction;
+
 	void PlayerDead();
 
 	virtual void Tick( float DeltaSeconds );
+
+	void InputJump(const FInputActionValue& Value);
 	
 public:
 	AGreenOneCharacter();
@@ -124,7 +129,9 @@ private:
 
 	void ShootRafale();
 
-	void DotImpact();
+	void ShootTick(float deltatime);
+
+	//void DotImpact();
 
 #pragma endregion
 
@@ -140,11 +147,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
 	void Dash();
 
-	// Vitesse du dash en m/s
+	// Distance du dash
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
-	float DashSpeed;
+	float DashDistance;
 
-	// Le temps que le dash sera actif.
+	// Le temps que va prendre le dash pour attendre ça destination.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
 	float DashTime;
@@ -153,6 +160,33 @@ public:
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
 	float DashCooldown;
+
+	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
+	bool bIsDashing;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
+	bool bDashOnCooldown;
+
+	/**
+	 * Return the remaining time of the dash cooldown.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
+	float GetRemainingDashTime() { return CurrentDashCooldown; };
+
+private:
+
+	// Utiliser pour placer le player pendant le Dash
+	void DashTick(float deltatime);
+
+	void CooldownDash(float deltatime);
+
+	FVector TargetDashLocation;
+
+	FVector StartDashLocation;
+
+	float CurrentDashAlpha;
+
+	float CurrentDashCooldown;
 
 #pragma endregion
 
