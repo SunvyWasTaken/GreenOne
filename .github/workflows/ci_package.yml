@@ -1,15 +1,11 @@
-# YML : Jobs Builds on GreenOne Project
-name: Build
+# YML : Jobs Package on GreenOne Project
+name: Package
 
 on:
-  push:
-    branches:
-      - 'feature-*'
+  # Jobs run when 'pull_request' on 'master'
   pull_request:
     branches:
-      - 'release'
-
-  workflow_dispatch:
+      - 'master'
 
 jobs:
   build:
@@ -18,11 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name : Debug Git
+      - name: Debug Git
         run: git log
 
-      - name: Run build CI
+      - name: Run Package 
         shell: powershell
         run: |
             cd "C:\Users\SERV-ADMIN\Desktop\GreenOneProject\"
-            .\build_ue5.ps1
+            .\package_ue5.ps1
