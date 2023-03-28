@@ -84,6 +84,8 @@ private:
 
 	void ChangeTextureBaseHealth();
 
+protected:
+
 	void DeadEntity();
 
 };

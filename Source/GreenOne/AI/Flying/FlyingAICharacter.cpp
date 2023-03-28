@@ -4,6 +4,8 @@
 #include "FlyingAICharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/Gameplay/EntityGame.h"
+#include "GreenOne/GreenOneCharacter.h"	
+#include "Engine/CollisionProfile.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
@@ -11,13 +13,17 @@ AFlyingAICharacter::AFlyingAICharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	ExploRadius = 100.f;
+
+	ExploDmg = 20.f;
+
 }
 
 // Called when the game starts or when spawned
 void AFlyingAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -41,6 +47,31 @@ void AFlyingAICharacter::Shoot()
 	{
 		TimerShoot();
 	}
+}
+
+void AFlyingAICharacter::SelfDestruction()
+{
+	TArray<FHitResult> Outhits;
+	TArray<AActor*> ActorToIgnore;
+	ActorToIgnore.Add(this);
+	if (UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), GetActorLocation(), ExploRadius, UCollisionProfile::Get()->ConvertToTraceType(ECC_Camera), false, ActorToIgnore, EDrawDebugTrace::Persistent, Outhits, true))
+	{
+		for (FHitResult Outhit : Outhits)
+		{
+			if(!Outhit.GetActor())
+			{
+				// Do nothing parce que sinon ça casse. bref
+				UE_LOG(LogTemp, Warning, TEXT("nothing hit by the explosion."));
+			}
+			if (AGreenOneCharacter* PlayerRef = Cast<AGreenOneCharacter>(Outhit.GetActor()))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *Outhit.GetActor()->GetFName().ToString());
+				IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), ExploDmg, Outhit.BoneName, this);
+				break;
+			}
+		}
+	}
+	DeadEntity();
 }
 
 void AFlyingAICharacter::ActiveCooldown()

@@ -27,14 +27,6 @@ EBTNodeResult::Type UBTT_FlyingTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 		UE_LOG(LogTemp, Warning, TEXT("Aucun target n'a était assigner au flying move to."));
 		return EBTNodeResult::Aborted;
 	}
-	if (AActor* ActorRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
-	{
-		TargetLocation = ActorRef->GetActorLocation();
-	}
-	else
-	{
-		TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TargetRef.SelectedKeyName);
-	}
 	return EBTNodeResult::InProgress;
 }
 
@@ -44,13 +36,20 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 	if (ACharacter* AIRef = Cast<ACharacter>(ControllerRef->GetPawn()))
 	{
+		if (AActor* ActorRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
+		{
+			TargetLocation = ActorRef->GetActorLocation();
+		}
+		else
+		{
+			TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TargetRef.SelectedKeyName);
+		}
 		FVector LocTo = TargetLocation - ControllerRef->GetPawn()->GetActorLocation();	
 		if (Zlock)
 		{
 			LocTo.Z = 0.f;
 		}
 		LocTo.Normalize();
-		UE_LOG(LogTemp,Warning, TEXT("Direction : %s"), *LocTo.ToString());
 		AIRef->GetMovementComponent()->AddInputVector(LocTo);
 	}
 	else

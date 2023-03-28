@@ -44,6 +44,26 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	float ShootRange = 5000.f;
 
+#pragma region Explosion
+
+	UFUNCTION(BlueprintCallable)
+	void SelfDestruction();
+
+	/**
+	 * Radius de l'explosion.
+	 */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, meta = (DisplayName = "Radius d'explosion", ClampMin = 0), Category = "Custom|Explosion")
+	float ExploRadius;
+
+	/**
+	 * valeur de damage appliquer au player si in range.
+	 * Default one 20% of the player max health.
+	 */
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage de l'explosion", ClampMin = 0), Category = "Custom|Explosion")
+	float ExploDmg;
+
+#pragma endregion 
+
 private:
 
 	void ActiveCooldown();
