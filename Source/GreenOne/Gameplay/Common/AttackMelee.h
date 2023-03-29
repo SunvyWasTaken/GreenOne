@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "AttackMelee.generated.h"
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GREENONE_API UAttackMelee : public UActorComponent
 {
@@ -28,17 +27,47 @@ public:
 	void Attack();
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Fight|Melee")
-	float ImpulseForce = 0.f;
 
-	UPROPERTY(EditAnywhere, Category = "Fight|Melee")
+	/** Force appliquée pour repousser le(s) actor(s) */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Impulse", DisplayName = "Force d'impulsion")
+	float ImpulseForce = 0.f;
+	float ImpulseForceTemp;
+	/** Valeur de décrémentation pour la force de repouse */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Impulse", DisplayName = "Reduction force d'impulsion")
+	float ImpulseForceReduce = 100.f;
+
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Damage")
 	float Damage = 5.f;
-	
-	UPROPERTY(EditAnywhere, Category = "Fight|Detection")
+
+	/** Valeur de cooldown minimum avant d'effectuer de nouveau l'attaque */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", DisplayName = "Valeur du coolDown")
+	float MinCoolDown;
+	float CoolDown;
+	float CoolDownTimer;
+	bool bActiveCoolDown = false;
+	/** Valeur d'incrémentation du cooldown après chaque attaque */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", DisplayName = "Valeur d'incrémentation du coolDown")
+	float CoolDownIncrease = 2.f;
+
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", DisplayName = "Activer la réinitialisation du coolDown")
+	bool bDelayToResetCoolDown;
+	/** Valeur du delai pour la réinitialisation du cooldown */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", meta = (EditCondition="bDelayToResetCoolDown"), DisplayName = "Delay reset coolDown")
+	float MaxDelayToResetCoolDown;
+	float DelayToResetCoolDown;
+	bool bActiveDelayToResetCoolDown = false;
+
+	/** Offset de la detection selon la position du parent */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Offset de la zone de détection")
 	float DetectionOffset = 50.f;
 
-	UPROPERTY(EditAnywhere, Category = "Fight|Detection")
+	/** Radius de la zone de detection */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Radius de la zone de détection")
 	float DetectionRadius = 80.f;
 
+	void DetectActors();
 	void ApplyImpulseForce(TArray<FHitResult>& ActorsHit);
+	void SetCoolDown(float DeltaTime);
+	void SetDelayToResetCoolDown(float DeltaTime);
+	void ResetCoolDownValues();
 };
