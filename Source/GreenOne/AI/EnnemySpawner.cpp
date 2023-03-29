@@ -44,6 +44,11 @@ void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedCompon
 	GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
 }
 
+void AEnnemySpawner::RemoveEntityFromList(ABaseEnnemy* entity)
+{
+	EntityList.Remove(entity);
+}
+
 /// <summary>
 /// Triggers the spawning of an enemy entity with a delay between each spawn.
 /// </summary>
@@ -60,6 +65,8 @@ void AEnnemySpawner::TriggerSpawnEntity()
 
 void AEnnemySpawner::SpawnEntity()
 {
+	if(EntityList.Num() >= NbrEnnemySameTime)
+		{ return; }
 	// Rewritten
 	if (EnnemyToSpawnClass != nullptr)
 	{
@@ -74,6 +81,7 @@ void AEnnemySpawner::SpawnEntity()
 		if (CurrentSpawnEnnemy != nullptr)
 		{
 			EntityList.Add(CurrentSpawnEnnemy);
+			CurrentSpawnEnnemy->ParentRef = this;
 		}
 	}
 }

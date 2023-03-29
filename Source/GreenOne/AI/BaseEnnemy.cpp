@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "AIController.h"
 #include "BrainComponent.h"
+#include "EnnemySpawner.h"
 
 // Sets default values
 ABaseEnnemy::ABaseEnnemy()
@@ -16,6 +17,8 @@ ABaseEnnemy::ABaseEnnemy()
 	LifeBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LifeBar_DEBUG"));
 	LifeBarComponent->SetupAttachment(RootComponent);
 	LifeBarComponent->SetWidgetClass(LifeBarClass);
+
+	ParentRef = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -90,5 +93,9 @@ void ABaseEnnemy::DeadEntity()
 {
 	GetMesh()->SetSimulatePhysics(true);
 	Cast<AAIController>(GetController())->GetBrainComponent()->StopLogic("Because");
+	if (ParentRef != nullptr)
+	{
+		ParentRef->RemoveEntityFromList(this);
+	}
 }
 

@@ -42,6 +42,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Custom|Damage")
 	void EntityTakeDamage(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr);
 
+	class AEnnemySpawner* ParentRef;
+
 protected:
 
 	/************************************************************************/
