@@ -11,7 +11,7 @@ void UDebug_W_LifeBar::SetOwner(AActor* OwnerRef)
 	CurrentOwner = Cast<ABaseEnnemy>(OwnerRef);
 	if (!CurrentOwner)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Attention l'owner n'est pas enfant de la class BaseEnnemy!!!"));
+		UE_LOG(LogTemp, Error, TEXT("Attention l'owner de Debug_W_LifeBar n'est pas enfant de la class BaseEnnemy!!!"));
 		return;
 	}
 	CurrentOwner->OnTakeDamage.AddDynamic(this, &UDebug_W_LifeBar::UpdateBar);

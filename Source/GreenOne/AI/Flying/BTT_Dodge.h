@@ -7,7 +7,7 @@
 #include "BTT_Dodge.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS(BlueprintType)
 class GREENONE_API UBTT_Dodge : public UBTTaskNode
@@ -23,19 +23,19 @@ public:
 	void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
 
 	UPROPERTY(EditAnywhere)
-	FBlackboardKeySelector TargetRef;
+		FBlackboardKeySelector TargetRef;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Distance de dodge", UIMin = 0, UIMax = 1, ClampMin = 0, ClampMax = 1))
-	// Distance de Dodge autour du player.
-	// 0 Le dodge ne parcours aucune distance
-	// 1 le Drone se retrouve derrière le player.
-	float DodgeDistance = 0.4f;
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Dodge Distance", UIMin = 0, UIMax = 1, ClampMin = 0, ClampMax = 1))
+		// Dodge distance around the player.
+		// 0 Dodge does not travel any distance
+		// 1 Drone is behind the player.
+		float DodgeDistance = 0.4f;
 
 	/**
-	 * Distance à la que le drone doit se repositionner par rapport au player
+	 * Distance at which the drone should reposition itself relative to the player
 	 */
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
-	float SafeDistance = 500.f;
+		float SafeDistance = 500.f;
 
 private:
 
