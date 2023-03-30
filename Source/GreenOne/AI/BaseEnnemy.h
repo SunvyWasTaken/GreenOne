@@ -74,16 +74,16 @@ protected:
 	float CritMultiplyer = 2.f;
 
 	/**
-	 * List de différent palier de vie.
-	 * En lien avec la liste de matérial. lors que la vie de l'index 0 sera atteint.
-	 * Le material dans la list MatTreshold à l'index 0 sera appliquer au mesh.
+	 * List de diffÃ©rent palier de vie.
+	 * En lien avec la liste de matÃ©rial. lors que la vie de l'index 0 sera atteint.
+	 * Le material dans la list MatTreshold Ã  l'index 0 sera appliquer au mesh.
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
 	TArray<int32> LifeTreshold;
 
 	/**
-	 * List des mat qui seront appliquer à la mesh lors des différents palier de vie
-	 * La liste doit être de la même longueur que celle de Lifetreshold sinon EXPLOSION!!!
+	 * List des mat qui seront appliquer Ã  la mesh lors des diffÃ©rents palier de vie
+	 * La liste doit Ãªtre de la mÃªme longueur que celle de Lifetreshold sinon EXPLOSION!!!
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
 	TArray<UMaterialInterface*> MatTreshold;

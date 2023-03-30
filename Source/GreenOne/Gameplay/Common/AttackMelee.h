@@ -32,6 +32,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Impulse", DisplayName = "Force d'impulsion")
 	float ImpulseForce = 0.f;
 	float ImpulseForceTemp;
+	
 	/** Valeur de décrémentation pour la force de repouse */
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Impulse", DisplayName = "Reduction force d'impulsion")
 	float ImpulseForceReduce = 100.f;
@@ -42,19 +43,23 @@ private:
 	/** Valeur de cooldown minimum avant d'effectuer de nouveau l'attaque */
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", DisplayName = "Valeur du coolDown")
 	float MinCoolDown;
+	
 	float CoolDown;
 	float CoolDownTimer;
 	bool bActiveCoolDown = false;
+	
 	/** Valeur d'incrémentation du cooldown après chaque attaque */
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", DisplayName = "Valeur d'incrémentation du coolDown")
 	float CoolDownIncrease = 2.f;
 
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", DisplayName = "Activer la réinitialisation du coolDown")
-	bool bDelayToResetCoolDown;
+	bool bDelayToResetCoolDown = true;
 	/** Valeur du delai pour la réinitialisation du cooldown */
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", meta = (EditCondition="bDelayToResetCoolDown"), DisplayName = "Delay reset coolDown")
 	float MaxDelayToResetCoolDown;
+	
 	float DelayToResetCoolDown;
+	float DelayToResetCoolDownTimer;
 	bool bActiveDelayToResetCoolDown = false;
 
 	/** Offset de la detection selon la position du parent */
