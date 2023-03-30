@@ -171,7 +171,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
 	float DashTime;
 
-	// Temps que va prendre le dash � revenir apr�s utilisation.
+	// Temps que va prendre le dash à revenir après utilisation.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
 	float DashCooldown;
