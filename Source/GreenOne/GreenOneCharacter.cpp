@@ -12,6 +12,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
@@ -55,7 +58,7 @@ AGreenOneCharacter::AGreenOneCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	ShootCooldown = 1.f/3.f;
+	ShootCooldown = 1.f / 3.f;
 	ShootBloom = 0.f;
 	CanShoot = true;
 
@@ -163,7 +166,7 @@ bool AGreenOneCharacter::IsAttacking()
 void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit, AActor* DamageSource = nullptr)
 {
 	Health -= damage;
-	if(Health <= 0)
+	if (Health <= 0)
 	{
 		PlayerDead();
 		Health = 0.f;
@@ -173,7 +176,7 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName Bon
 
 float AGreenOneCharacter::GetHealthPercent()
 {
-	return Health/MaxHealth;
+	return Health / MaxHealth;
 }
 
 void AGreenOneCharacter::Shoot()
@@ -235,7 +238,7 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 
 void AGreenOneCharacter::Dash()
 {
-	if(bDashOnCooldown || bIsDashing) { return; }
+	if (bDashOnCooldown || bIsDashing) { return; }
 	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
 	StartDashLocation = GetActorLocation();
 	TargetDashLocation = StartDashLocation + GetActorForwardVector() * DashDistance;
@@ -247,7 +250,7 @@ void AGreenOneCharacter::DashTick(float deltatime)
 {
 	if (!bIsDashing || bDashOnCooldown) { return; }
 
-	CurrentDashAlpha += (1/DashTime) * deltatime;
+	CurrentDashAlpha += (1 / DashTime) * deltatime;
 	if (CurrentDashAlpha >= 1)
 	{
 		CurrentDashAlpha = 1;
@@ -263,11 +266,55 @@ void AGreenOneCharacter::DashTick(float deltatime)
 
 void AGreenOneCharacter::CooldownDash(float deltatime)
 {
-	if(!bDashOnCooldown) { return; }
+	if (!bDashOnCooldown) { return; }
 	CurrentDashCooldown -= deltatime;
 	if (CurrentDashCooldown <= 0.f)
 	{
 		bDashOnCooldown = false;
+	}
+}
+
+//This function is used to toggle the pause state of the game. It first checks if a pause widget class has been set, and if not, it logs a warning. It then casts the
+// controller to a player controller and checks if it is valid. If it is, it checks if the world is paused. If it is, it creates a pause widget and adds it to the view
+//port, and sets the input mode to game and UI. If the world is not paused, it sets the visibility of the pause widget to collapsed and sets the input mode to game
+// only.
+void AGreenOneCharacter::TogglePauseGame()
+{
+	if (!PauseWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Wesh t'as oublier de mettre un widget dans le pause."));
+		return;
+	}
+
+	APlayerController* ControllerRef = Cast<APlayerController>(Controller);
+
+	if (!ControllerRef)
+		{ return; }
+
+	if (GetWorld()->IsPaused())
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		if (PauseWidgetRef)
+		{
+			PauseWidgetRef->SetVisibility(ESlateVisibility::Collapsed);
+			ControllerRef->SetShowMouseCursor(false);
+			UWidgetBlueprintLibrary::SetInputMode_GameOnly(ControllerRef);
+		}
+	}
+	else
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		if (!PauseWidgetRef)
+		{
+			PauseWidgetRef = CreateWidget<UUserWidget>(ControllerRef, PauseWidgetClass);
+			PauseWidgetRef->AddToViewport();
+		}
+		else
+		{
+			PauseWidgetRef->SetVisibility(ESlateVisibility::Visible);
+		}
+		ControllerRef->SetShowMouseCursor(true);
+		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(ControllerRef, PauseWidgetRef);
 	}
 }
 

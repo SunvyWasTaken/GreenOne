@@ -48,6 +48,7 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	void InputJump(const FInputActionValue& Value);
 	
 public:
+
 	AGreenOneCharacter();
 
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
@@ -192,6 +193,21 @@ private:
 
 #pragma endregion
 
+#pragma region Pause
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void TogglePauseGame();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Pause")
+	TSubclassOf<UUserWidget> PauseWidgetClass;
+
+private:
+
+	class UUserWidget* PauseWidgetRef;
+
+#pragma endregion
 
 protected:
 
