@@ -22,6 +22,7 @@ void UAttackMelee::BeginPlay()
 
 	CoolDownTimer = MinCoolDown;
 	ImpulseForceTemp = ImpulseForce;
+	DelayToResetCoolDownTimer = MaxDelayToResetCoolDown;
 }
 
 
@@ -32,6 +33,18 @@ void UAttackMelee::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 	SetCoolDown(DeltaTime);
 	SetDelayToResetCoolDown(DeltaTime);
+
+#if WITH_EDITOR
+	
+	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("CoolDown %f"), CoolDownTimer), true, FVector2d(1.5,1.5));
+	GEngine->AddOnScreenDebugMessage(2, 1.0f, FColor::Red, FString::Printf(TEXT("CoolDownValue %f"), CoolDown), true, FVector2d(1.5,1.5));
+
+	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Green, FString::Printf(TEXT("DelayToResetCoolDown %f"), DelayToResetCoolDownTimer), true, FVector2d(1.5,1.5));
+	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Yellow, FString::Printf(TEXT("DelayToResetCoolDownValue %f"), DelayToResetCoolDown), true, FVector2d(1.5,1.5));
+
+	GEngine->AddOnScreenDebugMessage(5, 1.0f, FColor::Magenta, FString::Printf(TEXT("ImpulseForce %f"), ImpulseForceTemp), true, FVector2d(1.5,1.5));
+
+#endif
 }
 
 void UAttackMelee::Attack()
@@ -57,8 +70,9 @@ void UAttackMelee::DetectActors()
 	
 	bool bActorsHit = GetWorld()->SweepMultiByChannel(ActorsHit, End, End, FQuat::Identity, ECC_GameTraceChannel1, DetectionConeShape);
 	DrawDebugSphere(GetWorld(), End, DetectionRadius, 8, FColor::Red, false, 2);
-	
-	ResetCoolDownValues();
+
+	if(bDelayToResetCoolDown)
+		ResetCoolDownValues();
 	
 	UE_LOG(LogTemp, Warning, TEXT("CoolDown %f"), CoolDownTimer);
 	
@@ -80,7 +94,6 @@ void UAttackMelee::ApplyImpulseForce(TArray<FHitResult>& ActorsHit)
 		if(UPrimitiveComponent* Comp = Cast<UPrimitiveComponent>(Actor.GetActor()->GetRootComponent()))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Impulse %s"), *Actor.GetActor()->GetName());
-			//MeshComp->AddImpulse(FVector::UpVector * ImpulseForce * MeshComp->GetMass(), "NAME_None", true);
 			Comp->AddImpulse(GetOwner()->GetActorForwardVector() * ImpulseForceTemp, "NAME_None", true);
 		}
 	}
@@ -105,12 +118,12 @@ void UAttackMelee::SetDelayToResetCoolDown(float DeltaTime)
 {
 	if(bActiveDelayToResetCoolDown)
 	{
-		if(DelayToResetCoolDown > 0)
+		if(DelayToResetCoolDown < DelayToResetCoolDownTimer)
 		{
-			DelayToResetCoolDown -= DeltaTime;
+			DelayToResetCoolDown += DeltaTime;
 		}else
 		{
-			DelayToResetCoolDown = MaxDelayToResetCoolDown;
+			DelayToResetCoolDown = 0;
 			CoolDownTimer = MinCoolDown;
 			ImpulseForceTemp = ImpulseForce;
 			bActiveDelayToResetCoolDown = false;
@@ -122,12 +135,16 @@ void UAttackMelee::ResetCoolDownValues()
 {
 	if(bActiveDelayToResetCoolDown)
 	{
-		DelayToResetCoolDown = MaxDelayToResetCoolDown;
+		UE_LOG(LogTemp, Warning, TEXT("DelayCoolDown %f"), DelayToResetCoolDown);
 		CoolDownTimer += CoolDownIncrease;
+		if(CoolDownTimer > DelayToResetCoolDownTimer-1)
+		{
+			CoolDownTimer = DelayToResetCoolDownTimer-1;
+		}
+		DelayToResetCoolDown = 0;
 		ImpulseForceTemp -= ImpulseForceReduce;
 	}else
 	{
 		bActiveDelayToResetCoolDown = true;
 	}
 }
-
