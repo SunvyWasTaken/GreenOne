@@ -92,4 +92,8 @@ private:
 
 	TArray<class ABaseEnnemy*> EntityList;
 
+	AActor* PlayerRef;
+
+	void SetPlayerRefToEntitys(AActor* ref);
+
 };

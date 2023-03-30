@@ -47,6 +47,17 @@ float ABaseEnnemy::GetPercentHealth()
 	return Health/MaxHealth;
 }
 
+void ABaseEnnemy::SetPlayerRef(AActor* ref)
+{
+	PlayerRef = nullptr;
+	OnPlayerRefSet.Broadcast(PlayerRef);
+}
+
+AActor* ABaseEnnemy::GetPlayerRef()
+{
+	return PlayerRef;
+}
+
 void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr)
 {
 	//UE_LOG(LogTemp, Error, TEXT("Damage On Ennemy"));

@@ -63,10 +63,10 @@ void AFlyingAICharacter::SelfDestruction()
 				// Do nothing parce que sinon ça casse. bref
 				UE_LOG(LogTemp, Warning, TEXT("nothing hit by the explosion."));
 			}
-			if (AGreenOneCharacter* PlayerRef = Cast<AGreenOneCharacter>(Outhit.GetActor()))
+			if (AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(Outhit.GetActor()))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *Outhit.GetActor()->GetFName().ToString());
-				IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), ExploDmg, Outhit.BoneName, this);
+				UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
+				IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, ExploDmg, Outhit.BoneName, this);
 				break;
 			}
 		}

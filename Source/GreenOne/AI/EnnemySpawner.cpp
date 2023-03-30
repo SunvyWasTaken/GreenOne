@@ -1,6 +1,7 @@
 ﻿#include "EnnemySpawner.h"
 #include "Components/SphereComponent.h"
 #include "BaseEnnemy.h"
+#include "GreenOne/GreenOneCharacter.h"
 
 // Définit les valeurs par défaut
 AEnnemySpawner::AEnnemySpawner()
@@ -14,9 +15,11 @@ AEnnemySpawner::AEnnemySpawner()
 
 	SphereCollisionActivation = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Collision"));
 	RootComponent = SphereCollisionActivation;
+	SphereCollisionDesactivation = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionDesactivation"));
+	SphereCollisionDesactivation->SetupAttachment(RootComponent);
 
 	SphereCollisionActivation->SetSphereRadius(RangeDetection);
-
+	SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
 }
 
 // Appelé au début du jeu ou au moment de l'apparition de l'animal.
@@ -24,6 +27,7 @@ void AEnnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	SphereCollisionActivation->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentActivate);
+	SphereCollisionDesactivation->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentDeactivate);
 }
 
 // Appelé chaque frame
@@ -36,11 +40,18 @@ void AEnnemySpawner::Tick(float DeltaTime)
 
 void AEnnemySpawner::OnComponentActivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	PlayerRef = Cast<AGreenOneCharacter>(OtherActor);
+	if (PlayerRef)
+	{
+		SetPlayerRefToEntitys(PlayerRef);
+	}
 	TriggerSpawnEntity();
 }
 
 void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	PlayerRef = nullptr;
+	SetPlayerRefToEntitys(PlayerRef);
 	GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
 }
 
@@ -82,6 +93,10 @@ void AEnnemySpawner::SpawnEntity()
 		{
 			EntityList.Add(CurrentSpawnEnnemy);
 			CurrentSpawnEnnemy->ParentRef = this;
+			if (PlayerRef)
+			{
+				CurrentSpawnEnnemy->SetPlayerRef(PlayerRef);
+			}
 		}
 	}
 }
@@ -103,3 +118,10 @@ void AEnnemySpawner::SpawnTick(float deltaseconds)
 	}
 }
 
+void AEnnemySpawner::SetPlayerRefToEntitys(AActor* ref)
+{
+	for (ABaseEnnemy* Entity : EntityList)
+	{
+		Entity->SetPlayerRef(ref);
+	}
+}
