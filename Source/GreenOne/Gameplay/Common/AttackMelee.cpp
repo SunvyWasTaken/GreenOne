@@ -142,9 +142,14 @@ void UAttackMelee::ResetCoolDownValues()
 			CoolDownTimer = DelayToResetCoolDownTimer-1;
 		}
 		DelayToResetCoolDown = 0;
-		ImpulseForceTemp -= ImpulseForceReduce;
+		ReduceImpusleForce();
 	}else
 	{
 		bActiveDelayToResetCoolDown = true;
 	}
+}
+
+void UAttackMelee::ReduceImpusleForce()
+{
+	ImpulseForceTemp<=0?0:ImpulseForceTemp -= ImpulseForceReduce;
 }
