@@ -27,6 +27,7 @@ EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& Owne
 			MovementComp->bOrientRotationToMovement = false;
 		}
 	}
+	DirectionValue = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	return EBTNodeResult::InProgress;
 }
 
@@ -36,7 +37,7 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 	if (APawn* Pawn = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		const FVector TargetDirection = Pawn->GetActorRightVector() * (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
+		const FVector TargetDirection = Pawn->GetActorRightVector() * DirectionValue;
 		Pawn->GetMovementComponent()->AddInputVector(TargetDirection);
 		if (const AActor* PlayerRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
 		{

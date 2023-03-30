@@ -43,4 +43,6 @@ private:
 
 	float CurrentTime;
 
+	int DirectionValue;
+
 };

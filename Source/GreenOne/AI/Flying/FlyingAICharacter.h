@@ -29,6 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Tire")
 	void Shoot();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool CanShoot() { return !IsInCooldown; };
+
 	/**
 	 * Correspond au nombre de tire par seconde
 	 * 2 = 2 tire par seconde
