@@ -75,4 +75,5 @@ private:
 	void SetCoolDown(float DeltaTime);
 	void SetDelayToResetCoolDown(float DeltaTime);
 	void ResetCoolDownValues();
+	void ReduceImpusleForce();
 };
