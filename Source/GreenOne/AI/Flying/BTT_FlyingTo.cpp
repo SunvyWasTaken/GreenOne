@@ -11,6 +11,7 @@
 UBTT_FlyingTo::UBTT_FlyingTo()
 {
 	bNotifyTick = true;
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UBTT_FlyingTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -44,26 +45,26 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 		{
 			TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TargetRef.SelectedKeyName);
 		}
-		FVector LocTo = TargetLocation - ControllerRef->GetPawn()->GetActorLocation();	
+		FVector LocTo = TargetLocation - AIRef->GetActorLocation();	
 		if (Zlock)
 		{
 			LocTo.Z = 0.f;
 		}
 		LocTo.Normalize();
 		AIRef->GetMovementComponent()->AddInputVector(LocTo);
+		FVector NormTargetLocation = TargetLocation;
+		if (Zlock)
+		{
+			NormTargetLocation.Z = AIRef->GetActorLocation().Z;
+		}
+		if (FVector::Distance(AIRef->GetActorLocation(), NormTargetLocation) <= Acceptance)
+		{
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Le Owner de la task n'est pas un character est du coup fail l'appel pour le move."));
 		FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
-	}
-	FVector NormTargetLocation = TargetLocation;
-	if (Zlock)
-	{
-		NormTargetLocation.Z =  ControllerRef->GetPawn()->GetActorLocation().Z;
-	}
-	if (FVector::Distance(ControllerRef->GetPawn()->GetActorLocation(), NormTargetLocation) <= Acceptance)
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }

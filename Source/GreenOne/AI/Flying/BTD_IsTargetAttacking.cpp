@@ -5,6 +5,11 @@
 #include "GreenOne/GreenOneCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
+UBTD_IsTargetAttacking::UBTD_IsTargetAttacking()
+{
+	bCreateNodeInstance = true;
+}
+
 bool UBTD_IsTargetAttacking::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
 	if (AGreenOneCharacter* PlayerRef = Cast<AGreenOneCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))

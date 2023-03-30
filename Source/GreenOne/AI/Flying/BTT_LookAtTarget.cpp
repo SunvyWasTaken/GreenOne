@@ -9,6 +9,7 @@
 UBTT_LookAtTarget::UBTT_LookAtTarget()
 {
 	NodeName = "Look At Target";
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UBTT_LookAtTarget::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

@@ -12,6 +12,7 @@ UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 	bNotifyTick = true;
 	MoveTime = 1.f;
 	Speed = 600.f;
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

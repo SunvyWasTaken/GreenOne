@@ -24,6 +24,8 @@ class GREENONE_API UBTT_GetRandPoint : public UBTTaskNode
 
 public:
 
+	UBTT_GetRandPoint();
+
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -47,5 +49,14 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (EditCondition = RelativeToSpawn))
 	FBlackboardKeySelector SpawnVector;
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool DrawDebug = false;
+
+	UPROPERTY(EditAnywhere, meta = (EditCondition = DrawDebug), Category = "Debug")
+	float DebugRadius = 100.f;
+
+	UPROPERTY(EditAnywhere, meta = (EditCondition = DrawDebug), Category = "Debug")
+	float DebugDuration = 10.f;
 
 };

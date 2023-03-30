@@ -15,6 +15,8 @@ class GREENONE_API UBTT_ShootOnPlayer : public UBTTaskNode
 	GENERATED_BODY()
 
 public:
+
+	UBTT_ShootOnPlayer();
 	
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 	

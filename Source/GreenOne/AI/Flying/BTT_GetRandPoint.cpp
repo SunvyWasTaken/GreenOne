@@ -6,6 +6,12 @@
 #include "BehaviorTree/BTFunctionLibrary.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
+
+UBTT_GetRandPoint::UBTT_GetRandPoint()
+{
+	bCreateNodeInstance = true;
+}
 
 EBTNodeResult::Type UBTT_GetRandPoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -43,6 +49,10 @@ EBTNodeResult::Type UBTT_GetRandPoint::ExecuteTask(UBehaviorTreeComponent& Owner
 	//	UE_LOG(LogTemp,Warning, TEXT("Faild in the get random Points there is a collision in the path."));
 	//	return EBTNodeResult::Failed;
 	//}
+	if (DrawDebug)
+	{
+		UKismetSystemLibrary::DrawDebugSphere(GetWorld(), TargetPoint, DebugRadius, 12, FLinearColor::Red, DebugDuration);
+	}
 
 	OwnerComp.GetBlackboardComponent()->SetValueAsVector(TargetLoction.SelectedKeyName, TargetPoint);
 	return EBTNodeResult::Succeeded;

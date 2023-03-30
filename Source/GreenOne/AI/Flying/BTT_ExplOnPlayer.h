@@ -14,6 +14,8 @@ class GREENONE_API UBTT_ExplOnPlayer : public UBTTaskNode
 
 public:
 
+	UBTT_ExplOnPlayer();
+
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 
 	UPROPERTY(EditAnywhere)

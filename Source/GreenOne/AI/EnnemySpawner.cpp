@@ -72,7 +72,7 @@ void AEnnemySpawner::SpawnEntity()
 	{
 		// Set spawn parameters
 		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 		// Spawn the actor
 		ABaseEnnemy* CurrentSpawnEnnemy = GetWorld()->SpawnActor<ABaseEnnemy>(EnnemyToSpawnClass, GetActorLocation(), GetActorRotation(), SpawnParams);

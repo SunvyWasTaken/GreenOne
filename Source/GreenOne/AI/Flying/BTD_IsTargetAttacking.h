@@ -17,6 +17,8 @@ class GREENONE_API UBTD_IsTargetAttacking : public UBTDecorator
 
 public:
 
+	UBTD_IsTargetAttacking();
+
 	bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const;
 
 	UPROPERTY(EditAnywhere)

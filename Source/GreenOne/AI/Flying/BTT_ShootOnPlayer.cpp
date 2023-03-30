@@ -5,6 +5,11 @@
 #include "FlyingAiCharacter.h"
 #include "AIController.h"
 
+UBTT_ShootOnPlayer::UBTT_ShootOnPlayer()
+{
+	bCreateNodeInstance = true;
+}
+
 EBTNodeResult::Type UBTT_ShootOnPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	if (AFlyingAICharacter* PawnRef = Cast<AFlyingAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
