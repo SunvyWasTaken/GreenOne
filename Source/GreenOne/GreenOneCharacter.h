@@ -101,11 +101,10 @@ public:
 	void StopShoot();
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
+	float DamagePlayer = 10.f;
+	
 	UFUNCTION(BlueprintCallable)
 	void AttackMelee();
-
-	UPROPERTY(EditAnywhere)
-	float DamagePlayer = 10.f;
 
 	/**
 	 * Cooldown entre chaque tire par d�fault c'est 1/3;
