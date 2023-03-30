@@ -22,6 +22,12 @@ public:
 
 	void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
 
+protected:
+
+	void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult);
+
+public:
+
 	UPROPERTY(EditAnywhere)
 		FBlackboardKeySelector TargetRef;
 
@@ -44,5 +50,7 @@ private:
 	float CurrentTime;
 
 	int DirectionValue;
+
+	void ActivateRotateOnMovement(UBehaviorTreeComponent& OwnerComp, bool activ);
 
 };

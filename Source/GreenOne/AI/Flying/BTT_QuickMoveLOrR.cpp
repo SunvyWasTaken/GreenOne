@@ -13,20 +13,14 @@ UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 	MoveTime = 1.f;
 	Speed = 600.f;
 	bCreateNodeInstance = true;
+	bNotifyTaskFinished = true;
 }
 
 EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	CurrentTime = MoveTime;
 	// Optimized and secured
-
-	if (APawn* SelfPawnRef = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn()))
-	{
-		if (UCharacterMovementComponent* MovementComp = Cast<UCharacterMovementComponent>(SelfPawnRef->GetMovementComponent()))
-		{
-			MovementComp->bOrientRotationToMovement = false;
-		}
-	}
+	ActivateRotateOnMovement(OwnerComp, false);
 	DirectionValue = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	return EBTNodeResult::InProgress;
 }
@@ -43,17 +37,33 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		{
 			Pawn->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(Pawn->GetActorLocation(), PlayerRef->GetActorLocation()));
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Fail du cast target player dans QuickMoveLOrR. Aborted"));
+			ActivateRotateOnMovement(OwnerComp, true);
+			FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
+		}
 	}
 	if (CurrentTime <= 0.f)
 	{
-		if (APawn* SelfPawnRef = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn()))
-		{
-			if (UCharacterMovementComponent* MovementComp = Cast<UCharacterMovementComponent>(SelfPawnRef->GetMovementComponent()))
-			{
-				MovementComp->bOrientRotationToMovement = true;
-			}
-		}
+
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	}
+}
+
+void UBTT_QuickMoveLOrR::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+	ActivateRotateOnMovement(OwnerComp, true);
+}
+
+void UBTT_QuickMoveLOrR::ActivateRotateOnMovement(UBehaviorTreeComponent& OwnerComp, bool activ)
+{
+	if (APawn* SelfPawnRef = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn()))
+	{
+		if (UCharacterMovementComponent* MovementComp = Cast<UCharacterMovementComponent>(SelfPawnRef->GetMovementComponent()))
+		{
+			MovementComp->bOrientRotationToMovement = activ;
+		}
 	}
 }
 
