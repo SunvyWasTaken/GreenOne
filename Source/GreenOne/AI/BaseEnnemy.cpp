@@ -49,7 +49,7 @@ float ABaseEnnemy::GetPercentHealth()
 
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
 {
-	PlayerRef = nullptr;
+	PlayerRef = ref;
 	OnPlayerRefSet.Broadcast(PlayerRef);
 }
 

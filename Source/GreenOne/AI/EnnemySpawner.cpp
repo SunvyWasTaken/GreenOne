@@ -12,6 +12,7 @@ AEnnemySpawner::AEnnemySpawner()
 	NbrSpawnEnnemy = 10;
 
 	RangeDetection = 1000.f;
+	RangeDetectionDisable = 1100.f;
 
 	SphereCollisionActivation = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Collision"));
 	RootComponent = SphereCollisionActivation;
@@ -22,12 +23,30 @@ AEnnemySpawner::AEnnemySpawner()
 	SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
 }
 
+void AEnnemySpawner::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	// Call parent implementation of this function first
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	// Check if the property that changed is RangeDetection
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AEnnemySpawner, RangeDetection))
+	{
+		// Update the sphere radius
+		SphereCollisionActivation->SetSphereRadius(RangeDetection);
+	}
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AEnnemySpawner, RangeDetectionDisable))
+	{
+		SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
+	}
+}
+
+
 // Appelé au début du jeu ou au moment de l'apparition de l'animal.
 void AEnnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	SphereCollisionActivation->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentActivate);
-	SphereCollisionDesactivation->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentDeactivate);
+	SphereCollisionDesactivation->OnComponentEndOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentDeactivate);
 }
 
 // Appelé chaque frame
@@ -43,13 +62,18 @@ void AEnnemySpawner::OnComponentActivate(UPrimitiveComponent* OverlappedComponen
 	PlayerRef = Cast<AGreenOneCharacter>(OtherActor);
 	if (PlayerRef)
 	{
+		FTimerHandle PlayerRefHandle;
 		SetPlayerRefToEntitys(PlayerRef);
 	}
 	TriggerSpawnEntity();
 }
 
-void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (!Cast<AGreenOneCharacter>(OtherActor))
+	{
+		return;
+	}
 	PlayerRef = nullptr;
 	SetPlayerRefToEntitys(PlayerRef);
 	GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
