@@ -18,8 +18,10 @@ class GREENONE_API UGI_GreenOne : public UGameInstance
 	GENERATED_BODY()
 
 public:
-
+	
 	virtual void Init();
+
+#pragma region Save
 
 	/**
 	 * Sauvegarde la current save.
@@ -113,4 +115,60 @@ private:
 	/// This method deletes the save screen.
 	/// </summary>
 	void DeleteSaveScreen();
+
+#pragma endregion
+
+#pragma region SaveSettingAudio
+
+public:
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Audio")
+	float GetMasterVolume();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Audio")
+	float GetMusicVolume();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Audio")
+	float GetSFXVolume();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void SetMasterVolume(float value);
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void SetMusicVolume(float value);
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void SetSFXVolume(float value);
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0.f, ClampMax = 1.f, UIMin = 0.f, UIMax = 1.f), Category = "Audio")
+	float FadeInTime = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	USoundMix* SoundMix;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	USoundClass* MasterSoundClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	USoundClass* MusicSoundClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	USoundClass* SFXSoundClass;
+
+private:
+
+	void CreateAudioSave();
+	
+	void LoadAudioSave();
+
+	void SavedAudioSettings();
+
+	void ApplyAudioSettings();
+
+	FString AudioSaveName = "AudioSettings";
+
+	class USG_AudioSettings* AudioSettingsRef;
+
+#pragma endregion
+
 };

@@ -5,11 +5,20 @@
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "SG_GreenOne.h"
+#include "SG_AudioSettings.h"
 
 void UGI_GreenOne::Init()
 {
 	Super::Init();
+	if (LoadSave())
+	{
+		FTimerHandle SaveHandler;
+		GetWorld()->GetTimerManager().SetTimer(SaveHandler, [&](){ApplySaveData();}, 0.2f, false);
+	}
+	LoadAudioSave();
 }
+
+#pragma region Save
 
 void UGI_GreenOne::SaveGame()
 {
@@ -108,4 +117,120 @@ void UGI_GreenOne::DeleteSaveScreen()
 {
 	CurrenSaveScreen->RemoveFromParent();
 	CurrenSaveScreen = nullptr;
+}
+
+#pragma endregion
+
+float UGI_GreenOne::GetMasterVolume()
+{
+	if (!AudioSettingsRef)
+	{
+		CreateAudioSave();
+	}
+	return AudioSettingsRef->MasterVolume;
+}
+
+float UGI_GreenOne::GetMusicVolume()
+{
+	if (!AudioSettingsRef)
+	{
+		CreateAudioSave();
+	}
+	return AudioSettingsRef->MusicVolume;
+}
+
+float UGI_GreenOne::GetSFXVolume()
+{
+	if (!AudioSettingsRef)
+	{
+		CreateAudioSave();
+	}
+	return AudioSettingsRef->SFXVolume;
+}
+
+void UGI_GreenOne::SetMasterVolume(float value)
+{
+	if (!AudioSettingsRef)
+	{
+		CreateAudioSave();
+	}
+	AudioSettingsRef->MasterVolume = value;
+	if (!MasterSoundClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de MasterSoundClass assigner dans le game instance"))
+		return;
+	}
+	SavedAudioSettings();
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), SoundMix, MasterSoundClass, value, 1.f, FadeInTime);
+}
+
+void UGI_GreenOne::SetMusicVolume(float value)
+{
+	if (!AudioSettingsRef)
+	{
+		CreateAudioSave();
+	}
+	AudioSettingsRef->MusicVolume = value;
+	if (!MusicSoundClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de MusicSoundClass assigner dans le game instance"))
+			return;
+	}
+	SavedAudioSettings();
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), SoundMix, MusicSoundClass, value, 1.f, FadeInTime);
+}
+
+void UGI_GreenOne::SetSFXVolume(float value)
+{
+	if (!AudioSettingsRef)
+	{
+		CreateAudioSave();
+	}
+	AudioSettingsRef->SFXVolume = value;
+	if (!SFXSoundClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de SFXSoundClass assigner dans le game instance"))
+			return;
+	}
+	SavedAudioSettings();
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), SoundMix, SFXSoundClass, value, 1.f, FadeInTime);
+}
+
+void UGI_GreenOne::CreateAudioSave()
+{
+	AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::CreateSaveGameObject(USG_AudioSettings::StaticClass()));
+	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
+}
+
+void UGI_GreenOne::LoadAudioSave()
+{
+	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex))
+	{
+		AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::LoadGameFromSlot(AudioSaveName, SaveIndex));
+	}
+	else
+	{
+		CreateAudioSave();
+	}
+	ApplyAudioSettings();
+}
+
+void UGI_GreenOne::SavedAudioSettings()
+{
+	if (!AudioSettingsRef)
+	{
+		CreateAudioSave();
+	}
+	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
+}
+
+void UGI_GreenOne::ApplyAudioSettings()
+{
+	if (!AudioSettingsRef)
+	{
+		CreateAudioSave();
+	}
+	SetMusicVolume(AudioSettingsRef->MusicVolume);
+	SetMasterVolume(AudioSettingsRef->MasterVolume);
+	SetSFXVolume(AudioSettingsRef->SFXVolume);
 }

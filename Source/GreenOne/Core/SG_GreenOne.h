@@ -9,7 +9,7 @@
 /**
  * Save à utiliser dans le jeu.
  */
-UCLASS()
+UCLASS(NotBlueprintable)
 class GREENONE_API USG_GreenOne : public USaveGame
 {
 	GENERATED_BODY()
