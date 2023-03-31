@@ -11,7 +11,6 @@ UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 {
 	bNotifyTick = true;
 	MoveTime = 1.f;
-	Speed = 600.f;
 	bCreateNodeInstance = true;
 	bNotifyTaskFinished = true;
 }
@@ -22,6 +21,8 @@ EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& Owne
 	// Optimized and secured
 	ActivateRotateOnMovement(OwnerComp, false);
 	DirectionValue = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
+	OtherDirection = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
+	IsHorizontal = UKismetMathLibrary::RandomBool();
 	return EBTNodeResult::InProgress;
 }
 
@@ -31,7 +32,25 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 	if (APawn* Pawn = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		const FVector TargetDirection = Pawn->GetActorRightVector() * DirectionValue;
+		FVector TargetDirection;
+		switch (Deplacement)
+		{
+		case EDimension::Horizontal:
+			TargetDirection = Pawn->GetActorRightVector() * DirectionValue;
+			break;
+		case EDimension::Vertical:
+			TargetDirection = Pawn->GetActorUpVector() * DirectionValue;
+			break;
+		case EDimension::Diagonal:
+			TargetDirection = Pawn->GetActorRightVector() * DirectionValue;
+			TargetDirection += Pawn->GetActorUpVector() * OtherDirection;
+			break;
+		case EDimension::Alternate:
+			TargetDirection = (IsHorizontal ? (Pawn->GetActorRightVector()) : (Pawn->GetActorUpVector())) * DirectionValue;
+			break;
+		default:
+			break;
+		}
 		Pawn->GetMovementComponent()->AddInputVector(TargetDirection);
 		if (const AActor* PlayerRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
 		{

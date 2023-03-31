@@ -6,6 +6,15 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTT_QuickMoveLOrR.generated.h"
 
+UENUM()
+enum class EDimension : uint8
+{
+	Horizontal,
+	Vertical,
+	Diagonal,
+	Alternate
+};
+
 /**
  *
  */
@@ -37,7 +46,7 @@ public:
 	/// Awaiting approval.
 	/// </summary>
 	UPROPERTY(EditAnywhere)
-		float Speed;
+	EDimension Deplacement;
 
 	/// <summary>
 	/// Time taken to move from one point to another
@@ -50,6 +59,10 @@ private:
 	float CurrentTime;
 
 	int DirectionValue;
+
+	int OtherDirection;
+
+	bool IsHorizontal;
 
 	void ActivateRotateOnMovement(UBehaviorTreeComponent& OwnerComp, bool activ);
 

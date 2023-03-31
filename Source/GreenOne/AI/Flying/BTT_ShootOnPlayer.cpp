@@ -9,6 +9,7 @@ UBTT_ShootOnPlayer::UBTT_ShootOnPlayer()
 {
 	bCreateNodeInstance = true;
 	bNotifyTick = true;
+	CurrentBehavior = EBehavior::None;
 }
 
 //This function is used to execute the task ShootOnPlayer.
@@ -21,10 +22,15 @@ EBTNodeResult::Type UBTT_ShootOnPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 	{
 		if (!PawnRef->CanShoot())
 		{
-			if (ShouldWait)
-				{ return EBTNodeResult::InProgress;	}
-			else if(ShouldFail)
-				{ return EBTNodeResult::Failed;	}
+			switch (CurrentBehavior)
+			{
+			case EBehavior::Wait:
+				return EBTNodeResult::InProgress;
+				break;
+			case EBehavior::Faild:
+				return EBTNodeResult::Failed;
+				break;
+			}
 		}
 		//Call the Shoot() function
 		PawnRef->Shoot();

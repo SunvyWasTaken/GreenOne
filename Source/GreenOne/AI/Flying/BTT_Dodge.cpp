@@ -16,15 +16,15 @@ UBTT_Dodge::UBTT_Dodge()
 
 EBTNodeResult::Type UBTT_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	if(TargetRef.IsNone())
+	if (TargetRef.IsNone())
 	{
-		UE_LOG(LogTemp,Warning, TEXT("PlayerRef not set in the Dodge Task."));
+		UE_LOG(LogTemp, Warning, TEXT("PlayerRef not set in the Dodge Task."));
 		return EBTNodeResult::Failed;
 	}
 	ControllerRef = Cast<AController>(OwnerComp.GetOwner());
 	if (!ControllerRef)
 	{
-		UE_LOG(LogTemp,Warning, TEXT("Le cast du controller à fail dans la task Dodge"));
+		UE_LOG(LogTemp, Warning, TEXT("Le cast du controller à fail dans la task Dodge"));
 		return EBTNodeResult::Failed;
 	}
 	PlayerRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName));
@@ -40,7 +40,7 @@ EBTNodeResult::Type UBTT_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 		return EBTNodeResult::Failed;
 	}
 	FlyingSpeedInit = CharaMovementComp->MaxFlySpeed;
-	CharaMovementComp->MaxFlySpeed = FlyingSpeedInit*2;
+	CharaMovementComp->MaxFlySpeed = FlyingSpeedInit * 2;
 	CharaMovementComp->bOrientRotationToMovement = false;
 	if (UKismetMathLibrary::RandomBool())
 	{
@@ -51,27 +51,33 @@ EBTNodeResult::Type UBTT_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 
 void UBTT_Dodge::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-
 	ControllerRef->GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(ControllerRef->GetPawn()->GetActorLocation(), PlayerRef->GetActorLocation()));
 	const double DistanceBetween = FVector::Distance(PlayerRef->GetActorLocation(), ControllerRef->GetPawn()->GetActorLocation());
 	FVector DodgeVelocity = ControllerRef->GetPawn()->GetActorRightVector() * DodgeDirection;
+	//Normalize the DodgeVelocity vector
 	DodgeVelocity.Normalize();
+
+	//Check if the ControllerRef is a character
 	if (ACharacter* AIRef = Cast<ACharacter>(ControllerRef->GetPawn()))
 	{
-		
+		//If it is, get the movement component and add the DodgeVelocity vector to it
 		AIRef->GetMovementComponent()->AddInputVector(DodgeVelocity);
-		//UE_LOG(LogTemp,Warning, TEXT("Vector Dodge : %s"), *DodgeVelocity.ToString());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Le Owner de la task Dodge n'est pas un character est du coup fail l'appel pour le move."));
 	}
+	// Calculates the dot product of the controller's pawn's forward vector and the player's forward vector.
 	const float DotPro = FVector::DotProduct(ControllerRef->GetPawn()->GetActorForwardVector(), PlayerRef->GetActorForwardVector());
-	//UE_LOG(LogTemp, Warning, TEXT("Dot : %f"), DotPro);
-	if ( DotPro >= DodgeDistance || DotPro >= DodgeDistance*-1)
+	if (DotPro >= DodgeDistance || DotPro >= DodgeDistance * -1)
 	{
+		// Set the maximum flying speed of the character movement component to the initial flying speed.
 		CharaMovementComp->MaxFlySpeed = FlyingSpeedInit;
+
+		// Set the character movement component to orient the rotation to the movement. 
 		CharaMovementComp->bOrientRotationToMovement = true;
+
+		// Finish the latent task with a successful result. 
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }
