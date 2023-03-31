@@ -7,6 +7,12 @@
 #include "SG_GreenOne.h"
 #include "SG_AudioSettings.h"
 
+UGI_GreenOne::UGI_GreenOne() : UGameInstance()
+{
+	SaveClass = USG_GreenOne::StaticClass();
+	
+}
+
 void UGI_GreenOne::Init()
 {
 	Super::Init();
@@ -16,6 +22,8 @@ void UGI_GreenOne::Init()
 		GetWorld()->GetTimerManager().SetTimer(SaveHandler, [&](){ApplySaveData();}, 0.2f, false);
 	}
 	LoadAudioSave();
+	FTimerHandle AudioHandler;
+	GetWorld()->GetTimerManager().SetTimer(AudioHandler, this, &UGI_GreenOne::ApplyAudioSettings, 0.2f, false);
 }
 
 #pragma region Save
@@ -160,7 +168,6 @@ void UGI_GreenOne::SetMasterVolume(float value)
 		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de MasterSoundClass assigner dans le game instance"))
 		return;
 	}
-	SavedAudioSettings();
 	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), SoundMix, MasterSoundClass, value, 1.f, FadeInTime);
 }
 
@@ -176,7 +183,6 @@ void UGI_GreenOne::SetMusicVolume(float value)
 		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de MusicSoundClass assigner dans le game instance"))
 			return;
 	}
-	SavedAudioSettings();
 	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), SoundMix, MusicSoundClass, value, 1.f, FadeInTime);
 }
 
@@ -192,21 +198,27 @@ void UGI_GreenOne::SetSFXVolume(float value)
 		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de SFXSoundClass assigner dans le game instance"))
 			return;
 	}
-	SavedAudioSettings();
 	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), SoundMix, SFXSoundClass, value, 1.f, FadeInTime);
 }
 
 void UGI_GreenOne::CreateAudioSave()
 {
 	AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::CreateSaveGameObject(USG_AudioSettings::StaticClass()));
-	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
+	if (AudioSettingsRef == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("La creation du Sound Save à Fail!!!"));
+	}
 }
 
 void UGI_GreenOne::LoadAudioSave()
 {
-	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex))
+	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex + 1))
 	{
-		AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::LoadGameFromSlot(AudioSaveName, SaveIndex));
+		AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::LoadGameFromSlot(AudioSaveName, SaveIndex + 1));
+		if (AudioSettingsRef == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Le cast du get Sound Save à Fail!!!"));
+		}
 	}
 	else
 	{
@@ -217,11 +229,10 @@ void UGI_GreenOne::LoadAudioSave()
 
 void UGI_GreenOne::SavedAudioSettings()
 {
-	if (!AudioSettingsRef)
+	if (!UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex + 1))
 	{
-		CreateAudioSave();
+		UE_LOG(LogTemp, Error, TEXT("Save audio FAILD!!!"));
 	}
-	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
 }
 
 void UGI_GreenOne::ApplyAudioSettings()

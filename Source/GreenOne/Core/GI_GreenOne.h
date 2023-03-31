@@ -18,6 +18,8 @@ class GREENONE_API UGI_GreenOne : public UGameInstance
 	GENERATED_BODY()
 
 public:
+
+	UGI_GreenOne();
 	
 	virtual void Init();
 
@@ -140,6 +142,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void SetSFXVolume(float value);
 
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void SavedAudioSettings();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	FString AudioSaveName = "CustomAudioSettings";
+
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0.f, ClampMax = 1.f, UIMin = 0.f, UIMax = 1.f), Category = "Audio")
 	float FadeInTime = 0.5f;
 
@@ -157,15 +165,14 @@ public:
 
 private:
 
+	UFUNCTION()
 	void CreateAudioSave();
 	
+	UFUNCTION()
 	void LoadAudioSave();
 
-	void SavedAudioSettings();
-
+	UFUNCTION()
 	void ApplyAudioSettings();
-
-	FString AudioSaveName = "AudioSettings";
 
 	class USG_AudioSettings* AudioSettingsRef;
 

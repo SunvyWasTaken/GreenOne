@@ -11,10 +11,13 @@ class GREENONE_API USG_AudioSettings : public USaveGame
 
 public:
 
+	UPROPERTY()
 	float MasterVolume = 0.7f;
 
+	UPROPERTY()
 	float MusicVolume = 0.7f;
 
+	UPROPERTY()
 	float SFXVolume = 0.7f;
 
 };
