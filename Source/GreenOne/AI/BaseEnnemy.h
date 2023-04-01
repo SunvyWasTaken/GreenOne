@@ -45,6 +45,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerRef(AActor* ref);
 
+	class AEnnemySpawner* SpawnerRef;
+
 protected:
 
 	/************************************************************************/

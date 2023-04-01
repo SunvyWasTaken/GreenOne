@@ -104,9 +104,9 @@ void ABaseEnnemy::DeadEntity()
 {
 	GetMesh()->SetSimulatePhysics(true);
 	Cast<AAIController>(GetController())->GetBrainComponent()->StopLogic("Because");
-	if (AEnnemySpawner* ParentRef = Cast<AEnnemySpawner>(Owner))
+	if (SpawnerRef != nullptr)
 	{
-		ParentRef->RemoveEntityFromList(this);
+		SpawnerRef->RemoveEntityFromList(this);
 	}
 }
 

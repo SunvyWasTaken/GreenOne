@@ -108,7 +108,6 @@ void AEnnemySpawner::SpawnEntity()
 		// Set spawn parameters
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		SpawnParams.Owner = this;
 
 		// Spawn the actor
 		ABaseEnnemy* CurrentSpawnEnnemy = GetWorld()->SpawnActor<ABaseEnnemy>(EnnemyToSpawnClass, GetActorLocation(), GetActorRotation(), SpawnParams);
@@ -121,6 +120,7 @@ void AEnnemySpawner::SpawnEntity()
 			{
 				FTimerHandle SetPlayerTimer;
 				CurrentSpawnEnnemy->SetPlayerRef(PlayerRef);
+				CurrentSpawnEnnemy->SpawnerRef = this;
 			}
 		}
 	}
