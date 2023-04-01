@@ -230,7 +230,7 @@ void UGI_GreenOne::LoadAudioSave()
 
 void UGI_GreenOne::SavedAudioSettings()
 {
-	if(!AudioSettingsRef)
+	if(AudioSettingsRef == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attention save du sound la variable AudioSettingsRef nullptr"));
 		return;
