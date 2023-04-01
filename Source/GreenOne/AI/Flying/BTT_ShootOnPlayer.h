@@ -15,6 +15,8 @@ enum class EBehavior : uint8
 	Skip
 };
 
+// TODO Add the feature that AI can try to predict where the player will be based on the speed of the bullet.
+
 /**
  *
  */
@@ -38,6 +40,6 @@ private:
 public:
 
 	UPROPERTY(EditAnywhere)
-	EBehavior CurrentBehavior;
+		EBehavior CurrentBehavior;
 
 };

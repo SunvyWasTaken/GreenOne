@@ -14,8 +14,6 @@ class GREENONE_API ABaseEnnemy : public ACharacter, public IEntityGame
 	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamage);
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerRefSet, AActor*, PlayerRef);
-
 public:
 	// Sets default values for this character's properties
 	ABaseEnnemy();
@@ -46,11 +44,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerRef(AActor* ref);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	AActor* GetPlayerRef();
-
-	class AEnnemySpawner* ParentRef;
 
 protected:
 
@@ -94,13 +87,8 @@ private:
 
 	void ChangeTextureBaseHealth();
 
-	AActor* PlayerRef;
-
 protected:
 
 	void DeadEntity();
-
-	UPROPERTY(BlueprintAssignable)
-		FOnPlayerRefSet OnPlayerRefSet;
 
 };

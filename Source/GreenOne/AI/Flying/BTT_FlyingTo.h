@@ -6,6 +6,8 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTT_FlyingTo.generated.h"
 
+// TODO Faire en sorte que le fly to puisse stop même si il a pas atteint sa cible.
+
 /**
  *
  */

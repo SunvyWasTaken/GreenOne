@@ -8,17 +8,16 @@
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "EnnemySpawner.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 // Sets default values
 ABaseEnnemy::ABaseEnnemy()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	LifeBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LifeBar_DEBUG"));
 	LifeBarComponent->SetupAttachment(RootComponent);
 	LifeBarComponent->SetWidgetClass(LifeBarClass);
-
-	ParentRef = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -44,18 +43,19 @@ void ABaseEnnemy::BeginPlay()
 
 float ABaseEnnemy::GetPercentHealth()
 {
-	return Health/MaxHealth;
+	return Health / MaxHealth;
 }
 
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
 {
-	PlayerRef = ref;
-	OnPlayerRefSet.Broadcast(PlayerRef);
-}
-
-AActor* ABaseEnnemy::GetPlayerRef()
-{
-	return PlayerRef;
+	if (AAIController* AIController = Cast<AAIController>(Controller))
+	{
+		UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			BlackboardComp->SetValueAsObject("TargetPlayer", ref);
+		}
+	}
 }
 
 void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr)
@@ -64,7 +64,7 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 	float CurrentDamageMulti = 1.f;
 	if (!ListWeakPoint.IsEmpty())
 	{
-		for(FName& var : ListWeakPoint)
+		for (FName& var : ListWeakPoint)
 		{
 			if (BoneNameHit == var)
 			{
@@ -78,7 +78,7 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 	{
 		ChangeTextureBaseHealth();
 	}
-	if (Health <= 0.f )
+	if (Health <= 0.f)
 	{
 		Health = 0.f;
 		DeadEntity();
@@ -104,7 +104,7 @@ void ABaseEnnemy::DeadEntity()
 {
 	GetMesh()->SetSimulatePhysics(true);
 	Cast<AAIController>(GetController())->GetBrainComponent()->StopLogic("Because");
-	if (ParentRef != nullptr)
+	if (AEnnemySpawner* ParentRef = Cast<AEnnemySpawner>(Owner))
 	{
 		ParentRef->RemoveEntityFromList(this);
 	}

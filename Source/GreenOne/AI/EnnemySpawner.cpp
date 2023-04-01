@@ -59,13 +59,13 @@ void AEnnemySpawner::Tick(float DeltaTime)
 
 void AEnnemySpawner::OnComponentActivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	PlayerRef = Cast<AGreenOneCharacter>(OtherActor);
-	if (PlayerRef)
+	if (Cast<AGreenOneCharacter>(OtherActor))
 	{
+		PlayerRef = OtherActor;
 		FTimerHandle PlayerRefHandle;
+		TriggerSpawnEntity();
 		SetPlayerRefToEntitys(PlayerRef);
 	}
-	TriggerSpawnEntity();
 }
 
 void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -108,6 +108,7 @@ void AEnnemySpawner::SpawnEntity()
 		// Set spawn parameters
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		SpawnParams.Owner = this;
 
 		// Spawn the actor
 		ABaseEnnemy* CurrentSpawnEnnemy = GetWorld()->SpawnActor<ABaseEnnemy>(EnnemyToSpawnClass, GetActorLocation(), GetActorRotation(), SpawnParams);
@@ -116,9 +117,9 @@ void AEnnemySpawner::SpawnEntity()
 		if (CurrentSpawnEnnemy != nullptr)
 		{
 			EntityList.Add(CurrentSpawnEnnemy);
-			CurrentSpawnEnnemy->ParentRef = this;
 			if (PlayerRef)
 			{
+				FTimerHandle SetPlayerTimer;
 				CurrentSpawnEnnemy->SetPlayerRef(PlayerRef);
 			}
 		}
