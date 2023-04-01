@@ -42,7 +42,10 @@ public:
 	float ShootRate = 0.5f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
-	TSubclassOf<AActor> ProjectileClass;
+	bool bUseTrace = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
+	TSubclassOf<class AAIProjectil> ProjectileClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	float ShootRange = 5000.f;

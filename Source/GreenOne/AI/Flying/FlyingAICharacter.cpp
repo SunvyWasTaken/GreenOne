@@ -6,6 +6,7 @@
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "GreenOne/GreenOneCharacter.h"	
 #include "Engine/CollisionProfile.h"
+#include "AIProjectil.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
@@ -94,23 +95,37 @@ void AFlyingAICharacter::TickCooldown(float DeltaSeconds)
 
 void AFlyingAICharacter::TimerShoot()
 {
-	FHitResult Outhit;
-	
-	// TODO à changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe Bref magic number toi meme tu sais.
-	if (GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * ShootRange), ECC_Camera))
+	if(bUseTrace)
 	{
-		// Check si l'actor hit est vide ou pas.
-		if (!Outhit.GetActor())
+		FHitResult Outhit;
+
+		// TODO à changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe Bref magic number toi meme tu sais.
+		if (GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * ShootRange), ECC_Camera))
 		{
-			//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon ça crash xD."));
+			// Check si l'actor hit est vide ou pas.
+			if (!Outhit.GetActor())
+			{
+				//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon ça crash xD."));
+				return;
+			}
+			else if (Outhit.GetActor()->Implements<UEntityGame>())
+			{
+				ActiveCooldown();
+				IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
+			}
+			//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
+		}
+	}
+	else
+	{
+		if (!ProjectileClass)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("La class Projectil de l'ennemie est vide!!"));
 			return;
 		}
-		else if (Outhit.GetActor()->Implements<UEntityGame>())
-		{
-			ActiveCooldown();
-			IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
-		}
-		//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
+		FActorSpawnParameters SpawnParam;
+		SpawnParam.Owner = this;
+		GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
 	}
 }
 
