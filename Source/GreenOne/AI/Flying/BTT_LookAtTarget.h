@@ -6,8 +6,11 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTT_LookAtTarget.generated.h"
 
+// TODO Adding the degree of imprecision is not bad.
+// TODO Adding prediction to this.
+
 /**
- * 
+ *
  */
 UCLASS()
 class GREENONE_API UBTT_LookAtTarget : public UBTTaskNode
@@ -21,6 +24,6 @@ public:
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 
 	UPROPERTY(EditAnywhere)
-	FBlackboardKeySelector PlayerRef;
-	
+		FBlackboardKeySelector PlayerRef;
+
 };

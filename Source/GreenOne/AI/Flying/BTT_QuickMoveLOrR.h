@@ -15,6 +15,8 @@ enum class EDimension : uint8
 	Alternate
 };
 
+// TODO ajouter un dot pour faire en sorte que le truc aille pas non plus au dessus du player Ou en dessous totalement de la map.
+
 /**
  *
  */
