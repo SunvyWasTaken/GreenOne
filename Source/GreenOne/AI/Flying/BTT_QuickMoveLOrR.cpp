@@ -48,13 +48,17 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		case EDimension::Alternate:
 			TargetDirection = (IsHorizontal ? (Pawn->GetActorRightVector()) : (Pawn->GetActorUpVector())) * DirectionValue;
 			break;
-		default:
-			break;
 		}
-		Pawn->GetMovementComponent()->AddInputVector(TargetDirection);
 		if (const AActor* PlayerRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
 		{
+			const float dotPro = UKismetMathLibrary::Dot_VectorVector(Pawn->GetActorForwardVector(), PlayerRef->GetActorUpVector());
+			if (abs(dotPro) >= PercentAlignment)
+			{
+				
+				TargetDirection = Pawn->GetActorUpVector() * ((dotPro < 0) ? (-1) : (1));
+			}
 			Pawn->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(Pawn->GetActorLocation(), PlayerRef->GetActorLocation()));
+			Pawn->GetMovementComponent()->AddInputVector(TargetDirection);
 		}
 		else
 		{

@@ -54,7 +54,10 @@ public:
 	/// Time taken to move from one point to another
 	/// </summary>
 	UPROPERTY(EditAnywhere)
-		float MoveTime;
+	float MoveTime;
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Pourcentage d'alignement", UIMin = 0, UIMax = 1, ClampMin = 0, ClampMax = 1))
+	float PercentAlignment;
 
 private:
 
