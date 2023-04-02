@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Effects/Effect.h"
 #include "UObject/Interface.h"
 #include "EntityGame.generated.h"
 
@@ -17,4 +18,7 @@ class GREENONE_API IEntityGame
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void EntityTakeDamage(float damage, FName BoneNameHit, AActor* DamageSource = nullptr);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void EnityTakeEffect(UEffect* Effect);
 };
