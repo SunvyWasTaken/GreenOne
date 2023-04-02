@@ -12,7 +12,7 @@
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	ExploRadius = 100.f;
@@ -51,39 +51,52 @@ void AFlyingAICharacter::Shoot()
 	}
 }
 
+//This function is used to perform self-destruction of the AI character.
 void AFlyingAICharacter::SelfDestruction()
 {
+	//Create an array to store the results of the trace
 	TArray<FHitResult> Outhits;
+	//Create an array to store the actors to ignore
 	TArray<AActor*> ActorToIgnore;
+	//Add the current actor to the array of actors to ignore
 	ActorToIgnore.Add(this);
+	//Perform a sphere trace to detect any actors within the explosion radius
 	if (UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), GetActorLocation(), ExploRadius, UCollisionProfile::Get()->ConvertToTraceType(ECC_Camera), false, ActorToIgnore, EDrawDebugTrace::None, Outhits, true))
 	{
+		//Loop through the results of the trace
 		for (FHitResult Outhit : Outhits)
 		{
-			if(!Outhit.GetActor())
+			//Check if nothing was hit by the explosion
+			if (!Outhit.GetActor())
 			{
-				// Do nothing parce que sinon ça casse. bref
 				UE_LOG(LogTemp, Warning, TEXT("nothing hit by the explosion."));
 			}
+			//Check if the actor hit is a GreenOneCharacter
 			if (AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(Outhit.GetActor()))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
+				//Call the EntityTakeDamage function on the GreenOneCharacter
 				IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, ExploDmg, Outhit.BoneName, this);
+				//Break out of the loop
 				break;
 			}
 		}
 	}
+	//Check if the ExplosionParticule is not null
 	if (ExplosionParticule != nullptr)
 	{
+		//Spawn the ExplosionParticule at the actor's location
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
 	}
+	//Call the DeadEntity function
 	DeadEntity();
 }
 
+//This function sets the IsInCooldown boolean to true and sets the TimeRemainingForShoot to 1 divided by the ShootRate. 
 void AFlyingAICharacter::ActiveCooldown()
 {
-	IsInCooldown = true;
-	TimeRemainingForShoot = 1/ShootRate;
+	IsInCooldown = true; //Set IsInCooldown to true
+	TimeRemainingForShoot = 1 / ShootRate; //Set TimeRemainingForShoot to 1 divided by the ShootRate
 }
 
 void AFlyingAICharacter::TickCooldown(float DeltaSeconds)
@@ -100,7 +113,7 @@ void AFlyingAICharacter::TickCooldown(float DeltaSeconds)
 
 void AFlyingAICharacter::TimerShoot()
 {
-	if(bUseTrace)
+	if (bUseTrace)
 	{
 		FHitResult Outhit;
 
