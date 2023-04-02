@@ -7,6 +7,7 @@
 #include "GreenOne/GreenOneCharacter.h"	
 #include "Engine/CollisionProfile.h"
 #include "AIProjectil.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
@@ -71,6 +72,10 @@ void AFlyingAICharacter::SelfDestruction()
 				break;
 			}
 		}
+	}
+	if (ExplosionParticule != nullptr)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
 	}
 	DeadEntity();
 }

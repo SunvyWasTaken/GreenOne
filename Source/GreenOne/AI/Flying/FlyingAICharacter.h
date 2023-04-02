@@ -55,6 +55,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SelfDestruction();
 
+	UPROPERTY(EditAnywhere, Category = "Custom|Explosion")
+	class UNiagaraSystem* ExplosionParticule;
+
 	/**
 	 * Radius de l'explosion.
 	 */
