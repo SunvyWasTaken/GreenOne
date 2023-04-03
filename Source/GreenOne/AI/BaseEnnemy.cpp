@@ -93,7 +93,7 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 		Health = 0.f;
 		DeadEntity();
 	}
-	OnTakeDamage.Broadcast();
+	OnTakeDamage.Broadcast(DamageApply);
 }
 
 void ABaseEnnemy::ChangeTextureBaseHealth()

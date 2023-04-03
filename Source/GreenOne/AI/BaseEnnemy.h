@@ -12,7 +12,7 @@ class GREENONE_API ABaseEnnemy : public ACharacter, public IEntityGame
 {
 	GENERATED_BODY()
 	
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamage);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTakeDamage, float, NbrDamage);
 
 public:
 	// Sets default values for this character's properties

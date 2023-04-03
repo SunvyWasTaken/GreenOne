@@ -138,6 +138,8 @@ void AFlyingAICharacter::TimerShoot()
 				//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon �a crash xD."));
 				return;
 			}
+			else if(Outhit.GetActor() == this)
+			{ return; }
 			else if (Outhit.GetActor()->Implements<UEntityGame>())
 			{
 				ActiveCooldown();
