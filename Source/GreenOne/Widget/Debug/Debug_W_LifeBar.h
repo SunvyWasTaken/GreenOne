@@ -27,6 +27,6 @@ private:
 	class ABaseEnnemy* CurrentOwner;
 
 	UFUNCTION()
-	void UpdateBar();
+	void UpdateBar(float NbrDamage);
 	
 };

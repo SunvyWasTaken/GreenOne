@@ -15,10 +15,10 @@ void UDebug_W_LifeBar::SetOwner(AActor* OwnerRef)
 		return;
 	}
 	CurrentOwner->OnTakeDamage.AddDynamic(this, &UDebug_W_LifeBar::UpdateBar);
-	UpdateBar();
+	UpdateBar(CurrentOwner->Health);
 }
 
-void UDebug_W_LifeBar::UpdateBar()
+void UDebug_W_LifeBar::UpdateBar(float NbrDamage)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Update Life Bar"));
 	LifeBar->SetPercent(CurrentOwner->GetPercentHealth());
