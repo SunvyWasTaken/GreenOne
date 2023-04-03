@@ -4,11 +4,12 @@
 
 #include "Navigation/CrowdFollowingComponent.h"
 #include "CoreMinimal.h"
+#include "GreenOne/AI/BaseEnnemy.h"
 #include "GameFramework/Character.h"
 #include "MeleeAICharacter.generated.h"
 
 UCLASS()
-class GREENONE_API AMeleeAICharacter : public ACharacter
+class GREENONE_API AMeleeAICharacter : public ABaseEnnemy
 {
 	GENERATED_BODY()
 
@@ -26,5 +27,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable)
+	void AttackMeleeOK();
 
 };

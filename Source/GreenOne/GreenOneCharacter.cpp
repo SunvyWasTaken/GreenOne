@@ -110,7 +110,7 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
-		EnhancedInputComponent->BindAction(AttackMeleeAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::AttackMelee);
+		EnhancedInputComponent->BindAction(AttackMeleeAction, ETriggerEvent::Triggered, AttackMeleeComponent, &UAttackMelee::Attack);
 	}
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
@@ -369,13 +369,6 @@ void AGreenOneCharacter::TogglePauseGame()
 	}
 }
 
-void AGreenOneCharacter::AttackMelee()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Attack Melee"));
-	if(!AttackMeleeComponent) return;
-
-	AttackMeleeComponent->Attack();
-}
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {

@@ -124,9 +124,6 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
 	float DamagePlayer = 10.f;
-	
-	UFUNCTION(BlueprintCallable)
-	void AttackMelee();
 
 	/**
 	 * Cooldown entre chaque tire par d�fault c'est 1/3;
@@ -252,8 +249,7 @@ protected:
 
 	float MaxHealth = 0;
 
-	UPROPERTY(BlueprintReadWrite)
-	bool IsAtk;
+	
 
 	/** 
 	 * Called via input to turn at a given rate. 
@@ -281,6 +277,8 @@ protected:
 	virtual void BeginPlay();
 
 public:
+	UPROPERTY(BlueprintReadWrite)
+	bool IsAtk;
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/

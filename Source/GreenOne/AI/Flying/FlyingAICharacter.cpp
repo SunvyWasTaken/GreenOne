@@ -129,13 +129,13 @@ void AFlyingAICharacter::TimerShoot()
 	{
 		FHitResult Outhit;
 
-		// TODO � changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe Bref magic number toi meme tu sais.
+		// TODO à changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe Bref magic number toi meme tu sais.
 		if (GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * ShootRange), ECC_Camera))
 		{
 			// Check si l'actor hit est vide ou pas.
 			if (!Outhit.GetActor())
 			{
-				//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon �a crash xD."));
+				//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon ça crash xD."));
 				return;
 
 				//Check if the actor that was hit is the same as this actor

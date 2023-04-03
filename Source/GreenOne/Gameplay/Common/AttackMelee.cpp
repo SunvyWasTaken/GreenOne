@@ -3,6 +3,9 @@
 #include "AttackMelee.h"
 #include "Engine/World.h"
 #include "Components/PrimitiveComponent.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GreenOne/GreenOneCharacter.h"
 
 // Sets default values for this component's properties
 UAttackMelee::UAttackMelee()
@@ -49,6 +52,12 @@ void UAttackMelee::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 void UAttackMelee::Attack()
 {
+	if(AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
+	{
+		Character->IsAtk = true;
+		
+	}
+	
 	if(!bActiveCoolDown)
 		bActiveCoolDown = true;
 	else
@@ -82,6 +91,10 @@ void UAttackMelee::DetectActors()
 	UE_LOG(LogTemp, Warning, TEXT("Numbers of actors hit : %d"), ActorsHit.Num());
 	
 	UE_LOG(LogTemp, Warning, TEXT("Attack in component"));
+	if(AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
+	{
+		Character->IsAtk = false;
+	}
 }
 
 void UAttackMelee::ApplyImpulseForce(TArray<FHitResult>& ActorsHit)
@@ -91,10 +104,10 @@ void UAttackMelee::ApplyImpulseForce(TArray<FHitResult>& ActorsHit)
 		if(Actor.GetActor() == GetOwner()) continue;
 		
 		UE_LOG(LogTemp, Warning, TEXT("Actor to impulse : %s"), *Actor.GetActor()->GetName());
-		if(UPrimitiveComponent* Comp = Cast<UPrimitiveComponent>(Actor.GetActor()->GetRootComponent()))
+		if(UCharacterMovementComponent* Comp = Cast<UCharacterMovementComponent>(Cast<ACharacter>(Actor.GetActor())->GetCharacterMovement()))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Impulse %s"), *Actor.GetActor()->GetName());
-			Comp->AddImpulse(GetOwner()->GetActorForwardVector() * ImpulseForceTemp, "NAME_None", true);
+			Comp->AddImpulse(GetOwner()->GetActorForwardVector() * ImpulseForceTemp, true);
 		}
 	}
 }
