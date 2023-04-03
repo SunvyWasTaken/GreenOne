@@ -33,4 +33,14 @@ void AMeleeAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 }
 
 
+void AMeleeAICharacter::AttackMeleeOK()
+{
+	UE_LOG(LogTemp, Warning, TEXT("yo"));
+	FHitResult Outhit;
+	//IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
+	
+}
+
+
+
 
