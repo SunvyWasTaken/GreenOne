@@ -55,6 +55,9 @@ public:
 
 	virtual void UpdateMaxSpeed(float Speed) {};
 
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Property")
+	bool IsFriendlyFire = true;
+
 protected:
 
 	/************************************************************************/

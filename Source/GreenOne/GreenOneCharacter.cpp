@@ -14,6 +14,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "GreenOne/AI/BaseEnnemy.h"
+#include "Components/SceneComponent.h"
 
 #include "Gameplay/Common/AttackMelee.h"
 #include "Gameplay/Effects/Fertilizer/FertilizerBase.h"
@@ -69,6 +71,9 @@ AGreenOneCharacter::AGreenOneCharacter()
 	{
 		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
 	}
+
+	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
+	TargetMuzzle->SetupAttachment(GetMesh());
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -89,6 +94,10 @@ void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, Health))
 	{
 		MaxHealth = Health;
+	}
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, SocketMuzzle))
+	{
+		//TargetMuzzle->SetAttachSocketName(SocketMuzzle);
 	}
 }
 
@@ -219,26 +228,26 @@ void AGreenOneCharacter::StopShoot()
 
 void AGreenOneCharacter::ShootRafale()
 {
-	APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FHitResult OutHit;
+	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
 
-	float DegreeRotation = UKismetMathLibrary::Lerp(0.f, 360.f, ShootBloom);
-	FVector StartLocation = CameraRef->GetCameraLocation();
-	FVector EndLocation = StartLocation + UKismetMathLibrary::RandomUnitVectorInConeInDegrees(CameraRef->GetActorForwardVector(), DegreeRotation) * ShootDistance;
-
-	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera))
+	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, LocationToAim, ECC_Camera))
 	{
 		if (DotDecal)
 		{
 			GetWorld()->SpawnActor<AActor>(DotDecal, OutHit.Location, OutHit.Normal.Rotation());
 		}
-		if (OutHit.GetActor())
+		if (OutHit.GetActor() == nullptr)
 		{
-			if (OutHit.GetActor()->Implements<UEntityGame>())
+			return;
+		}
+		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
+		{
+			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
-				IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName, this);
-				IEntityGame::Execute_EnityTakeEffect(OutHit.GetActor(), FertilizerFactory::Factory(EFertilizerType,GetCurrentEffect(EFertilizerType)),this);
-				OnHitEnnemy.Broadcast();
+				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
+				IEntityGame::Execute_EnityTakeEffect(CurrentTargetHit, FertilizerFactory::Factory(EFertilizerType,GetCurrentEffect(EFertilizerType)),this);
+				OnHitEnnemy.Broadcast(CurrentTargetHit);
 			}
 		}
 	}
@@ -253,6 +262,27 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 		{
 			ShootCooldownRemaining = ShootCooldown;
 			CanShoot = true;
+		}
+	}
+	else
+	{
+		APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+		FHitResult OutHit;
+
+		float DegreeRotation = UKismetMathLibrary::Lerp(0.f, 360.f, ShootBloom);
+		FVector StartLocation = CameraRef->GetCameraLocation();
+		FVector EndLocation = StartLocation + UKismetMathLibrary::RandomUnitVectorInConeInDegrees(CameraRef->GetActorForwardVector(), DegreeRotation) * ShootDistance;
+		IsTouchSomething = GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera);
+		if (IsTouchSomething)
+		{
+			if (OutHit.GetActor() == this)
+			{
+				LocationToAim = TargetMuzzle->GetComponentLocation() + (GetActorForwardVector() * ShootDistance);
+			}
+			else
+			{
+				LocationToAim = (OutHit.Location - TargetMuzzle->GetComponentLocation()) * ShootDistance;
+			}
 		}
 	}
 }

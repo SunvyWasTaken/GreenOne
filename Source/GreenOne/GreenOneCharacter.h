@@ -99,10 +99,12 @@ public:
 
 #pragma region Tire
 
+public:
+
 	UPROPERTY(BlueprintAssignable)
 	FOnHitEnnemy OnHitEnnemy;
 
-	UPROPERTY(EditAnywhere, Category = "Component")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	class USceneComponent* TargetMuzzle;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
