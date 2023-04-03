@@ -49,6 +49,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	float ShootRange = 5000.f;
+	
+	virtual void UpdateMaxSpeed(float Speed) override;
 
 #pragma region Explosion
 

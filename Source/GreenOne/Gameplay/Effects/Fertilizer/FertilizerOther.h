@@ -3,18 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GreenOne/Gameplay/Effects/Effect.h"	
-#include "FertilizerBase.generated.h"
+#include "FertilizerBase.h"
+#include "FertilizerOther.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GREENONE_API UFertilizerBase : public UEffect
+class GREENONE_API UFertilizerOther : public UFertilizerBase
 {
 	GENERATED_BODY()
-
 public:
-	UFertilizerBase();
+	UFertilizerOther();
 	virtual void ApplyEffect(AActor* Actor) override;
+	
 };

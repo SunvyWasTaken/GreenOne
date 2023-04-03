@@ -2,6 +2,10 @@
 
 #include "Effect.h"
 
+UEffect::UEffect()
+{
+}
+
 void UEffect::ApplyEffect(AActor* Actor)
 {
 	IEffectInterface::ApplyEffect(Actor);

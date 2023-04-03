@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
+#include "Gameplay/Effects/Fertilizer/FertilizerBase.h"
+#include "Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
 #include "GreenOneCharacter.generated.h"
 
 class UInputAction;
@@ -54,6 +56,17 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool Invisible = false;
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool Immortal = false;
+
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TMap<FertilizerType,TSubclassOf<UFertilizerBase>> Effects;
+	UPROPERTY(EditAnywhere, Category = "Test")
+	FertilizerType EFertilizerType;
+
+	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
+	
 	
 public:
 

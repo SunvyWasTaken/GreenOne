@@ -3,6 +3,10 @@
 
 #include "FertilizerBase.h"
 
+UFertilizerBase::UFertilizerBase()
+{
+}
+
 void UFertilizerBase::ApplyEffect(AActor* Actor)
 {
 	Super::ApplyEffect(Actor);

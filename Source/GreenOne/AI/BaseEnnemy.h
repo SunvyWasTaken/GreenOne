@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = 0), Category = "Custom|Property")
 	float Damage = 12.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Property", DisplayName = "Speed Max (cm/s)");
+	float MaxSpeed = 600.f;
+
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de vie de l'entity
 	 */
@@ -42,10 +45,15 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Custom|Damage")
 	void EntityTakeDamage(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr);
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void EnityTakeEffect(UEffect* Effect);
+
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerRef(AActor* ref);
 
 	class AEnnemySpawner* SpawnerRef;
+
+	virtual void UpdateMaxSpeed(float Speed) {};
 
 protected:
 

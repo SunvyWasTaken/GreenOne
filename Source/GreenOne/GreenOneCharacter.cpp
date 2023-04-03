@@ -16,9 +16,16 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
 #include "Gameplay/Common/AttackMelee.h"
+#include "Gameplay/Effects/Fertilizer/FertilizerBase.h"
+#include "Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
+
+TSubclassOf<UFertilizerBase> AGreenOneCharacter::GetCurrentEffect(FertilizerType Type)
+{
+	return *Effects.Find(Type);
+}
 
 AGreenOneCharacter::AGreenOneCharacter()
 {
@@ -174,6 +181,8 @@ bool AGreenOneCharacter::IsAttacking()
 
 void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit, AActor* DamageSource = nullptr)
 {
+	if(Immortal) return;
+	
 	Health -= damage;
 	if (Health <= 0)
 	if(!Invisible) Health -= damage;
@@ -228,6 +237,7 @@ void AGreenOneCharacter::ShootRafale()
 			if (OutHit.GetActor()->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName, this);
+				IEntityGame::Execute_EnityTakeEffect(OutHit.GetActor(), FertilizerFactory::Factory(EFertilizerType,GetCurrentEffect(EFertilizerType)));
 				OnHitEnnemy.Broadcast();
 			}
 		}

@@ -8,6 +8,7 @@
 #include "Engine/CollisionProfile.h"
 #include "AIProjectil.h"
 #include "NiagaraFunctionLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
@@ -25,7 +26,10 @@ AFlyingAICharacter::AFlyingAICharacter()
 void AFlyingAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	if(GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxFlySpeed = MaxSpeed;
+	}
 }
 
 // Called every frame
@@ -48,6 +52,14 @@ void AFlyingAICharacter::Shoot()
 	if (!IsInCooldown)
 	{
 		TimerShoot();
+	}
+}
+
+void AFlyingAICharacter::UpdateMaxSpeed(float NewSpeed)
+{
+	if(GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxFlySpeed = NewSpeed;
 	}
 }
 
@@ -117,13 +129,13 @@ void AFlyingAICharacter::TimerShoot()
 	{
 		FHitResult Outhit;
 
-		// TODO à changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe Bref magic number toi meme tu sais.
+		// TODO ï¿½ changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe Bref magic number toi meme tu sais.
 		if (GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * ShootRange), ECC_Camera))
 		{
 			// Check si l'actor hit est vide ou pas.
 			if (!Outhit.GetActor())
 			{
-				//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon ça crash xD."));
+				//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon ï¿½a crash xD."));
 				return;
 			}
 			else if (Outhit.GetActor()->Implements<UEntityGame>())

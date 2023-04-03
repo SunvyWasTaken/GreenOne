@@ -46,6 +46,12 @@ float ABaseEnnemy::GetPercentHealth()
 	return Health / MaxHealth;
 }
 
+void ABaseEnnemy::EnityTakeEffect_Implementation(UEffect* Effect)
+{
+	if(!Effect) return;
+	Effect->ApplyEffect(this);
+}
+
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
 {
 	if (AAIController* AIController = Cast<AAIController>(Controller))
