@@ -50,7 +50,7 @@ void AAIProjectil::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	{
 		return;
 	}
-	if (OtherActor == Owner || Cast<AEnnemySpawner>(OtherActor))
+	if (OtherActor == Owner || Cast<AEnnemySpawner>(OtherActor) || Cast<AAIProjectil>(OtherActor))
 	{
 		return;
 	}

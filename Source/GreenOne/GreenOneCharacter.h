@@ -20,7 +20,7 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHitEnnemy);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHitEnnemy, class ABaseEnnemy*, CurrentTarget);
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -102,6 +102,12 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHitEnnemy OnHitEnnemy;
 
+	UPROPERTY(EditAnywhere, Category = "Component")
+	class USceneComponent* TargetMuzzle;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
+	FName SocketMuzzle;
+
 	/**
 	 * Give if the player is attacking or not.
 	 */
@@ -150,6 +156,10 @@ protected:
 	float ShootCooldownRemaining;
 
 private:
+	
+	FVector LocationToAim;
+
+	bool IsTouchSomething;
 
 	bool CanShoot;
 

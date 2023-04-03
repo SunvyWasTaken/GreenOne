@@ -80,6 +80,10 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 		}
 	}
 	Health -= DamageApply * CurrentDamageMulti;
+	if (IsFriendlyFire)
+	{
+		Cast<AAIController>(Controller)->GetBlackboardComponent()->SetValueAsObject("TargetPlayer", DamageSource);
+	}
 	if (LifeTreshold.Num() == MatTreshold.Num())
 	{
 		ChangeTextureBaseHealth();

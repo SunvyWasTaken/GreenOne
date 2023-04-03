@@ -153,6 +153,7 @@ void AFlyingAICharacter::TimerShoot()
 			UE_LOG(LogTemp, Warning, TEXT("La class Projectil de l'ennemie est vide!!"));
 			return;
 		}
+		ActiveCooldown();
 		FActorSpawnParameters SpawnParam;
 		SpawnParam.Owner = this;
 		GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
