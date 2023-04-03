@@ -237,7 +237,7 @@ void AGreenOneCharacter::ShootRafale()
 			if (OutHit.GetActor()->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer, OutHit.BoneName, this);
-				IEntityGame::Execute_EnityTakeEffect(OutHit.GetActor(), FertilizerFactory::Factory(EFertilizerType,GetCurrentEffect(EFertilizerType)));
+				IEntityGame::Execute_EnityTakeEffect(OutHit.GetActor(), FertilizerFactory::Factory(EFertilizerType,GetCurrentEffect(EFertilizerType)),this);
 				OnHitEnnemy.Broadcast();
 			}
 		}

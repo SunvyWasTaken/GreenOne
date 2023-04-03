@@ -60,13 +60,14 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool Immortal = false;
 
+#pragma region Test
 	UPROPERTY(EditAnywhere, Category = "Test")
 	TMap<FertilizerType,TSubclassOf<UFertilizerBase>> Effects;
 	UPROPERTY(EditAnywhere, Category = "Test")
 	FertilizerType EFertilizerType;
 
 	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
-	
+#pragma endregion 
 	
 public:
 

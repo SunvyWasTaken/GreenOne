@@ -46,7 +46,7 @@ public:
 	void EntityTakeDamage(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void EnityTakeEffect(UEffect* Effect);
+	void EnityTakeEffect(UEffect* Effect, AActor* Source = nullptr);
 
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerRef(AActor* ref);

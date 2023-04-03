@@ -46,7 +46,7 @@ float ABaseEnnemy::GetPercentHealth()
 	return Health / MaxHealth;
 }
 
-void ABaseEnnemy::EnityTakeEffect_Implementation(UEffect* Effect)
+void ABaseEnnemy::EnityTakeEffect_Implementation(UEffect* Effect, AActor* Source)
 {
 	if(!Effect) return;
 	Effect->ApplyEffect(this);
