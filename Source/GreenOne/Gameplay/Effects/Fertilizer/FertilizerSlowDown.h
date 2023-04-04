@@ -22,8 +22,10 @@ class GREENONE_API UFertilizerSlowDown : public UFertilizerBase
 
 public:
 	UFertilizerSlowDown();
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	/**
 	 * Applique l'effet sur l'acteur
 	 */

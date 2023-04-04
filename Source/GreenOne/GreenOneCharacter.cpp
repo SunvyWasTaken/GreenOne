@@ -28,7 +28,7 @@ TSubclassOf<UFertilizerBase> AGreenOneCharacter::GetCurrentEffect(FertilizerType
 {
 	if (!Effects.Contains(Type))
 	{
-		// Prévoir quelque chose
+		// Prï¿½voir quelque chose
 	}
 	return *Effects.Find(Type);
 }
@@ -93,6 +93,7 @@ AGreenOneCharacter::AGreenOneCharacter()
 	bIsDashing = false;
 }
 
+#if WITH_EDITOR
 void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, Health))
@@ -104,6 +105,7 @@ void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 		//TargetMuzzle->SetAttachSocketName(SocketMuzzle);
 	}
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 // Input

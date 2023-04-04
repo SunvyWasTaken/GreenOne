@@ -23,6 +23,7 @@ AEnnemySpawner::AEnnemySpawner()
 	SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
 }
 
+#if WITH_EDITOR
 void AEnnemySpawner::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	// Call parent implementation of this function first
@@ -39,7 +40,7 @@ void AEnnemySpawner::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 		SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
 	}
 }
-
+#endif
 
 // Appelé au début du jeu ou au moment de l'apparition de l'animal.
 void AEnnemySpawner::BeginPlay()

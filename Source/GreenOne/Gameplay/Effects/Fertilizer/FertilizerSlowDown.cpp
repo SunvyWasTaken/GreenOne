@@ -10,12 +10,14 @@ UFertilizerSlowDown::UFertilizerSlowDown()
 {
 }
 
+#if WITH_EDITOR
 void UFertilizerSlowDown::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	PercentSlowDown = FMath::Clamp(PercentSlowDown, 0, MaxPercentSlownDown);
 }
+#endif
 
 void UFertilizerSlowDown::ApplyEffect(AActor* Actor)
 {

@@ -21,7 +21,9 @@ public:
 	// Appelé chaque frame
 	virtual void Tick(float DeltaTime) override;
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+#endif
 
 public:
 
