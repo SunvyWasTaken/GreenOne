@@ -187,10 +187,12 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	bool bIsJumping = Value.Get<bool>();
 	if (bIsJumping)
 	{
-		Jump();
+		//Jump();
+		DoubleJump();
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Stop Jump"));
 		StopJumping();
 	}
 }
@@ -458,6 +460,27 @@ void AGreenOneCharacter::TogglePauseGame()
 void AGreenOneCharacter::TurnCamera()
 {
 	SetActorRotation(FRotator(GetActorRotation().Roll, GetFollowCamera()->GetComponentRotation().Yaw, GetActorRotation().Pitch));
+}
+
+void AGreenOneCharacter::DoubleJump()
+{
+	bPressedJump = true;
+	const float vj = GetCharacterMovement()->JumpZVelocity;
+	UE_LOG(LogTemp, Warning, TEXT("MaxJumpValue %f"),vj);
+	
+	if(JumpCurrentCount == 1 && GetCharacterMovement()->IsFalling())
+	{
+		GetCharacterMovement()->GravityScale = 0.f;
+		UE_LOG(LogTemp, Warning, TEXT("Horizontal"));
+		LaunchCharacter(GetActorForwardVector()*vj,true, true);
+		return;
+	}
+	
+	if(JumpCurrentCount == 0 && !GetCharacterMovement()->IsFalling())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Vertical"));
+		//LaunchCharacter(FVector::UpVector*VerticalJumpVelocity,false, true);
+	}
 }
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)

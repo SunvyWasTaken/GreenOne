@@ -358,6 +358,18 @@ private:
 #pragma endregion 
 
 #pragma region Test
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s"))
+	float VerticalJumpVelocity = 100.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump")
+	int32 MaxJump = 2;
+	int32 NumberOfJump = 0;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump")
+	float TimeBeforeFalling = 5.f; //TODO: Faire le delay avant la chute du perso sur le jump 
+	void DoubleJump();
+	
+protected:
+
+	void Move(const FInputActionValue& Value);
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Test")
