@@ -28,15 +28,9 @@ TSubclassOf<UFertilizerBase> AGreenOneCharacter::GetCurrentEffect(FertilizerType
 {
 	if (!Effects.Contains(Type))
 	{
-		return TSubclassOf<UFertilizerBase>();
+		// Prévoir quelque chose
 	}
 	return *Effects.Find(Type);
-}
-
-bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
-{
-	if(!Effects.Find(Type)) return false;
-	return true;
 }
 
 AGreenOneCharacter::AGreenOneCharacter()
@@ -99,7 +93,6 @@ AGreenOneCharacter::AGreenOneCharacter()
 	bIsDashing = false;
 }
 
-#if WITH_EDITOR
 void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, Health))
@@ -111,7 +104,6 @@ void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 		//TargetMuzzle->SetAttachSocketName(SocketMuzzle);
 	}
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -123,8 +115,8 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Dash);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AGreenOneCharacter::Shoot);
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AGreenOneCharacter::StopShoot);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Ongoing, this, &AGreenOneCharacter::Shoot);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Canceled, this, &AGreenOneCharacter::StopShoot);
 		EnhancedInputComponent->BindAction(AttackMeleeAction, ETriggerEvent::Triggered, AttackMeleeComponent, &UAttackMelee::Attack);
 		EnhancedInputComponent->BindAction(EnableFertilizerAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::EnableFertilizer);
 		EnhancedInputComponent->BindAction(ChangeFertilizerTypeAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::ChangeFertilizerType);
@@ -221,7 +213,7 @@ bool AGreenOneCharacter::IsAttacking()
 	return IsAtk;
 }
 
-void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit, AActor* DamageSource)
+void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit, AActor* DamageSource = nullptr)
 {
 	if(Immortal) return;
 	
@@ -279,13 +271,9 @@ void AGreenOneCharacter::ShootRafale()
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
-				if(IsCurrentEffectExist(EFertilizerType))
-				{
-					if(UFertilizerBase* Fertilizer = FertilizerFactory::Factory(EFertilizerType, GetCurrentEffect(EFertilizerType)))
-					{
-						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer,this);	
-					}	
-				}
+				UFertilizerBase* Fertilizer = FertilizerFactory::Factory(EFertilizerType, GetCurrentEffect(EFertilizerType));
+				if(Fertilizer != nullptr)
+					IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer,this);
 				OnHitEnnemy.Broadcast(CurrentTargetHit);
 			}
 		}
