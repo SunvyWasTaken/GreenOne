@@ -243,6 +243,16 @@ private:
 
 #pragma endregion
 
+#pragma region TurnCamera
+
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Camera")
+	float Multiplicator;
+
+	UFUNCTION()
+	void TurnCamera();
+
+#pragma endregion 
+
 protected:
 
 	void Move(const FInputActionValue& Value);

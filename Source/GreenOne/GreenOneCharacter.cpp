@@ -210,7 +210,7 @@ float AGreenOneCharacter::GetHealthPercent()
 
 void AGreenOneCharacter::Shoot()
 {
-
+	TurnCamera();
 	if (!CanShoot) { return; }
 
 	CanShoot = false;
@@ -246,7 +246,7 @@ void AGreenOneCharacter::ShootRafale()
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
-				IEntityGame::Execute_EnityTakeEffect(CurrentTargetHit, FertilizerFactory::Factory(EFertilizerType,GetCurrentEffect(EFertilizerType)),this);
+				IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, FertilizerFactory::Factory(EFertilizerType,GetCurrentEffect(EFertilizerType)),this);
 				OnHitEnnemy.Broadcast(CurrentTargetHit);
 			}
 		}
@@ -369,6 +369,10 @@ void AGreenOneCharacter::TogglePauseGame()
 	}
 }
 
+void AGreenOneCharacter::TurnCamera()
+{
+	SetActorRotation(FRotator(GetActorRotation().Roll, GetFollowCamera()->GetComponentRotation().Yaw, GetActorRotation().Pitch));
+}
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
