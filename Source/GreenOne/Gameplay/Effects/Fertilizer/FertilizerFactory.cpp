@@ -4,6 +4,7 @@
 #include "FertilizerEffectFactory.h"
 
 #include "FertilizerOther.h"
+#include "MyFertilizerAttackBonus.h"
 
 FertilizerFactory::FertilizerFactory()
 {
@@ -23,6 +24,9 @@ UFertilizerBase* FertilizerFactory::Factory(FertilizerType Type, TSubclassOf<UFe
 	{
 	case FertilizerType::SlowDown:
 		Fertilizer = NewObject<UFertilizerSlowDown>(FertilizerBase);
+		break;
+	case FertilizerType::AttackBonus:
+		Fertilizer = NewObject<UMyFertilizerAttackBonus>(FertilizerBase);
 		break;
 	case FertilizerType::Other:
 		Fertilizer = NewObject<UFertilizerOther>(FertilizerBase);

@@ -49,7 +49,11 @@ float ABaseEnnemy::GetPercentHealth()
 void ABaseEnnemy::EnityTakeEffect_Implementation(UEffect* Effect, AActor* Source)
 {
 	if(!Effect) return;
-	Effect->ApplyEffect(this);
+	if(!Source)
+		Effect->ApplyEffect(this);
+	else
+		Effect->ApplyEffect(this, Source);
+	
 }
 
 void ABaseEnnemy::SetPlayerRef(AActor* ref)

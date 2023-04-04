@@ -22,4 +22,5 @@ class GREENONE_API IEffectInterface
 
 public:
 	virtual void ApplyEffect(AActor* Actor) {};
+	virtual void ApplyEffect(AActor* Actor, AActor* Source) {};
 };

@@ -16,4 +16,5 @@ class GREENONE_API UEffect : public UObject, public IEffectInterface
 public:
 	UEffect();
 	virtual void ApplyEffect(AActor* Actor) override;
+	virtual void ApplyEffect(AActor* Actor, AActor* Source) override;
 };
