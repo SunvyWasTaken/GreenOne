@@ -19,7 +19,7 @@ EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& Owne
 {
 	CurrentTime = MoveTime;
 	// Optimized and secured
-	ActivateRotateOnMovement(OwnerComp, false);
+	//ActivateRotateOnMovement(OwnerComp, false);
 	DirectionValue = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	OtherDirection = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	IsHorizontal = UKismetMathLibrary::RandomBool();
@@ -63,7 +63,7 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Fail du cast target player dans QuickMoveLOrR. Aborted"));
-			ActivateRotateOnMovement(OwnerComp, true);
+			//ActivateRotateOnMovement(OwnerComp, true);
 			FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
 		}
 	}
@@ -76,7 +76,7 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 void UBTT_QuickMoveLOrR::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
 {
-	ActivateRotateOnMovement(OwnerComp, true);
+	//ActivateRotateOnMovement(OwnerComp, true);
 }
 
 void UBTT_QuickMoveLOrR::ActivateRotateOnMovement(UBehaviorTreeComponent& OwnerComp, bool activ)
