@@ -27,8 +27,52 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
+	UPROPERTY(EditAnywhere)
+	FVector Offset = FVector(0, 0, 0);
+	
 	UFUNCTION(BlueprintCallable)
-	void AttackMeleeOK();
+	void Collision();
+	
 
+
+
+
+
+private:
+	
+	/** Radius de la zone de detection */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Radius de la zone de détection")
+	float DetectionRadius = 80.f;
+
+
+	/** Offset de la detection selon la position du parent */
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Offset de la zone de détection")
+	FVector DetectionOffset;
+
+
+	// blabla
+	
+	//UFUNCTION(BlueprintCallable)
+	//void AttackMeleeOK();
+
+
+	// blabla
+	UPROPERTY(EditAnywhere, Category = "Custom|Explosion")
+	class UNiagaraSystem* ExplosionParticule;
+	
+	/**
+	 * Radius de l'explosion.
+	 */
+	//UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, meta = (DisplayName = "Radius d'explosion", ClampMin = 0), Category = "Custom|Explosion")
+	//float ExploRadius;
+
+	/**
+	 * valeur de damage appliquer au player si in range.
+	 * Default one 20% of the player max health.
+	 */
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage de l'explosion", ClampMin = 0), Category = "Custom|Explosion")
+	float ExploDmg;
+
+	
 };
