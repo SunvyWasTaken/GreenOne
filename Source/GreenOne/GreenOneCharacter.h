@@ -67,6 +67,7 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	FertilizerType EFertilizerType;
 
 	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
+	bool IsCurrentEffectExist(FertilizerType Type);
 #pragma endregion 
 	
 public:

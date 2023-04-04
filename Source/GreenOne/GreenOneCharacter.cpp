@@ -28,9 +28,15 @@ TSubclassOf<UFertilizerBase> AGreenOneCharacter::GetCurrentEffect(FertilizerType
 {
 	if (!Effects.Contains(Type))
 	{
-		// Pr�voir quelque chose
+		return TSubclassOf<UFertilizerBase>();
 	}
 	return *Effects.Find(Type);
+}
+
+bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
+{
+	if(!Effects.Find(Type)) return false;
+	return true;
 }
 
 AGreenOneCharacter::AGreenOneCharacter()
@@ -194,7 +200,7 @@ bool AGreenOneCharacter::IsAttacking()
 	return IsAtk;
 }
 
-void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit, AActor* DamageSource = nullptr)
+void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName BoneNameHit, AActor* DamageSource)
 {
 	if(Immortal) return;
 	
@@ -252,9 +258,13 @@ void AGreenOneCharacter::ShootRafale()
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
-				UFertilizerBase* Fertilizer = FertilizerFactory::Factory(EFertilizerType, GetCurrentEffect(EFertilizerType));
-				if(Fertilizer != nullptr)
-					IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer,this);
+				if(IsCurrentEffectExist(EFertilizerType))
+				{
+					if(UFertilizerBase* Fertilizer = FertilizerFactory::Factory(EFertilizerType, GetCurrentEffect(EFertilizerType)))
+					{
+						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer,this);	
+					}	
+				}
 				OnHitEnnemy.Broadcast(CurrentTargetHit);
 			}
 		}
