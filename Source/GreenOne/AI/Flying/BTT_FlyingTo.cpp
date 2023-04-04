@@ -6,6 +6,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 UBTT_FlyingTo::UBTT_FlyingTo()
@@ -50,8 +51,16 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 		{
 			LocTo.Z = 0.f;
 		}
-		LocTo.Normalize();
-		AIRef->GetMovementComponent()->AddInputVector(LocTo);
+		if (bUseOld)
+		{
+			AIRef->GetMovementComponent()->AddInputVector(LocTo);
+		}
+		else
+		{
+			const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(AIRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(LocTo), DeltaSeconds, RotationSpeed);
+			AIRef->SetActorRotation(CurrentTargetRotation);
+			AIRef->GetMovementComponent()->AddInputVector(AIRef->GetActorForwardVector());
+		}
 		FVector NormTargetLocation = TargetLocation;
 		if (Zlock)
 		{

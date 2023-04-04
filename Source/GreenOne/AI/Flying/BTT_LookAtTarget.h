@@ -23,7 +23,23 @@ public:
 
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 
+	void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
+
 	UPROPERTY(EditAnywhere)
 		FBlackboardKeySelector PlayerRef;
+
+	UPROPERTY(EditAnywhere)
+	float RotationSpeed = 2.f;
+
+	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (DisplayName = "Tolerance pour la rotation"))
+	float RotationTolerance = 0.1f;
+
+	// Use the old system rotation.
+	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (DisplayName = "Old System"))
+	bool bUseOld = true;
+
+private:
+
+	AActor* PlayerRefActor;
 
 };

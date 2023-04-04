@@ -27,6 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Vitesse du projectile", ClampMin = 0), Category = "Custom|Property")
 	float ProjectilSpeed = 1200.f;
 
+	// This property is useless now cause it is link to the Ai property
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0), Category = "Custom|Property")
 	float ProjectilDamage = 10.f;
 

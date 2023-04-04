@@ -26,7 +26,7 @@ AFlyingAICharacter::AFlyingAICharacter()
 void AFlyingAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if(GetCharacterMovement())
+	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->MaxFlySpeed = MaxSpeed;
 	}
@@ -57,7 +57,7 @@ void AFlyingAICharacter::Shoot()
 
 void AFlyingAICharacter::UpdateMaxSpeed(float NewSpeed)
 {
-	if(GetCharacterMovement())
+	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->MaxFlySpeed = NewSpeed;
 	}
@@ -137,15 +137,22 @@ void AFlyingAICharacter::TimerShoot()
 			{
 				//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon �a crash xD."));
 				return;
+
+				//Check if the actor that was hit is the same as this actor
+				if (Outhit.GetActor() == this)
+				{
+					//If so, return
+					return;
+				}
+				//Check if the actor implements the UEntityGame interface
+				else if (Outhit.GetActor()->Implements<UEntityGame>())
+				{
+					//If so, activate the cooldown and execute the EntityTakeDamage function
+					ActiveCooldown();
+					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
+				}
+				//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
 			}
-			else if(Outhit.GetActor() == this)
-			{ return; }
-			else if (Outhit.GetActor()->Implements<UEntityGame>())
-			{
-				ActiveCooldown();
-				IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
-			}
-			//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
 		}
 	}
 	else
@@ -158,7 +165,8 @@ void AFlyingAICharacter::TimerShoot()
 		ActiveCooldown();
 		FActorSpawnParameters SpawnParam;
 		SpawnParam.Owner = this;
-		GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
+		AAIProjectil* CurrentBullet = GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
+		CurrentBullet->ProjectilDamage = Damage;
 	}
 }
 

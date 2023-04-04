@@ -31,11 +31,20 @@ public:
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Target move to"))
 		FBlackboardKeySelector TargetRef;
 
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
+		float RotationSpeed = 2.f;
+
 	/**
 	 * If true the AI would fly without moving in the z axis.
 	 */
 	UPROPERTY(EditAnywhere)
 		bool Zlock = false;
+
+	/**
+	* Use the Old flying system
+	*/
+	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (DisplayName = "Use Old System"))
+		bool bUseOld = true;
 
 private:
 
