@@ -26,6 +26,10 @@
 
 TSubclassOf<UFertilizerBase> AGreenOneCharacter::GetCurrentEffect(FertilizerType Type)
 {
+	if (!Effects.Contains(Type))
+	{
+		// Prévoir quelque chose
+	}
 	return *Effects.Find(Type);
 }
 
@@ -246,7 +250,9 @@ void AGreenOneCharacter::ShootRafale()
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
-				IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, FertilizerFactory::Factory(EFertilizerType,GetCurrentEffect(EFertilizerType)),this);
+				UFertilizerBase* Fertilizer = FertilizerFactory::Factory(EFertilizerType, GetCurrentEffect(EFertilizerType));
+				if(Fertilizer != nullptr)
+					IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer,this);
 				OnHitEnnemy.Broadcast(CurrentTargetHit);
 			}
 		}
