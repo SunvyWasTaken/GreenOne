@@ -5,14 +5,15 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
-#include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 UBTT_FlyingTo::UBTT_FlyingTo()
 {
 	bNotifyTick = true;
 	bCreateNodeInstance = true;
+	bNotifyTaskFinished = true;
 }
 
 EBTNodeResult::Type UBTT_FlyingTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -29,6 +30,20 @@ EBTNodeResult::Type UBTT_FlyingTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 		UE_LOG(LogTemp, Warning, TEXT("Aucun target n'a était assigner au flying move to."));
 		return EBTNodeResult::Aborted;
 	}
+	if (!bOverrideSpeed)
+	{
+		return EBTNodeResult::InProgress;
+	}
+	PawnMovementRef = Cast<UCharacterMovementComponent>(ControllerRef->GetCharacter()->GetMovementComponent());
+	if (PawnMovementRef == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cast fail du Pawn movement dans le flying to."));
+		return EBTNodeResult::Failed;
+	}
+	InitialSpeed = PawnMovementRef->MaxFlySpeed;
+	InitialAcceleration = PawnMovementRef->GetMaxAcceleration();
+	PawnMovementRef->MaxFlySpeed = FlyingSpeed;
+	PawnMovementRef->MaxAcceleration *= AccelerationMultiPly;
 	return EBTNodeResult::InProgress;
 }
 
@@ -46,7 +61,7 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 		{
 			TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TargetRef.SelectedKeyName);
 		}
-		FVector LocTo = TargetLocation - AIRef->GetActorLocation();	
+		FVector LocTo = TargetLocation - AIRef->GetActorLocation();
 		if (Zlock)
 		{
 			LocTo.Z = 0.f;
@@ -75,5 +90,19 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Le Owner de la task n'est pas un character est du coup fail l'appel pour le move."));
 		FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
+	}
+}
+
+void UBTT_FlyingTo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+	if (!bOverrideSpeed)
+	{
+		return;
+	}
+	if (PawnMovementRef != nullptr)
+	{
+		PawnMovementRef->MaxFlySpeed = InitialSpeed;
+		PawnMovementRef->MaxAcceleration = InitialAcceleration;
+		return;
 	}
 }

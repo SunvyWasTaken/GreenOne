@@ -22,6 +22,8 @@ public:
 
 	void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
 
+	void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult);
+
 	/// <summary>
 	/// This property defines the Acceptance Radius with a minimum value of 0.
 	/// </summary>
@@ -41,15 +43,39 @@ public:
 		bool Zlock = false;
 
 	/**
+	 * Set new values for the AI's movement speed and resets at the end of the task or when it fails.
+	 */
+	UPROPERTY(EditAnywhere)
+		bool bOverrideSpeed = false;
+
+	/**
+	*	AI movement speed when speed needs to be overridden.
+	*/
+	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (EditCondition = bOverrideSpeed, DisplayName = "Speed to override"))
+		float FlyingSpeed = 1200.f;
+
+	/**
+	 * Multiplier used to determine the speed at which AI will accelerate.
+	 */
+	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (EditCondition = bOverrideSpeed, DisplayName = "Multiplicateur d'accélération"))
+		float AccelerationMultiPly = 2.f;
+
+	/**
 	* Use the Old flying system
 	*/
 	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (DisplayName = "Use Old System"))
-		bool bUseOld = true;
+		bool bUseOld = false;
 
 private:
 
 	AController* ControllerRef;
 
 	FVector TargetLocation;
+
+	float InitialSpeed;
+
+	float InitialAcceleration;
+
+	class UCharacterMovementComponent* PawnMovementRef;
 
 };
