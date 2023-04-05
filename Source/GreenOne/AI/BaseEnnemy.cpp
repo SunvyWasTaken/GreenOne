@@ -9,6 +9,8 @@
 #include "BrainComponent.h"
 #include "EnnemySpawner.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "GreenOne/GreenOneCharacter.h"
 
 // Sets default values
 ABaseEnnemy::ABaseEnnemy()
@@ -83,6 +85,13 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 	if (IsFriendlyFire)
 	{
 		Cast<AAIController>(Controller)->GetBlackboardComponent()->SetValueAsObject("TargetPlayer", DamageSource);
+	}
+	else
+	{
+		if (UKismetMathLibrary::ClassIsChildOf(DamageSource->StaticClass(), AGreenOneCharacter::StaticClass()))
+		{
+			Cast<AAIController>(Controller)->GetBlackboardComponent()->SetValueAsObject("TargetPlayer", DamageSource);
+		}
 	}
 	if (LifeTreshold.Num() == MatTreshold.Num())
 	{
