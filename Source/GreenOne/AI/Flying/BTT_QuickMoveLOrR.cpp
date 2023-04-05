@@ -73,7 +73,6 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	}
 	if (CurrentTime <= 0.f)
 	{
-
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }
