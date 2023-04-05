@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "FlyingAICharacter.h"
 
 UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 {
@@ -18,8 +19,6 @@ UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	CurrentTime = MoveTime;
-	// Optimized and secured
-	//ActivateRotateOnMovement(OwnerComp, false);
 	DirectionValue = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	OtherDirection = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	IsHorizontal = UKismetMathLibrary::RandomBool();
@@ -37,6 +36,7 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		{
 		case EDimension::Horizontal:
 			TargetDirection = Pawn->GetActorRightVector() * DirectionValue;
+			SetFlyingRotation(Pawn, FVector2D(DirectionValue, 0));
 			break;
 		case EDimension::Vertical:
 			TargetDirection = Pawn->GetActorUpVector() * DirectionValue;
@@ -44,9 +44,14 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		case EDimension::Diagonal:
 			TargetDirection = Pawn->GetActorRightVector() * DirectionValue;
 			TargetDirection += Pawn->GetActorUpVector() * OtherDirection;
+			SetFlyingRotation(Pawn, FVector2D(DirectionValue, 0));
 			break;
 		case EDimension::Alternate:
-			TargetDirection = (IsHorizontal ? (Pawn->GetActorRightVector()) : (Pawn->GetActorUpVector())) * DirectionValue;
+			TargetDirection = (IsHorizontal ? (Pawn->GetActorRightVector() * DirectionValue) : (Pawn->GetActorUpVector())) * DirectionValue;
+			if(IsHorizontal)
+			{
+				SetFlyingRotation(Pawn, FVector2D(DirectionValue, 0));
+			}
 			break;
 		}
 		if (const AActor* PlayerRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
@@ -63,7 +68,6 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Fail du cast target player dans QuickMoveLOrR. Aborted"));
-			//ActivateRotateOnMovement(OwnerComp, true);
 			FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
 		}
 	}
@@ -74,19 +78,11 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	}
 }
 
-void UBTT_QuickMoveLOrR::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+void UBTT_QuickMoveLOrR::SetFlyingRotation(APawn* RefOwner, FVector2D Axis)
 {
-	//ActivateRotateOnMovement(OwnerComp, true);
-}
-
-void UBTT_QuickMoveLOrR::ActivateRotateOnMovement(UBehaviorTreeComponent& OwnerComp, bool activ)
-{
-	if (APawn* SelfPawnRef = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn()))
+	if (AFlyingAICharacter* Oui = Cast<AFlyingAICharacter>(RefOwner))
 	{
-		if (UCharacterMovementComponent* MovementComp = Cast<UCharacterMovementComponent>(SelfPawnRef->GetMovementComponent()))
-		{
-			MovementComp->bOrientRotationToMovement = activ;
-		}
+		Oui->SetRotationAxis(Axis);
 	}
 }
 

@@ -3,7 +3,7 @@
 
 #include "BTT_Dodge.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "GameFramework/Character.h"
+#include "FlyingAICharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -62,6 +62,11 @@ void UBTT_Dodge::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	{
 		//If it is, get the movement component and add the DodgeVelocity vector to it
 		AIRef->GetMovementComponent()->AddInputVector(DodgeVelocity);
+		// Check if it's a flying AI to rotate if
+		if (AFlyingAICharacter* reffly = Cast<AFlyingAICharacter>(AIRef))
+		{
+			reffly->SetRotationAxis(FVector2D(DodgeDirection, 0));
+		}
 	}
 	else
 	{

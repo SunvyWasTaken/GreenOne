@@ -52,6 +52,18 @@ public:
 	
 	virtual void UpdateMaxSpeed(float Speed) override;
 
+#pragma region AnimationRotation
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	float RotationSpeed = 1.f;
+
+	UFUNCTION(BlueprintPure, BlueprintCallable)
+	FVector2D GetRotationAxis() { return CurrentRotationInput; };
+
+	void SetRotationAxis(FVector2D TargetAxis);
+
+#pragma endregion
+
 #pragma region Explosion
 
 	UFUNCTION(BlueprintCallable)
@@ -88,5 +100,11 @@ private:
 	void TimerShoot();
 
 	FTimerHandle ShootTimer;
+
+	void TickRotation(float DeltaSeconds);
+	
+	FVector2D CurrentRotationInput;
+
+	FVector2D TargetRotationInput;
 
 };

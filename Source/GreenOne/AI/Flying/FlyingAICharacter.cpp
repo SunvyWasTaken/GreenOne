@@ -9,6 +9,7 @@
 #include "AIProjectil.h"
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
@@ -37,6 +38,7 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	TickCooldown(DeltaTime);
+	TickRotation(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -61,6 +63,11 @@ void AFlyingAICharacter::UpdateMaxSpeed(float NewSpeed)
 	{
 		GetCharacterMovement()->MaxFlySpeed = NewSpeed;
 	}
+}
+
+void AFlyingAICharacter::SetRotationAxis(FVector2D TargetAxis)
+{
+	TargetRotationInput = TargetAxis;
 }
 
 //This function is used to perform self-destruction of the AI character.
@@ -168,5 +175,10 @@ void AFlyingAICharacter::TimerShoot()
 		AAIProjectil* CurrentBullet = GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
 		CurrentBullet->ProjectilDamage = Damage;
 	}
+}
+
+void AFlyingAICharacter::TickRotation(float DeltaSeconds)
+{
+	CurrentRotationInput = UKismetMathLibrary::Vector2DInterpTo(CurrentRotationInput, TargetRotationInput, DeltaSeconds, RotationSpeed);
 }
 

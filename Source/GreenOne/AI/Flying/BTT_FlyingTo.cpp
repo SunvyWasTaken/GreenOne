@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "FlyingAICharacter.h"
 
 
 UBTT_FlyingTo::UBTT_FlyingTo()
@@ -51,7 +52,7 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
-	if (ACharacter* AIRef = Cast<ACharacter>(ControllerRef->GetPawn()))
+	if (AFlyingAICharacter* AIRef = Cast<AFlyingAICharacter>(ControllerRef->GetPawn()))
 	{
 		if (AActor* ActorRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
 		{
@@ -62,9 +63,11 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 			TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TargetRef.SelectedKeyName);
 		}
 		FVector LocTo = TargetLocation - AIRef->GetActorLocation();
+		FVector NormTargetLocation = TargetLocation;
 		if (Zlock)
 		{
 			LocTo.Z = 0.f;
+			NormTargetLocation.Z = AIRef->GetActorLocation().Z;
 		}
 		if (bUseOld)
 		{
@@ -72,17 +75,22 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 		}
 		else
 		{
+			// To give the rotation axis.
+			FVector Direction = LocTo - AIRef->GetActorLocation();
+			Direction.Normalize();
+			FVector2D TargetInputRotation;
+			TargetInputRotation.X = UKismetMathLibrary::DotProduct2D(FVector2D(AIRef->GetActorForwardVector().X, AIRef->GetActorForwardVector().Y), FVector2D(Direction.X, Direction.Y));
+			TargetInputRotation.Y = 1.f;
+			AIRef->SetRotationAxis(TargetInputRotation);
+
+			// Rotate the player. and move forward
 			const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(AIRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(LocTo), DeltaSeconds, RotationSpeed);
 			AIRef->SetActorRotation(CurrentTargetRotation);
 			AIRef->GetMovementComponent()->AddInputVector(AIRef->GetActorForwardVector());
-		}
-		FVector NormTargetLocation = TargetLocation;
-		if (Zlock)
-		{
-			NormTargetLocation.Z = AIRef->GetActorLocation().Z;
-		}
+		}			
 		if (FVector::Distance(AIRef->GetActorLocation(), NormTargetLocation) <= Acceptance)
 		{
+			AIRef->SetRotationAxis(FVector2D(0,0));
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
 	}

@@ -33,10 +33,6 @@ public:
 
 	void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
 
-protected:
-
-	void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult);
-
 public:
 
 	UPROPERTY(EditAnywhere)
@@ -69,6 +65,6 @@ private:
 
 	bool IsHorizontal;
 
-	void ActivateRotateOnMovement(UBehaviorTreeComponent& OwnerComp, bool activ);
+	void SetFlyingRotation(APawn* RefOwner, FVector2D Axis);
 
 };
