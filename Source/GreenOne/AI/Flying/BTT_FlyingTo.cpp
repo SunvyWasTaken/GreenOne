@@ -146,12 +146,13 @@ void UBTT_FlyingTo::TickCheckCollision(float Deltatime, AFlyingAICharacter* Bird
 
 	FVector LocTo = BirdRef->GetActorLocation() + BirdRef->GetActorForwardVector() * UKismetMathLibrary::Clamp(Direction.Length(), 0.f, DistanceWallDetection);
 
+	Direction.Normalize();
+
 	UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), BirdRef->GetActorLocation(),(TraceForward ? (LocTo) : (BirdRef->GetActorLocation() + Direction * DistanceWallDetection)), MyCapsuleRadius, MyCapsuleHeight, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
 
 	if (!Outhit.bBlockingHit)
 	{ return; }
 
-	Direction.Normalize();
 
 	TargetLocation = BirdRef->GetActorLocation() + (UKismetMathLibrary::ProjectVectorOnToPlane(Direction, Outhit.ImpactNormal)* DistanceWallDetection);
 
