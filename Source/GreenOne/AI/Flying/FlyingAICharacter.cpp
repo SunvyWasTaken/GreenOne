@@ -173,7 +173,10 @@ void AFlyingAICharacter::TimerShoot()
 		FActorSpawnParameters SpawnParam;
 		SpawnParam.Owner = this;
 		AAIProjectil* CurrentBullet = GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
-		CurrentBullet->ProjectilDamage = Damage;
+		if (CurrentBullet)
+		{
+			CurrentBullet->ProjectilDamage = Damage;
+		}
 	}
 }
 

@@ -8,8 +8,11 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "FlyingAICharacter.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
-
+// TODO Regarder le Dot product parcequ'il est tjr pencher très legerement.
+// TODO Faire un trace vers l'avant pour voir si il va collide un truc après le trace vers le player.
 UBTT_FlyingTo::UBTT_FlyingTo()
 {
 	bNotifyTick = true;
@@ -17,6 +20,10 @@ UBTT_FlyingTo::UBTT_FlyingTo()
 	bNotifyTaskFinished = true;
 }
 
+//This function is part of the UBTT_FlyingTo class, which is a subclass of the UBTTaskNode class. It is used to execute a task in a behavior tree. It first checks if
+// the controller reference is valid, and if not, it returns a failed result. It then checks if a target has been assigned, and if not, it returns an aborted result
+//. It then checks if the override speed is set, and if not, it returns an in progress result. It then casts the character movement component and if it fails, it returns
+// a failed result. Finally, it sets the initial speed and acceleration and returns an in progress result.
 EBTNodeResult::Type UBTT_FlyingTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
@@ -54,6 +61,9 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 	if (AFlyingAICharacter* AIRef = Cast<AFlyingAICharacter>(ControllerRef->GetPawn()))
 	{
+		MyCapsuleRadius = AIRef->GetCapsuleComponent()->GetScaledCapsuleRadius();
+		MyCapsuleHeight = AIRef->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
 		if (AActor* ActorRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
 		{
 			TargetLocation = ActorRef->GetActorLocation();
@@ -62,35 +72,23 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 		{
 			TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TargetRef.SelectedKeyName);
 		}
+
+		TickCheckCollision(DeltaSeconds, AIRef, OwnerComp);
+
 		FVector LocTo = TargetLocation - AIRef->GetActorLocation();
-		FVector NormTargetLocation = TargetLocation;
+
 		if (Zlock)
 		{
 			LocTo.Z = 0.f;
-			NormTargetLocation.Z = AIRef->GetActorLocation().Z;
+			TargetLocation.Z = AIRef->GetActorLocation().Z;
 		}
-		if (bUseOld)
-		{
-			AIRef->GetMovementComponent()->AddInputVector(LocTo);
-		}
-		else
-		{
-			// To give the rotation axis.
-			FVector Direction = LocTo - AIRef->GetActorLocation();
-			Direction.Normalize();
-			FVector2D TargetInputRotation;
-			TargetInputRotation.X = UKismetMathLibrary::DotProduct2D(FVector2D(AIRef->GetActorForwardVector().X, AIRef->GetActorForwardVector().Y), FVector2D(Direction.X, Direction.Y));
-			TargetInputRotation.Y = 1.f;
-			AIRef->SetRotationAxis(TargetInputRotation);
 
-			// Rotate the player. and move forward
-			const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(AIRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(LocTo), DeltaSeconds, RotationSpeed);
-			AIRef->SetActorRotation(CurrentTargetRotation);
-			AIRef->GetMovementComponent()->AddInputVector(AIRef->GetActorForwardVector());
-		}			
-		if (FVector::Distance(AIRef->GetActorLocation(), NormTargetLocation) <= Acceptance)
+
+		TickAddInputToPawn(DeltaSeconds, AIRef, LocTo);
+
+		if (FVector::Distance(AIRef->GetActorLocation(), TargetLocation) <= Acceptance)
 		{
-			AIRef->SetRotationAxis(FVector2D(0,0));
+			AIRef->SetRotationAxis(FVector2D(0, 0));
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
 	}
@@ -113,4 +111,51 @@ void UBTT_FlyingTo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 		PawnMovementRef->MaxAcceleration = InitialAcceleration;
 		return;
 	}
+}
+
+void UBTT_FlyingTo::TickAddInputToPawn(float Deltatime, AFlyingAICharacter* BirdRef, FVector TargetLoc)
+{
+	if (bUseOld)
+	{
+		BirdRef->GetMovementComponent()->AddInputVector(TargetLoc);
+	}
+	else
+	{
+		// To give the rotation axis.
+		FVector Direction = TargetLoc - BirdRef->GetActorLocation();
+		Direction.Normalize();
+		FVector2D TargetInputRotation;
+		TargetInputRotation.X = UKismetMathLibrary::Dot_VectorVector(BirdRef->GetActorForwardVector(), Direction);
+		TargetInputRotation.Y = 1.f;
+		BirdRef->SetRotationAxis(TargetInputRotation);
+
+		// Rotate the player. and move forward
+		const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(BirdRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(TargetLoc), Deltatime, RotationSpeed);
+		BirdRef->SetActorRotation(CurrentTargetRotation);
+		BirdRef->GetMovementComponent()->AddInputVector(BirdRef->GetActorForwardVector());
+	}
+}
+
+void UBTT_FlyingTo::TickCheckCollision(float Deltatime, AFlyingAICharacter* BirdRef, UBehaviorTreeComponent& OwnerComp)
+{
+	TArray<AActor*> ActorToIgnore;
+	ActorToIgnore.Add(BirdRef);
+	FHitResult Outhit;
+
+	FVector Direction = TargetLocation - BirdRef->GetActorLocation();
+
+	FVector LocTo = BirdRef->GetActorLocation() + BirdRef->GetActorForwardVector() * UKismetMathLibrary::Clamp(Direction.Length(), 0.f, DistanceWallDetection);
+
+	UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), BirdRef->GetActorLocation(),(TraceForward ? (LocTo) : (BirdRef->GetActorLocation() + Direction * DistanceWallDetection)), MyCapsuleRadius, MyCapsuleHeight, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
+
+	if (!Outhit.bBlockingHit)
+	{ return; }
+
+	Direction.Normalize();
+
+	TargetLocation = BirdRef->GetActorLocation() + (UKismetMathLibrary::ProjectVectorOnToPlane(Direction, Outhit.ImpactNormal)* DistanceWallDetection);
+
+	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), BirdRef->GetActorLocation(), TargetLocation, 5.f, FLinearColor::Red, 0.2f, 5.f);
+
+	return;
 }

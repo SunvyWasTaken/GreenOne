@@ -66,6 +66,15 @@ public:
 	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (DisplayName = "Use Old System"))
 		bool bUseOld = false;
 
+	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (DisplayName = "Use avoidance"))
+	bool bUseAvoidance = true;
+
+	UPROPERTY(EditAnywhere)
+	float DistanceWallDetection = 100.f;
+
+	UPROPERTY(EditAnywhere)
+	bool TraceForward = false;
+
 private:
 
 	AController* ControllerRef;
@@ -77,5 +86,13 @@ private:
 	float InitialAcceleration;
 
 	class UCharacterMovementComponent* PawnMovementRef;
+
+	void TickAddInputToPawn(float Deltatime, class AFlyingAICharacter* BirdRef, FVector TargetLoc);
+
+	float MyCapsuleRadius;
+
+	float MyCapsuleHeight;
+
+	void TickCheckCollision(float Deltatime, class AFlyingAICharacter* BirdRef, UBehaviorTreeComponent& OwnerComp);
 
 };
