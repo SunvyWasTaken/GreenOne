@@ -11,6 +11,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GreenOne/GreenOneCharacter.h"
+#include "GreenOne/Gameplay/Ennemy/AC_DisplayDamage.h"
 
 // Sets default values
 ABaseEnnemy::ABaseEnnemy()
@@ -20,6 +21,8 @@ ABaseEnnemy::ABaseEnnemy()
 	LifeBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LifeBar_DEBUG"));
 	LifeBarComponent->SetupAttachment(RootComponent);
 	LifeBarComponent->SetWidgetClass(LifeBarClass);
+
+	DamageComp = CreateDefaultSubobject<UAC_DisplayDamage>(TEXT("DamageComp"));
 }
 
 // Called when the game starts or when spawned

@@ -33,10 +33,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void Collision();
-	
-
-
-
 
 
 private:
