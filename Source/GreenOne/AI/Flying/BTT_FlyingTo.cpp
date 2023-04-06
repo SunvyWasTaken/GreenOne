@@ -138,17 +138,20 @@ void UBTT_FlyingTo::TickAddInputToPawn(float Deltatime, AFlyingAICharacter* Bird
 
 void UBTT_FlyingTo::TickCheckCollision(float Deltatime, AFlyingAICharacter* BirdRef, UBehaviorTreeComponent& OwnerComp)
 {
+	if (!bUseAvoidance)
+	{ return; }
+
 	TArray<AActor*> ActorToIgnore;
 	ActorToIgnore.Add(BirdRef);
 	FHitResult Outhit;
 
 	FVector Direction = TargetLocation - BirdRef->GetActorLocation();
-
-	FVector LocTo = BirdRef->GetActorLocation() + BirdRef->GetActorForwardVector() * UKismetMathLibrary::Clamp(Direction.Length(), 0.f, DistanceWallDetection);
+	const float LenghtTrace = UKismetMathLibrary::Clamp(Direction.Length(), 0.f, DistanceWallDetection);
 
 	Direction.Normalize();
+	FVector LocTo = BirdRef->GetActorLocation() + (TraceForward ? (BirdRef->GetActorForwardVector()) : (Direction)) * LenghtTrace;
 
-	UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), BirdRef->GetActorLocation(),(TraceForward ? (LocTo) : (BirdRef->GetActorLocation() + Direction * DistanceWallDetection)), MyCapsuleRadius, MyCapsuleHeight, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
+	UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), BirdRef->GetActorLocation(), LocTo, MyCapsuleRadius, MyCapsuleHeight, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
 
 	if (!Outhit.bBlockingHit)
 	{ return; }
