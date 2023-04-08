@@ -4,12 +4,14 @@
 #include "BTT_ShootOnPlayer.h"
 #include "FlyingAiCharacter.h"
 #include "AIController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UBTT_ShootOnPlayer::UBTT_ShootOnPlayer()
 {
 	bCreateNodeInstance = true;
 	bNotifyTick = true;
-	CurrentBehavior = EBehavior::None;
+	CurrentBehavior = EBehavior::Skip;
 }
 
 //This function is used to execute the task ShootOnPlayer.
@@ -20,6 +22,21 @@ EBTNodeResult::Type UBTT_ShootOnPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 	PawnRef = Cast<AFlyingAICharacter>(OwnerComp.GetAIOwner()->GetPawn());
 	if (PawnRef != nullptr)
 	{
+		if (bCheckCanShoot)
+		{
+			if (CheckTargetVisible())
+			{
+				switch (ShootBehavior)
+				{
+				case EBehavior::Skip:
+					return EBTNodeResult::Succeeded;
+					break;
+				case EBehavior::Faild:
+					return EBTNodeResult::Failed;
+					break;
+				}
+			}
+		}
 		if (!PawnRef->CanShoot())
 		{
 			switch (CurrentBehavior)
@@ -53,4 +70,23 @@ void UBTT_ShootOnPlayer::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
 	}
+}
+
+bool UBTT_ShootOnPlayer::CheckTargetVisible()
+{
+	FHitResult Outhit;
+	AActor* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	TArray<AActor*> ActorToIgnore;
+	UKismetSystemLibrary::LineTraceSingle(GetWorld(), PawnRef->GetActorLocation() + 25.f, UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation(), UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
+	if (Outhit.bBlockingHit)
+	{
+		if (Outhit.GetActor() == nullptr)
+		{
+			return false;
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Hit : %s"),*Outhit.GetActor()->GetFName().ToString());
+	}
+	return Outhit.bBlockingHit;
+
+	//return GetWorld()->LineTraceSingleByChannel(Outhit, PawnRef->GetActorLocation() + 25.f, PlayerRef->GetActorLocation(), ECC_Visibility);
 }

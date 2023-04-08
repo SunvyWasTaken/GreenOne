@@ -151,7 +151,7 @@ void UBTT_FlyingTo::TickCheckCollision(float Deltatime, AFlyingAICharacter* Bird
 	Direction.Normalize();
 	FVector LocTo = BirdRef->GetActorLocation() + (TraceForward ? (BirdRef->GetActorForwardVector()) : (Direction)) * LenghtTrace;
 
-	UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), BirdRef->GetActorLocation(), LocTo, MyCapsuleRadius, MyCapsuleHeight, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
+	UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), BirdRef->GetActorLocation(), LocTo, MyCapsuleRadius, MyCapsuleHeight, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::None, Outhit, true);
 
 	if (!Outhit.bBlockingHit)
 	{ return; }

@@ -9,10 +9,9 @@
 UENUM()
 enum class EBehavior : uint8
 {
-	None,
+	Skip,
 	Wait,
-	Faild,
-	Skip
+	Faild
 };
 
 // TODO Add the feature that AI can try to predict where the player will be based on the speed of the bullet.
@@ -37,9 +36,24 @@ private:
 
 	class AFlyingAICharacter* PawnRef;
 
+	bool CheckTargetVisible();
+
 public:
 
 	UPROPERTY(EditAnywhere)
 		EBehavior CurrentBehavior;
+
+	/**
+	 * Check if there is a collision in front of the AI before shooting and react according to the behavior if it can't shoot.
+	 */
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Check si il peut tiré"), Category = "CheckCollision")
+		bool bCheckCanShoot = true;
+
+	/**
+	 * If there is a wall between the AI and the player, the AI's behavior will depend on the programming it has been given.
+	 * The Wait behavior will do nothing in particular since it is supposed to wait for something that will never be successful.
+	 */
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Behavior can shoot", EditCondition = bCheckCanShoot), Category = "CheckCollision")
+		EBehavior ShootBehavior;
 
 };
