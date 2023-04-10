@@ -10,7 +10,7 @@
 #include "EnnemySpawner.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "GreenOne/GreenOneCharacter.h"
+#include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "GreenOne/Gameplay/Ennemy/AC_DisplayDamage.h"
 
 // Sets default values

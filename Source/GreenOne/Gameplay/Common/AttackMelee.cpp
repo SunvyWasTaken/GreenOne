@@ -5,7 +5,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GreenOne/GreenOneCharacter.h"
+#include "GreenOne/Gameplay/GreenOneCharacter.h"
 
 // Sets default values for this component's properties
 UAttackMelee::UAttackMelee()

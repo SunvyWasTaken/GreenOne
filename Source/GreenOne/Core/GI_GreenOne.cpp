@@ -19,15 +19,8 @@ void UGI_GreenOne::Init()
 {
 	Super::Init();
 	LoadSave();
-	//if (LoadSave())
-	//{
-	//	FTimerHandle SaveHandler;
-	//	GetWorld()->GetTimerManager().SetTimer(SaveHandler, [&]() {ApplySaveData(); }, 0.2f, false);
-	//}
 	LoadAudioSave();
 	ApplyAudioSettings();
-	//FTimerHandle AudioHandler;
-	//GetWorld()->GetTimerManager().SetTimer(AudioHandler, this, &UGI_GreenOne::ApplyAudioSettings, 0.2f, false);
 }
 
 void UGI_GreenOne::DisplayLoadingScreen()

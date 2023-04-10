@@ -6,8 +6,8 @@
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
-#include "Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
 #include "GreenOneCharacter.generated.h"
 
 class UInputAction;

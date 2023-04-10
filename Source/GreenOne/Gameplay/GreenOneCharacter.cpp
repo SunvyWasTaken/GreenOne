@@ -17,9 +17,9 @@
 #include "GreenOne/AI/BaseEnnemy.h"
 #include "Components/SceneComponent.h"
 
-#include "Gameplay/Common/AttackMelee.h"
-#include "Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
+#include "GreenOne/Gameplay/Common/AttackMelee.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
@@ -307,6 +307,7 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 
 void AGreenOneCharacter::Dash()
 {
+	if (GetCharacterMovement()->IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }
 	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
 	StartDashLocation = GetActorLocation();

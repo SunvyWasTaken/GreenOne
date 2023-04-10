@@ -3,7 +3,7 @@
 
 #include "MeleeAICharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "GreenOne/GreenOneCharacter.h"	
+#include "GreenOne/Gameplay/GreenOneCharacter.h"	
 #include "NiagaraFunctionLibrary.h"
 
 // Sets default values

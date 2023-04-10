@@ -4,7 +4,7 @@
 #include "FlyingAICharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/Gameplay/EntityGame.h"
-#include "GreenOne/GreenOneCharacter.h"	
+#include "GreenOne/Gameplay/GreenOneCharacter.h"	
 #include "Engine/CollisionProfile.h"
 #include "AIProjectil.h"
 #include "NiagaraFunctionLibrary.h"

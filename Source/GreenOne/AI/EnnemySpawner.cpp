@@ -1,7 +1,7 @@
 ﻿#include "EnnemySpawner.h"
 #include "Components/SphereComponent.h"
 #include "BaseEnnemy.h"
-#include "GreenOne/GreenOneCharacter.h"
+#include "GreenOne/Gameplay/GreenOneCharacter.h"
 
 // Définit les valeurs par défaut
 AEnnemySpawner::AEnnemySpawner()
