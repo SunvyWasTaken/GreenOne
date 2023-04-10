@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "GreenOne/Core/GI_GreenOne.h"
 
 AGreenOneGameMode::AGreenOneGameMode()
 {
@@ -24,6 +25,7 @@ void AGreenOneGameMode::BeginPlay()
 	{
 		CharaRef->OnPlayerDeath.AddDynamic(this, &AGreenOneGameMode::DisplayGameOver);
 	}
+	Cast<UGI_GreenOne>(UGameplayStatics::GetGameInstance(GetWorld()))->ApplySaveData();
 }
 
 void AGreenOneGameMode::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToUnload, TSoftObjectPtr<UWorld> LevelToLoad)

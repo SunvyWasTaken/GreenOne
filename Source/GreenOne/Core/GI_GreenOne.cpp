@@ -10,20 +10,47 @@
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
 	SaveClass = USG_GreenOne::StaticClass();
-	
+
 }
 
 void UGI_GreenOne::Init()
 {
 	Super::Init();
-	if (LoadSave())
-	{
-		FTimerHandle SaveHandler;
-		GetWorld()->GetTimerManager().SetTimer(SaveHandler, [&](){ApplySaveData();}, 0.2f, false);
-	}
+	LoadSave();
+	//if (LoadSave())
+	//{
+	//	FTimerHandle SaveHandler;
+	//	GetWorld()->GetTimerManager().SetTimer(SaveHandler, [&]() {ApplySaveData(); }, 0.2f, false);
+	//}
 	LoadAudioSave();
-	FTimerHandle AudioHandler;
-	GetWorld()->GetTimerManager().SetTimer(AudioHandler, this, &UGI_GreenOne::ApplyAudioSettings, 0.2f, false);
+	ApplyAudioSettings();
+	//FTimerHandle AudioHandler;
+	//GetWorld()->GetTimerManager().SetTimer(AudioHandler, this, &UGI_GreenOne::ApplyAudioSettings, 0.2f, false);
+}
+
+void UGI_GreenOne::DisplayLoadingScreen()
+{
+	if (!LoadingScreenClass)
+	{
+		return;
+	}
+
+	CurrentLoadingScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
+	if (CurrentLoadingScreen)
+	{
+		CurrentLoadingScreen->AddToViewport();
+	}
+
+}
+
+void UGI_GreenOne::RemoveLoadingScreen()
+{
+	if (!CurrentLoadingScreen)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Wesh quelqu'un a try de remove le loading screen alors qu'il était déjà plus là."));
+		return;
+	}
+	CurrentLoadingScreen->RemoveFromParent();
 }
 
 #pragma region Save
@@ -32,7 +59,7 @@ void UGI_GreenOne::SaveGame()
 {
 	if (!CurrentSave)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error lors du save la variable currentSave est vide, Create une save avant"));
+		UE_LOG(LogTemp, Warning, TEXT("Error lors du save la variable currentSave est vide, Create une save avant"));	
 		return;
 	}
 	DisplaySaveScreen();
@@ -58,7 +85,7 @@ bool UGI_GreenOne::LoadSave()
 	{
 		CurrentSave = CreateSave();
 	}
-	if(!CurrentSave)
+	if (!CurrentSave)
 	{
 		UE_LOG(LogTemp, Error, TEXT("La creation du save à fail."));
 		return false;
@@ -82,6 +109,7 @@ void UGI_GreenOne::UpdateSaveData()
 {
 	if (!CurrentSave) { return; }
 	CurrentSave->PlayerLocation = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation();
+	CurrentSave->PlayerRotation = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorRotation();
 }
 
 USG_GreenOne* UGI_GreenOne::CreateSave()
@@ -106,28 +134,41 @@ void UGI_GreenOne::ApplySaveData()
 		return;
 	}
 	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
+	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
+
+	DisplayLoadingScreen();
+	FLatentActionInfo LatentInfo;
+	LatentInfo.CallbackTarget = this;
+	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
+	LatentInfo.Linkage = 0;
+	LatentInfo.UUID = 0;
+	UGameplayStatics::LoadStreamLevel(GetWorld(), FName("L_Level1_Gameplay"), true, false, LatentInfo);
 }
 
 void UGI_GreenOne::DisplaySaveScreen()
 {
-	if (!LoadingScreenClass)
+	if (!CurrenSaveScreen)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Class du widget loading vide"));
-		return;
+		CurrenSaveScreen = CreateWidget<UUserWidget>(GetWorld(), SaveScreenClass);
+		CurrenSaveScreen->AddToViewport();
 	}
-	CurrenSaveScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
-	CurrenSaveScreen->AddToViewport();
+	else
+	{
+		CurrenSaveScreen->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
 	FTimerHandle LoadingHandler;
 	GetWorld()->GetTimerManager().SetTimer(LoadingHandler, this, &UGI_GreenOne::DeleteSaveScreen, SaveTime, false);
 }
 
 void UGI_GreenOne::DeleteSaveScreen()
 {
-	CurrenSaveScreen->RemoveFromParent();
-	CurrenSaveScreen = nullptr;
+	CurrenSaveScreen->SetVisibility(ESlateVisibility::Collapsed);
+	return;
 }
 
 #pragma endregion
+
+#pragma region Save Setting Audio
 
 float UGI_GreenOne::GetMasterVolume()
 {
@@ -166,7 +207,7 @@ void UGI_GreenOne::SetMasterVolume(float value)
 	if (!MasterSoundClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de MasterSoundClass assigner dans le game instance"))
-		return;
+			return;
 	}
 	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), SoundMix, MasterSoundClass, value, 1.f, FadeInTime);
 }
@@ -230,7 +271,7 @@ void UGI_GreenOne::LoadAudioSave()
 
 void UGI_GreenOne::SavedAudioSettings()
 {
-	if(AudioSettingsRef == nullptr)
+	if (AudioSettingsRef == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attention save du sound la variable AudioSettingsRef nullptr"));
 		return;
@@ -251,3 +292,5 @@ void UGI_GreenOne::ApplyAudioSettings()
 	SetMasterVolume(AudioSettingsRef->MasterVolume);
 	SetSFXVolume(AudioSettingsRef->SFXVolume);
 }
+
+#pragma endregion

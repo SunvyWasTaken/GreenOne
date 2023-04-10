@@ -20,10 +20,38 @@ class GREENONE_API UGI_GreenOne : public UGameInstance
 public:
 
 	UGI_GreenOne();
-	
+
 	virtual void Init();
 
+#pragma region Loading Screen
+
+	UPROPERTY(EditDefaultsOnly, Category = "Loading Screen")
+		TSubclassOf<class UUserWidget> LoadingScreenClass;
+
+
+	/**
+	* Display the loading screen for the selected map when it begins to load.
+	* Cannot also use anywhere because this part is managed automatically.
+	*/
+	UFUNCTION(BlueprintCallable)
+		void DisplayLoadingScreen();
+
+	/**
+	 * Remove the current loading indicator from the screen.
+	 * Do not use it anywhere; it will be automatically called at the end of the loading process.
+	 */
+	UFUNCTION(BlueprintCallable)
+		void RemoveLoadingScreen();
+
+private:
+
+	class UUserWidget* CurrentLoadingScreen;
+
+#pragma endregion
+
 #pragma region Save
+
+public:
 
 	/**
 	 * Sauvegarde la current save.
@@ -44,6 +72,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Save")
 		void DeleteSave();
 
+	/// <summary>
+	/// Applies the save data to the game.
+	/// </summary>
+	UFUNCTION(BlueprintCallable, Category = "Custom|Save")
+		void ApplySaveData();
+
 	/**
 	 * Name of the save.
 	 */
@@ -60,7 +94,7 @@ public:
 	 * Class du widget à afficher lors de la sauvegarde.
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Loading Screen")
-		TSubclassOf<UUserWidget> LoadingScreenClass;
+		TSubclassOf<UUserWidget> SaveScreenClass;
 
 	/**
 	 * Temps que le save game sera afficher
@@ -98,12 +132,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Save")
 		int SaveIndex = 0;
 
-	/// <summary>
-	/// Applies the save data to the game.
-	/// </summary>
-	UFUNCTION(BlueprintCallable, Category = "Custom|Save")
-		void ApplySaveData();
-
 private:
 
 	class UUserWidget* CurrenSaveScreen;
@@ -125,54 +153,54 @@ private:
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Audio")
-	float GetMasterVolume();
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Audio")
-	float GetMusicVolume();
+		float GetMasterVolume();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Audio")
-	float GetSFXVolume();
+		float GetMusicVolume();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Audio")
+		float GetSFXVolume();
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void SetMasterVolume(float value);
+		void SetMasterVolume(float value);
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void SetMusicVolume(float value);
+		void SetMusicVolume(float value);
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void SetSFXVolume(float value);
+		void SetSFXVolume(float value);
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void SavedAudioSettings();
+		void SavedAudioSettings();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	FString AudioSaveName = "CustomAudioSettings";
+		FString AudioSaveName = "CustomAudioSettings";
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0.f, ClampMax = 1.f, UIMin = 0.f, UIMax = 1.f), Category = "Audio")
-	float FadeInTime = 0.5f;
+		float FadeInTime = 0.5f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	USoundMix* SoundMix;
+		USoundMix* SoundMix;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	USoundClass* MasterSoundClass;
+		USoundClass* MasterSoundClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	USoundClass* MusicSoundClass;
+		USoundClass* MusicSoundClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	USoundClass* SFXSoundClass;
+		USoundClass* SFXSoundClass;
 
 private:
 
 	UFUNCTION()
-	void CreateAudioSave();
-	
-	UFUNCTION()
-	void LoadAudioSave();
+		void CreateAudioSave();
 
 	UFUNCTION()
-	void ApplyAudioSettings();
+		void LoadAudioSave();
+
+	UFUNCTION()
+		void ApplyAudioSettings();
 
 	class USG_AudioSettings* AudioSettingsRef;
 
