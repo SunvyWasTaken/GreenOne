@@ -14,6 +14,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Math/UnrealMathUtility.h"
 #include "GreenOne/AI/BaseEnnemy.h"
 #include "Components/SceneComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -180,6 +181,7 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 	DashTick(DeltaSeconds);
 	CooldownDash(DeltaSeconds);
 	Regenerate(DeltaSeconds);
+	HorizontalJump();
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
@@ -464,27 +466,48 @@ void AGreenOneCharacter::TurnCamera()
 
 void AGreenOneCharacter::DoubleJump()
 {
+	if(bHorizontalJump) return;
+	
 	bPressedJump = true;
-	const float vj = GetCharacterMovement()->JumpZVelocity;
-	UE_LOG(LogTemp, Warning, TEXT("MaxJumpValue %f"),vj);
+	FVector Target = GetActorForwardVector();
+	if(bManualHorizontalVelocity)
+	{
+		Target *= HorizontalJumpVelocity;
+	}else
+	{
+		Target *= GetCharacterMovement()->JumpZVelocity;
+	}
+	
 	
 	if(JumpCurrentCount == 1 && GetCharacterMovement()->IsFalling())
 	{
 		GetCharacterMovement()->GravityScale = 0.f;
 		UE_LOG(LogTemp, Warning, TEXT("Horizontal"));
-		LaunchCharacter(GetActorForwardVector()*vj,true, true);
-		return;
+		
+		TargetHorizontalJump = GetActorLocation() + GetActorForwardVector() * DistanceHorizontalJump;
+		LaunchCharacter(Target,true, true);
+		DrawDebugCapsule(GetWorld(),TargetHorizontalJump, 8,25, FQuat::Identity, FColor::Purple, false, 3);
+		
+		bHorizontalJump = true;
 	}
-	
-	if(JumpCurrentCount == 0 && !GetCharacterMovement()->IsFalling())
+}
+
+void AGreenOneCharacter::HorizontalJump()
+{
+	if(!bHorizontalJump) return;
+
+	float TargetDistance = FVector::Distance(GetActorLocation(), TargetHorizontalJump);
+	if(TargetDistance <= 50.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Vertical"));
-		//LaunchCharacter(FVector::UpVector*VerticalJumpVelocity,false, true);
+		UE_LOG(LogTemp, Warning, TEXT("End"));
+		bHorizontalJump = false;
+		GetCharacterMovement()->GravityScale = 1.75f;
 	}
 }
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
+	if(bHorizontalJump) return;
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 

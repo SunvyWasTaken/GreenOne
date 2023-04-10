@@ -357,15 +357,22 @@ private:
 
 #pragma endregion 
 
-#pragma region Test
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s"))
-	float VerticalJumpVelocity = 100.f;
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump")
-	int32 MaxJump = 2;
-	int32 NumberOfJump = 0;
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump")
-	float TimeBeforeFalling = 5.f; //TODO: Faire le delay avant la chute du perso sur le jump 
+#pragma region HorizontalJump
+	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump", DisplayName = "Editer la rapidité du jump horizontal")
+	bool bManualHorizontalVelocity = false;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
+	float HorizontalJumpVelocity = 450.f;
+	bool bHorizontalJump;
+
+	FVector TargetHorizontalJump = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
+	float DistanceHorizontalJump;
+	
 	void DoubleJump();
+	void HorizontalJump();
+
+#pragma endregion 
 	
 protected:
 
