@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "SG_GreenOne.h"
 #include "SG_AudioSettings.h"
+#include "Engine/LevelStreaming.h"
+
 
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
@@ -110,6 +112,21 @@ void UGI_GreenOne::UpdateSaveData()
 	if (!CurrentSave) { return; }
 	CurrentSave->PlayerLocation = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation();
 	CurrentSave->PlayerRotation = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorRotation();
+
+	for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
+	{
+		if (!CurrentLevel)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
+			continue;
+		}
+		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+		{
+			CurrentSave->MapName = CurrentLevel->GetWorldAssetPackageFName();
+			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *CurrentSave->MapName.ToString());
+		}
+		//CurrentSave->MapName = CurrentLevel;
+	}
 }
 
 USG_GreenOne* UGI_GreenOne::CreateSave()
@@ -142,7 +159,7 @@ void UGI_GreenOne::ApplySaveData()
 	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
 	LatentInfo.Linkage = 0;
 	LatentInfo.UUID = 0;
-	UGameplayStatics::LoadStreamLevel(GetWorld(), FName("L_Level1_Gameplay"), true, false, LatentInfo);
+	UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
 }
 
 void UGI_GreenOne::DisplaySaveScreen()
