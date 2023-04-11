@@ -98,6 +98,7 @@ AGreenOneCharacter::AGreenOneCharacter()
 	DashCooldown = 3.f;
 	bDashOnCooldown = false;
 	bIsDashing = false;
+	
 }
 
 #if WITH_EDITOR
@@ -171,6 +172,7 @@ void AGreenOneCharacter::BeginPlay()
 
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
+	
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
 	DashTick(DeltaSeconds);
@@ -254,6 +256,7 @@ void AGreenOneCharacter::Shoot()
 
 void AGreenOneCharacter::StopShoot()
 {
+	IsRegenerate();
 	if (ShootHandler.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
@@ -453,3 +456,14 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(RightDirection, MovementVectorX);
 	}
 }
+
+
+void AGreenOneCharacter::IsRegenerate()
+{
+	if(IsCombatMode)
+	{
+		Health = Health + 10;
+	}
+	
+}
+
