@@ -87,6 +87,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Player")
 	float WalkSpeed = 800.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Player")
+	float LateralSlow = 0.3334f;
+
 	UPROPERTY(BlueprintReadWrite)
 	bool IsAtk;
 

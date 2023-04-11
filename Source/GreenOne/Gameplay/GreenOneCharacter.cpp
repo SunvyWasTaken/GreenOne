@@ -446,7 +446,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 		float MovementVectorX = 0.f;
 
-		MovementVectorX = (MovementVector.X * 0.3333);
+		MovementVectorX = (MovementVector.X * LateralSlow);
 
 		AddMovementInput(ForwardDirection, MovementVectorY);
 		AddMovementInput(RightDirection, MovementVectorX);
