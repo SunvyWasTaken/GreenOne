@@ -252,7 +252,6 @@ private:
 
 #pragma region Mode
 
-
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -260,10 +259,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 		bool IsCombatMode = false;
-private:
-
 
 #pragma endregion 
+
+
+
 
 #pragma region Pause
 
