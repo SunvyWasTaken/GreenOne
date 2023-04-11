@@ -70,11 +70,14 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Radius de la zone de détection")
 	float DetectionRadius = 80.f;
 
-	UPROPERTY(EditAnywhere, Category= "")
+	UPROPERTY(EditAnywhere, Category= "Fight|Melee|Detection")
 	float TraceDistance = 150.f;
 
-	UPROPERTY(EditAnywhere, Category= "")
+	UPROPERTY(EditAnywhere, Category= "Fight|Melee|Detection")
 	float ConeRadius = 200.f;
+
+	UPROPERTY(EditAnywhere, Category= "Fight|Melee|Detection")
+	float ConeHeight = 10.f;
 	
 	UFUNCTION()
 	void Conetrace(TArray<FHitResult>& TargetHits);

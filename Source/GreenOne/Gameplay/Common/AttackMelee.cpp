@@ -71,7 +71,7 @@ void UAttackMelee::Attack()
 void UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
 {
 	const unsigned Iteration = 5;
-	const float TraceSize = (TraceDistance / Iteration)/2;
+	const float TraceSize = (TraceDistance / Iteration);
 	const FVector StartPosition = GetOwner()->GetActorLocation();
 	const FVector ForwardActor = GetOwner()->GetActorForwardVector();
 	const FRotator ActorRotation = GetOwner()->GetActorRotation();
@@ -79,10 +79,10 @@ void UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
 	ActorToIgnore.Add(GetOwner());
 	for (int i = 1; i <= Iteration; ++i)
 	{
-		const float CurrentAlpha = UKismetMathLibrary::Clamp((TraceSize * 2 * i), 0, TraceDistance);
-		const float BoxSize = UKismetMathLibrary::Lerp(0, ConeRadius, CurrentAlpha);
-		const FVector CurrentPos = StartPosition+(ForwardActor * CurrentAlpha);
-		const FVector Box = FVector(Iteration, BoxSize, BoxSize);
+		float CurrentAlpha = UKismetMathLibrary::NormalizeToRange((TraceSize * i), 0, TraceDistance);
+		float BoxSize = UKismetMathLibrary::Lerp(0, ConeRadius, CurrentAlpha);
+		FVector CurrentPos = StartPosition + (ForwardActor * (TraceSize*2) * i+1);
+		FVector Box = FVector(TraceSize, BoxSize, ConeHeight);
 		TArray<FHitResult> CurrentHits;
 		UKismetSystemLibrary::BoxTraceMulti(GetWorld(), CurrentPos, CurrentPos, Box, ActorRotation, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::Persistent, CurrentHits, true);
 		TargetHits += CurrentHits;
