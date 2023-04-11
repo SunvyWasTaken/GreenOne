@@ -320,6 +320,8 @@ private:
 
 	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
 
+	bool IsCurrentEffectExist(FertilizerType Type);
+
 #pragma endregion 
 
 };
