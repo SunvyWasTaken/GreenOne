@@ -3,7 +3,7 @@
 
 #include "MyFertilizerAttackBonus.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GreenOne/GreenOneCharacter.h"
+#include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "GreenOne/AI/BaseEnnemy.h"
 
 UMyFertilizerAttackBonus::UMyFertilizerAttackBonus() {}
