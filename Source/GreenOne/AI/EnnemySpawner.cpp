@@ -16,11 +16,11 @@ AEnnemySpawner::AEnnemySpawner()
 
 	SphereCollisionActivation = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Collision"));
 	RootComponent = SphereCollisionActivation;
-	SphereCollisionDesactivation = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionDesactivation"));
-	SphereCollisionDesactivation->SetupAttachment(RootComponent);
+	//SphereCollisionDesactivation = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionDesactivation"));
+	//SphereCollisionDesactivation->SetupAttachment(RootComponent);
 
 	SphereCollisionActivation->SetSphereRadius(RangeDetection);
-	SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
+	//SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
 }
 
 #if WITH_EDITOR
@@ -35,10 +35,10 @@ void AEnnemySpawner::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 		// Update the sphere radius
 		SphereCollisionActivation->SetSphereRadius(RangeDetection);
 	}
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AEnnemySpawner, RangeDetectionDisable))
+	/*if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AEnnemySpawner, RangeDetectionDisable))
 	{
 		SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
-	}
+	}*/
 }
 #endif
 
@@ -47,7 +47,7 @@ void AEnnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	SphereCollisionActivation->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentActivate);
-	SphereCollisionDesactivation->OnComponentEndOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentDeactivate);
+	//SphereCollisionDesactivation->OnComponentEndOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentDeactivate);
 }
 
 // Appelé chaque frame
@@ -69,7 +69,7 @@ void AEnnemySpawner::OnComponentActivate(UPrimitiveComponent* OverlappedComponen
 	}
 }
 
-void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+/*void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (!Cast<AGreenOneCharacter>(OtherActor))
 	{
@@ -78,7 +78,7 @@ void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedCompon
 	PlayerRef = nullptr;
 	SetPlayerRefToEntitys(PlayerRef);
 	GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
-}
+}*/
 
 void AEnnemySpawner::RemoveEntityFromList(ABaseEnnemy* entity)
 {

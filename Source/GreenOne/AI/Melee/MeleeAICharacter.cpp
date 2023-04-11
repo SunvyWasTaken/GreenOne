@@ -21,7 +21,7 @@ AMeleeAICharacter::AMeleeAICharacter()
 void AMeleeAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	//OnTakeDamage.AddDynamic(this, &AMeleeAICharacter::OnDamage);
+	OnTakeDamage.AddDynamic(this, &AMeleeAICharacter::OnDamage);
 }
 
 // Called every frame
@@ -124,6 +124,7 @@ void AMeleeAICharacter::Collision()
 {
 	if(Health <= 0.f)
 	{
+		//DrawLifeBar = false;
 		DeadEntity();
 	}
 }*/

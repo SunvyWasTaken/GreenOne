@@ -9,7 +9,9 @@
 #include "BrainComponent.h"
 #include "EnnemySpawner.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "GreenOne/MeleeAICharacter.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "GreenOne/Gameplay/GreenOneCharacter.h"
+#include "GreenOne/Gameplay/Ennemy/AC_DisplayDamage.h"
 
 // Sets default values
 ABaseEnnemy::ABaseEnnemy()
@@ -19,6 +21,8 @@ ABaseEnnemy::ABaseEnnemy()
 	LifeBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LifeBar_DEBUG"));
 	LifeBarComponent->SetupAttachment(RootComponent);
 	LifeBarComponent->SetWidgetClass(LifeBarClass);
+
+	DamageComp = CreateDefaultSubobject<UAC_DisplayDamage>(TEXT("DamageComp"));
 }
 
 // Called when the game starts or when spawned
@@ -50,7 +54,11 @@ float ABaseEnnemy::GetPercentHealth()
 void ABaseEnnemy::EnityTakeEffect_Implementation(UEffect* Effect, AActor* Source)
 {
 	if(!Effect) return;
-	Effect->ApplyEffect(this);
+	if(!Source)
+		Effect->ApplyEffect(this);
+	else
+		Effect->ApplyEffect(this, Source);
+	
 }
 
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
@@ -85,6 +93,13 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 	{
 		Cast<AAIController>(Controller)->GetBlackboardComponent()->SetValueAsObject("TargetPlayer", DamageSource);
 	}
+	else
+	{
+		if (UKismetMathLibrary::ClassIsChildOf(DamageSource->StaticClass(), AGreenOneCharacter::StaticClass()))
+		{
+			Cast<AAIController>(Controller)->GetBlackboardComponent()->SetValueAsObject("TargetPlayer", DamageSource);
+		}
+	}
 	if (LifeTreshold.Num() == MatTreshold.Num())
 	{
 		ChangeTextureBaseHealth();
@@ -93,7 +108,6 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 	{
 		Health = 0.f;
 		DeadEntity();
-		
 	}
 	OnTakeDamage.Broadcast(DamageApply);
 }
@@ -118,7 +132,20 @@ void ABaseEnnemy::DeadEntity()
 	Cast<AAIController>(GetController())->GetBrainComponent()->StopLogic("Because");
 	if (SpawnerRef != nullptr)
 	{
+		UE_LOG(LogTemp,Warning, TEXT("OK"));
 		SpawnerRef->RemoveEntityFromList(this);
+		FTimerHandle TimerHandle;
+		DrawLifeBar = false;
+		
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);
 	}
 }
 
+void ABaseEnnemy::DestroyActor()
+{
+	if (IsValid(this))
+	{
+		this->Destroy();
+	}
+}
