@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
 UAttackMelee::UAttackMelee()
@@ -66,6 +68,27 @@ void UAttackMelee::Attack()
 	DetectActors();
 }
 
+void UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
+{
+	const unsigned Iteration = 5;
+	const float TraceSize = (TraceDistance / Iteration)/2;
+	const FVector StartPosition = GetOwner()->GetActorLocation();
+	const FVector ForwardActor = GetOwner()->GetActorForwardVector();
+	const FRotator ActorRotation = GetOwner()->GetActorRotation();
+	TArray<AActor*> ActorToIgnore;
+	ActorToIgnore.Add(GetOwner());
+	for (int i = 1; i <= Iteration; ++i)
+	{
+		const float CurrentAlpha = UKismetMathLibrary::Clamp((TraceSize * 2 * i), 0, TraceDistance);
+		const float BoxSize = UKismetMathLibrary::Lerp(0, ConeRadius, CurrentAlpha);
+		const FVector CurrentPos = StartPosition+(ForwardActor * CurrentAlpha);
+		const FVector Box = FVector(Iteration, BoxSize, BoxSize);
+		TArray<FHitResult> CurrentHits;
+		UKismetSystemLibrary::BoxTraceMulti(GetWorld(), CurrentPos, CurrentPos, Box, ActorRotation, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::Persistent, CurrentHits, true);
+		TargetHits += CurrentHits;
+	}
+}
+
 void UAttackMelee::DetectActors()
 {
 	TArray<FHitResult> ActorsHit;
@@ -76,8 +99,9 @@ void UAttackMelee::DetectActors()
 	FVector	End = Start + GetOwner()->GetActorForwardVector() * DetectionOffset;
 	
 	FCollisionShape DetectionConeShape = FCollisionShape::MakeSphere(DetectionRadius);
-	
-	bool bActorsHit = GetWorld()->SweepMultiByChannel(ActorsHit, End, End, FQuat::Identity, ECC_GameTraceChannel1, DetectionConeShape);
+	Conetrace(ActorsHit);
+	bool bActorsHit = false;
+	// bool bActorsHit = GetWorld()->SweepMultiByChannel(ActorsHit, End, End, FQuat::Identity, ECC_GameTraceChannel1, DetectionConeShape);
 	DrawDebugSphere(GetWorld(), End, DetectionRadius, 8, FColor::Red, false, 2);
 
 	if(bDelayToResetCoolDown)
