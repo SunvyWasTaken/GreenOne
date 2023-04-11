@@ -63,6 +63,7 @@ AGreenOneCharacter::AGreenOneCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->bRequestedMoveUseAcceleration = false;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -437,7 +438,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 		if(MovementVector.Y < 0.f) 
 		{
-			MovementVectorY = (MovementVector.Y / 2);
+			MovementVectorY = (MovementVector.Y * ReverseSlow);
 		}
 		else
 		{
