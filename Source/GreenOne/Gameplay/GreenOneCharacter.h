@@ -258,10 +258,6 @@ private:
 
 
 #pragma endregion 
-	
-private:
-
-	bool bIsDead = false;
 
 #pragma region Dash
 
@@ -353,21 +349,6 @@ private:
 	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
 
 	bool IsCurrentEffectExist(FertilizerType Type);
-
-#pragma endregion 
-
-#pragma region Mode
-
-
-public:
-
-	UFUNCTION(BlueprintCallable)
-	void IsRegenerate();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
-	bool IsCombatMode = false;
-private:
-
 
 #pragma endregion 
 	
