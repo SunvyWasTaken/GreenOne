@@ -28,11 +28,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Distance de Detection devant l'ennemie ")
 	FVector Offset = FVector(0, 0, 0);
 	
 	UFUNCTION(BlueprintCallable)
 	void Collision();
+
+
+
 
 
 private:
@@ -69,6 +72,9 @@ private:
 	 */
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage de l'explosion", ClampMin = 0), Category = "Custom|Explosion")
 	float ExploDmg;
+
+	//UFUNCTION()
+	//void OnDamage(float value);
 
 	
 };
