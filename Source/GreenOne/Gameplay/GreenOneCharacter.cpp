@@ -58,9 +58,9 @@ AGreenOneCharacter::AGreenOneCharacter()
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 700.f;
+	GetCharacterMovement()->JumpZVelocity = JumpVelocity;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 
@@ -432,7 +432,23 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
+
+		float MovementVectorY = 0.f;
+
+		if(MovementVector.Y < 0.f) 
+		{
+			MovementVectorY = (MovementVector.Y / 2);
+		}
+		else
+		{
+			MovementVectorY = MovementVector.Y;
+		}
+
+		float MovementVectorX = 0.f;
+
+		MovementVectorX = (MovementVector.X * 0.3333);
+
+		AddMovementInput(ForwardDirection, MovementVectorY);
+		AddMovementInput(RightDirection, MovementVectorX);
 	}
 }

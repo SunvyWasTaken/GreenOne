@@ -81,6 +81,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 	float Health = 100.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Player")
+	float JumpVelocity = 700.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Player")
+	float WalkSpeed = 800.f;
+
 	UPROPERTY(BlueprintReadWrite)
 	bool IsAtk;
 
@@ -162,57 +168,57 @@ public:
 public:
 
 	UPROPERTY(BlueprintAssignable)
-		FOnHitEnnemy OnHitEnnemy;
+	FOnHitEnnemy OnHitEnnemy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
-		class USceneComponent* TargetMuzzle;
+	class USceneComponent* TargetMuzzle;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
-		FName SocketMuzzle;
+	FName SocketMuzzle;
 
 	/**
 	 * Give if the player is attacking or not.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
-		bool IsAttacking();
+	bool IsAttacking();
 
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
-		void Shoot();
+	void Shoot();
 
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
-		void StopShoot();
+	void StopShoot();
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
-		float DamagePlayer = 10.f;
+	float DamagePlayer = 10.f;
 
 	/**
-	 * Cooldown entre chaque tire par d�fault c'est 1/3;
-	 * c'est � dire 1 tire toutes les 3 secondes.
+	 * Cooldown entre chaque tire par default c'est 1/3;
+	 * c'est a dire 1 tire toutes les 3 secondes.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Custom|Combat")
-		float ShootCooldown;
+	float ShootCooldown;
 
 	/**
 	 * Distance que le tire va atteindre depuis l'avant du gun.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0, DisplayName = "Distance de Tire"), Category = "Custom|Combat")
-		float ShootDistance = 400.f;
+	float ShootDistance = 400.f;
 
 	/**
 	 * Taux de dispertion du tire.
-	 * Allant de 0 � 1.
-	 * 0 quand il n'y a pas de bloom et 1 les tires fuse � 360� autour du joueur.
+	 * Allant de 0 a 1.
+	 * 0 quand il n'y a pas de bloom et 1 les tires fuse a 360degres autour du joueur.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0, ClampMax = 1, UIMin = 0, UIMax = 1, DisplayName = "Bloom du Tire"), Category = "Custom|Combat")
-		float ShootBloom;
+	float ShootBloom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Decal dot ref d'impact"), Category = "Custom|Combat")
-		TSubclassOf<AActor> DotDecal;
+	TSubclassOf<AActor> DotDecal;
 
 protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Combat")
-		float ShootCooldownRemaining;
+	float ShootCooldownRemaining;
 
 private:
 
@@ -238,33 +244,33 @@ public:
 
 	// Dash dans la direction de l'input mouvement.
 	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
-		void Dash();
+	void Dash();
 
 	// Distance du dash
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
-		float DashDistance;
+	float DashDistance;
 
-	// Le temps que va prendre le dash pour attendre �a destination.
+	// Le temps que va prendre le dash pour attendre ça destination.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
-		float DashTime;
+	float DashTime;
 
 	// Temps que va prendre le dash à revenir après utilisation.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
-		float DashCooldown;
+	float DashCooldown;
 
 	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
-		bool bIsDashing;
+	bool bIsDashing;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
-		bool bDashOnCooldown;
+	bool bDashOnCooldown;
 
 	/**
 	 * Return the remaining time of the dash cooldown.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
-		float GetRemainingDashTime() { return CurrentDashCooldown; };
+	float GetRemainingDashTime() { return CurrentDashCooldown; };
 
 private:
 
@@ -303,10 +309,10 @@ private:
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Camera")
-		float Multiplicator;
+	float Multiplicator;
 
 	UFUNCTION()
-		void TurnCamera();
+	void TurnCamera();
 
 #pragma endregion 
 
@@ -314,9 +320,10 @@ private:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Test")
-		TMap<FertilizerType, TSubclassOf<UFertilizerBase>> Effects;
+	TMap<FertilizerType, TSubclassOf<UFertilizerBase>> Effects;
+	
 	UPROPERTY(EditAnywhere, Category = "Test")
-		FertilizerType EFertilizerType;
+	FertilizerType EFertilizerType;
 
 	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
 
