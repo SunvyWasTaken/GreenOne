@@ -261,10 +261,7 @@ public:
 		bool IsCombatMode = false;
 
 #pragma endregion 
-
-
-
-
+	
 #pragma region Pause
 
 public:
