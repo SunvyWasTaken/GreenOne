@@ -17,12 +17,36 @@ protected:
 	// Appelé au début du jeu ou au moment de l'apparition de l'animal.
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float Deltatime) override;
+
 public:
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
+#endif
 
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "DrawDebug"), Category = "Custom|Debug")
 	bool bDebug = false;
+
+	#pragma region Magnetize
+public:
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Rotation speed"), Category = "Custom|Magnetize")
+	float RotationSpeed = 1.f;
+
+	/**
+	 * Distance minimum avant d'arrêter le magnétize.
+	 */
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Minimum Distance magnetize"), Category = "Custom|Magnetize")
+	float MinDistance = 100.f;
+
+private:
+
+	bool bMagnetize = true;
+
+#pragma endregion
+
+public:
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Vitesse du projectile", ClampMin = 0), Category = "Custom|Property")
 	float ProjectilSpeed = 1200.f;

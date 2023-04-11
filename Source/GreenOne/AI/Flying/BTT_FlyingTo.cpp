@@ -125,8 +125,8 @@ void UBTT_FlyingTo::TickAddInputToPawn(float Deltatime, AFlyingAICharacter* Bird
 		FVector Direction = TargetLoc - BirdRef->GetActorLocation();
 		Direction.Normalize();
 		FVector2D TargetInputRotation;
-		TargetInputRotation.X = UKismetMathLibrary::Dot_VectorVector(BirdRef->GetActorForwardVector(), Direction);
-		TargetInputRotation.Y = 1.f;
+		TargetInputRotation.X = UKismetMathLibrary::Dot_VectorVector(Direction.GetSafeNormal2D(), BirdRef->GetActorRightVector().GetSafeNormal2D());
+		TargetInputRotation.Y = UKismetMathLibrary::Dot_VectorVector(Direction.GetSafeNormal2D(), BirdRef->GetActorForwardVector().GetSafeNormal2D());
 		BirdRef->SetRotationAxis(TargetInputRotation);
 
 		// Rotate the player. and move forward
@@ -157,7 +157,9 @@ void UBTT_FlyingTo::TickCheckCollision(float Deltatime, AFlyingAICharacter* Bird
 	{ return; }
 
 
-	TargetLocation = BirdRef->GetActorLocation() + (UKismetMathLibrary::ProjectVectorOnToPlane(Direction, Outhit.ImpactNormal)* DistanceWallDetection);
+	TargetLocation = BirdRef->GetActorLocation() + (UKismetMathLibrary::ProjectVectorOnToPlane(Direction, Outhit.Normal) * DistanceWallDetection);
+
+	//DrawDebugPoint(GetWorld(), TargetLocation, 10.f, FColor::Red, false, 5.f);
 
 	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), BirdRef->GetActorLocation(), TargetLocation, 5.f, FLinearColor::Red, 0.2f, 5.f);
 

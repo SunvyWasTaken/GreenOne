@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/CapsuleComponent.h"
 
 UBTT_ShootOnPlayer::UBTT_ShootOnPlayer()
 {
@@ -66,6 +67,20 @@ void UBTT_ShootOnPlayer::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	{
 		if (PawnRef->CanShoot())
 		{
+			if (CheckTargetVisible())
+			{
+				switch (ShootBehavior)
+				{
+				case EBehavior::Skip:
+					FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+					return;
+					break;
+				case EBehavior::Faild:
+					FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+					return;
+					break;
+				}
+			}
 			PawnRef->Shoot();
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
@@ -77,7 +92,7 @@ bool UBTT_ShootOnPlayer::CheckTargetVisible()
 	FHitResult Outhit;
 	AActor* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	TArray<AActor*> ActorToIgnore;
-	UKismetSystemLibrary::LineTraceSingle(GetWorld(), PawnRef->GetActorLocation() + 25.f, UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation(), UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
+	UKismetSystemLibrary::LineTraceSingle(GetWorld(), PawnRef->GetActorLocation() + (PawnRef->GetActorForwardVector() * (1 + PawnRef->GetCapsuleComponent()->GetScaledCapsuleRadius())), UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation(), UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
 	if (Outhit.bBlockingHit)
 	{
 		if (Outhit.GetActor() == nullptr)

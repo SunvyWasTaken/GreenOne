@@ -20,7 +20,8 @@ void UGI_GreenOne::Init()
 	Super::Init();
 	LoadSave();
 	LoadAudioSave();
-	ApplyAudioSettings();
+	FTimerHandle AudioHandle;
+	GetWorld()->GetTimerManager().SetTimer(AudioHandle, this, &UGI_GreenOne::ApplyAudioSettings, 0.1f, false);
 }
 
 void UGI_GreenOne::DisplayLoadingScreen()

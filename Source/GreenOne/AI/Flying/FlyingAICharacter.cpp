@@ -191,6 +191,6 @@ void AFlyingAICharacter::TimerShoot()
 
 void AFlyingAICharacter::TickRotation(float DeltaSeconds)
 {
-	CurrentRotationInput = UKismetMathLibrary::Vector2DInterpTo(CurrentRotationInput, TargetRotationInput, DeltaSeconds, RotationSpeed);
+	CurrentRotationInput = UKismetMathLibrary::Vector2DInterpTo_Constant(CurrentRotationInput, TargetRotationInput, DeltaSeconds, RotationSpeed);
 }
 

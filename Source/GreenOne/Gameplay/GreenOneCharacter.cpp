@@ -131,6 +131,7 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		EnhancedInputComponent->BindAction(EnableFertilizerAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::EnableFertilizer);
 		EnhancedInputComponent->BindAction(ChangeFertilizerTypeAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::ChangeFertilizerType);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Interact);
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::TogglePauseGame);
 	}
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);

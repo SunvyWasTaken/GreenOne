@@ -56,8 +56,8 @@ public:
 
 #pragma region AnimationRotation
 
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	float RotationSpeed = 1.f;
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0), Category = "Animation")
+	float RotationSpeed = 5.f;
 
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	FVector2D GetRotationAxis() { return CurrentRotationInput; };
