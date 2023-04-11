@@ -9,6 +9,7 @@
 #include "BrainComponent.h"
 #include "EnnemySpawner.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "GreenOne/Gameplay/Ennemy/AC_DisplayDamage.h"
@@ -137,7 +138,7 @@ void ABaseEnnemy::DeadEntity()
 		SpawnerRef->RemoveEntityFromList(this);
 		FTimerHandle TimerHandle;
 		DrawLifeBar = false;
-		
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);
 	}
