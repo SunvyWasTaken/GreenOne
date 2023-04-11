@@ -18,7 +18,7 @@ void UFertilizerSlowDown::PostEditChangeProperty(FPropertyChangedEvent& Property
 }
 #endif
 
-void UFertilizerSlowDown::ApplyEffect(AActor* Actor)
+void UFertilizerSlowDown::ApplyEffect(AActor* Actor, AActor* Source)
 {
 	UE_LOG(LogTemp, Warning, TEXT("1 %d"), PercentSlowDown);
 	if(!Actor) return;

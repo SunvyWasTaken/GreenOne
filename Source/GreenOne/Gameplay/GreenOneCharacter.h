@@ -7,7 +7,7 @@
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 #include "GreenOneCharacter.generated.h"
 
 class UInputAction;

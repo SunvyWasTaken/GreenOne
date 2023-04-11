@@ -19,7 +19,7 @@
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
@@ -194,12 +194,26 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 
 void AGreenOneCharacter::EnableFertilizer()
 {
-	// TODO	
+	UE_LOG(LogTemp, Warning, TEXT("Fertilizer Enable"));
+	
+	if(EFertilizerType == FertilizerType::None)
+		EFertilizerType = FertilizerType::SlowDown;
+	else if(EFertilizerType != FertilizerType::None)
+		EFertilizerType = FertilizerType::None;
 }
 
 void AGreenOneCharacter::ChangeFertilizerType()
 {
-	// TODO
+	if(EFertilizerType == FertilizerType::AttackBonus)
+	{
+		EFertilizerType = FertilizerType::SlowDown;
+		UE_LOG(LogTemp, Warning, TEXT("Fertilizer SlowDown"));
+	}else if(EFertilizerType == FertilizerType::SlowDown)
+	{
+		EFertilizerType = FertilizerType::AttackBonus;
+		UE_LOG(LogTemp, Warning, TEXT("Fertilizer AttackBonus"));
+	}
+	
 }
 
 void AGreenOneCharacter::Interact()

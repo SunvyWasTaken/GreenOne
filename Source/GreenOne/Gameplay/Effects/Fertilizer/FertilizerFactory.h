@@ -8,9 +8,11 @@
 UENUM(BlueprintType)
 enum class FertilizerType : uint8
 {
+	None,
 	SlowDown UMETA(DisplayName = "Ralentissement"),
 	AttackBonus UMETA(DisplayName = "Bonus d'attaque"),
 	Other UMETA(DisplayName = "Test Other"),
+	Size,
 };
 
 /**

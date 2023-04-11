@@ -101,6 +101,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
 	TArray<UMaterialInterface*> MatTreshold;
 
+	FTimerHandle TimeToResetEffect;
+
 private:
 
 	float MaxHealth = 0;

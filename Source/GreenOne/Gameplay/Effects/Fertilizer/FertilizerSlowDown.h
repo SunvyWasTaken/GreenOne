@@ -29,7 +29,7 @@ public:
 	/**
 	 * Applique l'effet sur l'acteur
 	 */
-	virtual void ApplyEffect(AActor* Actor) override;
+	virtual void ApplyEffect(AActor* Actor, AActor* Source) override;
 
 	/**
 	 * Retourne le total de pourcentage affecté à l'acteur 

@@ -1,19 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "MyFertilizerAttackBonus.h"
+#include "FertilizerAttackBonus.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "GreenOne/AI/BaseEnnemy.h"
 
-UMyFertilizerAttackBonus::UMyFertilizerAttackBonus() {}
+UFertilizerAttackBonus::UFertilizerAttackBonus() {}
 #if WITH_EDITOR
-void UMyFertilizerAttackBonus::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UFertilizerAttackBonus::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	PercentAtkBonus = FMath::Clamp(PercentAtkBonus, 0, MaxPercentAtkBonus);
 }
 #endif 
-void UMyFertilizerAttackBonus::ApplyEffect(AActor* Actor, AActor* Source)
+void UFertilizerAttackBonus::ApplyEffect(AActor* Actor, AActor* Source)
 {
 	if(!Actor) return; if(!Source) return;
 	

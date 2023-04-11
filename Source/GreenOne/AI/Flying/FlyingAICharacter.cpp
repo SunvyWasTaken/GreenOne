@@ -73,8 +73,6 @@ void AFlyingAICharacter::SetRotationAxis(FVector2D TargetAxis)
 
 void AFlyingAICharacter::ResetEffect(float DelayToReset)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Reset Effect"));
-	FTimerHandle TimeToResetEffect;
 	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect,[&]()
 	{
 		UpdateMaxSpeed(MaxSpeed);

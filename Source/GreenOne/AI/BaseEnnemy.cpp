@@ -53,7 +53,6 @@ float ABaseEnnemy::GetPercentHealth()
 
 void ABaseEnnemy::EntityTakeEffect_Implementation(UEffect* Effect, AActor* Source)
 {
-	UE_LOG(LogTemp, Warning, TEXT("TAKE EFFECT"));
 	if(!Effect) return;
 	if(!Source)
 		Effect->ApplyEffect(this);

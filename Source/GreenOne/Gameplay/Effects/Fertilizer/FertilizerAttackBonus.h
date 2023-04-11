@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "MyFertilizerAttackBonus.generated.h"
+#include "FertilizerAttackBonus.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GREENONE_API UMyFertilizerAttackBonus : public UFertilizerBase
+class GREENONE_API UFertilizerAttackBonus : public UFertilizerBase
 {
 	GENERATED_BODY()
 	
@@ -21,7 +21,7 @@ class GREENONE_API UMyFertilizerAttackBonus : public UFertilizerBase
 	int32 PercentAtkBonus = 20;
 
 public:
-	UMyFertilizerAttackBonus();
+	UFertilizerAttackBonus();
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
