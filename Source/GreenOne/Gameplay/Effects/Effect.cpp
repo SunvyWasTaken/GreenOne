@@ -10,3 +10,8 @@ void UEffect::ApplyEffect(AActor* Actor)
 {
 	IEffectInterface::ApplyEffect(Actor);
 }
+
+void UEffect::ApplyEffect(AActor* Actor, AActor* Source)
+{
+	IEffectInterface::ApplyEffect(Actor, Source);
+}

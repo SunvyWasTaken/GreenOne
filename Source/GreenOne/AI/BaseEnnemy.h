@@ -36,6 +36,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Property", DisplayName = "Speed Max", meta = (ForceUnits = "cm/s"));
 	float MaxSpeed = 600.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Property", DisplayName = "Number of Hit");
+	float NumberOfHit = 0.f;
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de vie de l'entity
 	 */
@@ -105,6 +107,7 @@ private:
 
 protected:
 
-	void DeadEntity();
+	virtual void DeadEntity();
+	void DestroyActor();
 
 };

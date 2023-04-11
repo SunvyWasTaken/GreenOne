@@ -121,8 +121,14 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Dash);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AGreenOneCharacter::Shoot);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AGreenOneCharacter::StopShoot);
 		EnhancedInputComponent->BindAction(AttackMeleeAction, ETriggerEvent::Triggered, AttackMeleeComponent, &UAttackMelee::Attack);
+		EnhancedInputComponent->BindAction(EnableFertilizerAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::EnableFertilizer);
+		EnhancedInputComponent->BindAction(ChangeFertilizerTypeAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::ChangeFertilizerType);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Interact);
 	}
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
@@ -181,6 +187,21 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	{
 		StopJumping();
 	}
+}
+
+void AGreenOneCharacter::EnableFertilizer()
+{
+	// TODO	
+}
+
+void AGreenOneCharacter::ChangeFertilizerType()
+{
+	// TODO
+}
+
+void AGreenOneCharacter::Interact()
+{
+	// TODO
 }
 
 void AGreenOneCharacter::TurnAtRate(float Rate)

@@ -37,38 +37,31 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	UInputAction* MoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DashAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PauseAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* JumpAction;
+	UInputAction* ShootAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* AttackMeleeAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* EnableFertilizerAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ChangeFertilizerTypeAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
+
 	UPROPERTY(EditAnywhere)
 	class UAttackMelee* AttackMeleeComponent;
-	
-	void PlayerDead();
-
-	virtual void Tick( float DeltaSeconds );
-
-	void InputJump(const FInputActionValue& Value);
-
-	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool Invisible = false;
-
-	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool Immortal = false;
-
-#pragma region Test
-	UPROPERTY(EditAnywhere, Category = "Test")
-	TMap<FertilizerType,TSubclassOf<UFertilizerBase>> Effects;
-	UPROPERTY(EditAnywhere, Category = "Test")
-	FertilizerType EFertilizerType;
-
-	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
-	bool IsCurrentEffectExist(FertilizerType Type);
-#pragma endregion 
 	
 public:
 
@@ -88,6 +81,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 	float Health = 100.f;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool IsAtk;
+
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de la vie du joueur.
 	 */
@@ -100,46 +96,107 @@ public:
 	UPROPERTY(BlueprintReadWrite, BlueprintAssignable)
 	FOnPlayerDeath OnPlayerDeath;
 
-#pragma region Tire
+protected:
+
+	void Move(const FInputActionValue& Value);
+
+	float MaxHealth = 0;
+
+	/** 
+	 * Called via input to turn at a given rate. 
+	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+	 */
+	void TurnAtRate(float Rate);
+
+	/**
+	 * Called via input to turn look up/down at a given rate. 
+	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+	 */
+	void LookUpAtRate(float Rate);
+
+	/** Handler for when a touch input begins. */
+	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
+
+	/** Handler for when a touch input stops. */
+	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
+
+protected:
+
+	// APawn interface
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// End of APawn interface
+
+	virtual void BeginPlay();
+
+private:
+
+	bool bIsDead = false;
+
+	void PlayerDead();
+
+	virtual void Tick(float DeltaSeconds);
+
+	void InputJump(const FInputActionValue& Value);
+
+	void EnableFertilizer();
+
+	void ChangeFertilizerType();
+
+	void Interact();
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool Invisible = false;
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool Immortal = false;
+
+public:
+
+	/** Returns CameraBoom subobject **/
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Returns FollowCamera subobject **/
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+#pragma region Shoot
 
 public:
 
 	UPROPERTY(BlueprintAssignable)
-	FOnHitEnnemy OnHitEnnemy;
+		FOnHitEnnemy OnHitEnnemy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
-	class USceneComponent* TargetMuzzle;
+		class USceneComponent* TargetMuzzle;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
-	FName SocketMuzzle;
+		FName SocketMuzzle;
 
 	/**
 	 * Give if the player is attacking or not.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
-	bool IsAttacking();
+		bool IsAttacking();
 
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
-	void Shoot();
+		void Shoot();
 
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
-	void StopShoot();
+		void StopShoot();
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
-	float DamagePlayer = 10.f;
+		float DamagePlayer = 10.f;
 
 	/**
 	 * Cooldown entre chaque tire par d�fault c'est 1/3;
 	 * c'est � dire 1 tire toutes les 3 secondes.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Custom|Combat")
-	float ShootCooldown;
+		float ShootCooldown;
 
 	/**
 	 * Distance que le tire va atteindre depuis l'avant du gun.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0, DisplayName = "Distance de Tire"), Category = "Custom|Combat")
-	float ShootDistance = 400.f;
+		float ShootDistance = 400.f;
 
 	/**
 	 * Taux de dispertion du tire.
@@ -147,18 +204,18 @@ public:
 	 * 0 quand il n'y a pas de bloom et 1 les tires fuse � 360� autour du joueur.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0, ClampMax = 1, UIMin = 0, UIMax = 1, DisplayName = "Bloom du Tire"), Category = "Custom|Combat")
-	float ShootBloom;
+		float ShootBloom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Decal dot ref d'impact"), Category = "Custom|Combat")
-	TSubclassOf<AActor> DotDecal;
+		TSubclassOf<AActor> DotDecal;
 
 protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Combat")
-	float ShootCooldownRemaining;
+		float ShootCooldownRemaining;
 
 private:
-	
+
 	FVector LocationToAim;
 
 	bool IsTouchSomething;
@@ -175,43 +232,39 @@ private:
 
 #pragma endregion
 
-private:
-
-	bool bIsDead = false;
-
 #pragma region Dash
 
 public:
 
 	// Dash dans la direction de l'input mouvement.
 	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
-	void Dash();
+		void Dash();
 
 	// Distance du dash
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
-	float DashDistance;
+		float DashDistance;
 
 	// Le temps que va prendre le dash pour attendre �a destination.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
-	float DashTime;
+		float DashTime;
 
 	// Temps que va prendre le dash à revenir après utilisation.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
-	float DashCooldown;
+		float DashCooldown;
 
 	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
-	bool bIsDashing;
+		bool bIsDashing;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
-	bool bDashOnCooldown;
+		bool bDashOnCooldown;
 
 	/**
 	 * Return the remaining time of the dash cooldown.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
-	float GetRemainingDashTime() { return CurrentDashCooldown; };
+		float GetRemainingDashTime() { return CurrentDashCooldown; };
 
 private:
 
@@ -235,10 +288,10 @@ private:
 public:
 
 	UFUNCTION(BlueprintCallable)
-	void TogglePauseGame();
+		void TogglePauseGame();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Pause")
-	TSubclassOf<UUserWidget> PauseWidgetClass;
+		TSubclassOf<UUserWidget> PauseWidgetClass;
 
 private:
 
@@ -248,53 +301,28 @@ private:
 
 #pragma region TurnCamera
 
+private:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Camera")
-	float Multiplicator;
+		float Multiplicator;
 
 	UFUNCTION()
-	void TurnCamera();
+		void TurnCamera();
 
 #pragma endregion 
 
-protected:
+#pragma region Test
 
-	void Move(const FInputActionValue& Value);
+private:
+	UPROPERTY(EditAnywhere, Category = "Test")
+		TMap<FertilizerType, TSubclassOf<UFertilizerBase>> Effects;
+	UPROPERTY(EditAnywhere, Category = "Test")
+		FertilizerType EFertilizerType;
 
-	float MaxHealth = 0;
+	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
 
-	
+	bool IsCurrentEffectExist(FertilizerType Type);
 
-	/** 
-	 * Called via input to turn at a given rate. 
-	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	 */
-	void TurnAtRate(float Rate);
+#pragma endregion 
 
-	/**
-	 * Called via input to turn look up/down at a given rate. 
-	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	 */
-	void LookUpAtRate(float Rate);
-
-	/** Handler for when a touch input begins. */
-	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
-
-	/** Handler for when a touch input stops. */
-	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
-
-protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	// End of APawn interface
-
-	virtual void BeginPlay();
-
-public:
-	UPROPERTY(BlueprintReadWrite)
-	bool IsAtk;
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
 

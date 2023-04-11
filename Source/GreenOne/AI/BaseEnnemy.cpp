@@ -54,7 +54,11 @@ float ABaseEnnemy::GetPercentHealth()
 void ABaseEnnemy::EnityTakeEffect_Implementation(UEffect* Effect, AActor* Source)
 {
 	if(!Effect) return;
-	Effect->ApplyEffect(this);
+	if(!Source)
+		Effect->ApplyEffect(this);
+	else
+		Effect->ApplyEffect(this, Source);
+	
 }
 
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
@@ -128,7 +132,18 @@ void ABaseEnnemy::DeadEntity()
 	Cast<AAIController>(GetController())->GetBrainComponent()->StopLogic("Because");
 	if (SpawnerRef != nullptr)
 	{
+		UE_LOG(LogTemp,Warning, TEXT("OK"));
 		SpawnerRef->RemoveEntityFromList(this);
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);
+	}
+}
+
+void ABaseEnnemy::DestroyActor()
+{
+	if (IsValid(this))
+	{
+		this->Destroy();
 	}
 }
 
