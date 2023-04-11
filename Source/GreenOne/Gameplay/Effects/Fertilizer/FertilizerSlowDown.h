@@ -14,7 +14,7 @@ class GREENONE_API UFertilizerSlowDown : public UFertilizerBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Effect", DisplayName = "Max de ralentissement", meta = (ClampMin = 0, ClampMax = 100, ForceUnits = "%"))
+	UPROPERTY(EditAnywhere, Transient, Category = "Effect", DisplayName = "Max de ralentissement", meta = (ClampMin = 0, ClampMax = 100, ForceUnits = "%"))
 	int32 MaxPercentSlownDown = 50;
 
 	UPROPERTY(EditAnywhere, Category = "Effect", DisplayName = "% de ralentissement", meta = (ForceUnits = "%"))

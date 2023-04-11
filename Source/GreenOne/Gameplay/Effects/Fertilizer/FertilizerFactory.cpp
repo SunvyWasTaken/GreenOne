@@ -23,13 +23,13 @@ UFertilizerBase* FertilizerFactory::Factory(FertilizerType Type, TSubclassOf<UFe
 	switch (Type)
 	{
 	case FertilizerType::SlowDown:
-		Fertilizer = NewObject<UFertilizerSlowDown>(FertilizerBase);
+		Fertilizer = InitFertilizer<UFertilizerSlowDown>(FertilizerBase);
 		break;
 	case FertilizerType::AttackBonus:
 		Fertilizer = NewObject<UMyFertilizerAttackBonus>(FertilizerBase);
 		break;
 	case FertilizerType::Other:
-		Fertilizer = NewObject<UFertilizerOther>(FertilizerBase);
+		Fertilizer = InitFertilizer<UFertilizerOther>(FertilizerBase);
 		default:
 			break;
 	}

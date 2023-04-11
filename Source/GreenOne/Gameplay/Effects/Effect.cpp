@@ -15,3 +15,8 @@ void UEffect::ApplyEffect(AActor* Actor, AActor* Source)
 {
 	IEffectInterface::ApplyEffect(Actor, Source);
 }
+
+const float UEffect::GetTimeEffect()
+{
+	return TimeEffect;
+}

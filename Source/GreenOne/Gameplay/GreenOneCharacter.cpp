@@ -287,7 +287,7 @@ void AGreenOneCharacter::ShootRafale()
 				{
 					if(UFertilizerBase* Fertilizer = FertilizerFactory::Factory(EFertilizerType, GetCurrentEffect(EFertilizerType)))
 					{
-						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer,this);	
+						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer, this);	
 					}	
 				}
 				OnHitEnnemy.Broadcast(CurrentTargetHit);

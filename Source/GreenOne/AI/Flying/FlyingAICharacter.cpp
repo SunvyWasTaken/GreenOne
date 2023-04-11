@@ -59,6 +59,7 @@ void AFlyingAICharacter::Shoot()
 
 void AFlyingAICharacter::UpdateMaxSpeed(float NewSpeed)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Update Speed"));
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->MaxFlySpeed = NewSpeed;
@@ -68,6 +69,16 @@ void AFlyingAICharacter::UpdateMaxSpeed(float NewSpeed)
 void AFlyingAICharacter::SetRotationAxis(FVector2D TargetAxis)
 {
 	TargetRotationInput = TargetAxis;
+}
+
+void AFlyingAICharacter::ResetEffect(float DelayToReset)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Reset Effect"));
+	FTimerHandle TimeToResetEffect;
+	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect,[&]()
+	{
+		UpdateMaxSpeed(MaxSpeed);
+	},DelayToReset,false);
 }
 
 //This function is used to perform self-destruction of the AI character.

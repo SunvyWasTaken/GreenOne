@@ -51,8 +51,9 @@ float ABaseEnnemy::GetPercentHealth()
 	return Health / MaxHealth;
 }
 
-void ABaseEnnemy::EnityTakeEffect_Implementation(UEffect* Effect, AActor* Source)
+void ABaseEnnemy::EntityTakeEffect_Implementation(UEffect* Effect, AActor* Source)
 {
+	UE_LOG(LogTemp, Warning, TEXT("TAKE EFFECT"));
 	if(!Effect) return;
 	if(!Source)
 		Effect->ApplyEffect(this);
@@ -73,7 +74,7 @@ void ABaseEnnemy::SetPlayerRef(AActor* ref)
 	}
 }
 
-void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr)
+void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneNameHit, AActor* DamageSource)
 {
 	//UE_LOG(LogTemp, Error, TEXT("Damage On Ennemy"));
 	float CurrentDamageMulti = 1.f;
