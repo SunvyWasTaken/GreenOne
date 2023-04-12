@@ -41,13 +41,6 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 	TickRotation(DeltaTime);
 }
 
-// Called to bind functionality to input
-void AFlyingAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
 void AFlyingAICharacter::Shoot()
 {
 	//GetWorld()->GetTimerManager().SetTimer(ShootTimer, this, &AFlyingAICharacter::TimerShoot, ShootRate, true);
@@ -192,5 +185,6 @@ void AFlyingAICharacter::TimerShoot()
 void AFlyingAICharacter::TickRotation(float DeltaSeconds)
 {
 	CurrentRotationInput = UKismetMathLibrary::Vector2DInterpTo_Constant(CurrentRotationInput, TargetRotationInput, DeltaSeconds, RotationSpeed);
+	//UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f2"), CurrentRotationInput.X, CurrentRotationInput.Y);
 }
 

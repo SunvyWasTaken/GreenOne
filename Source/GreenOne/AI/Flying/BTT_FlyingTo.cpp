@@ -38,10 +38,6 @@ EBTNodeResult::Type UBTT_FlyingTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 		UE_LOG(LogTemp, Warning, TEXT("Aucun target n'a était assigner au flying move to."));
 		return EBTNodeResult::Aborted;
 	}
-	if (!bOverrideSpeed)
-	{
-		return EBTNodeResult::InProgress;
-	}
 	PawnMovementRef = Cast<UCharacterMovementComponent>(ControllerRef->GetCharacter()->GetMovementComponent());
 	if (PawnMovementRef == nullptr)
 	{
@@ -50,6 +46,10 @@ EBTNodeResult::Type UBTT_FlyingTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	}
 	InitialSpeed = PawnMovementRef->MaxFlySpeed;
 	InitialAcceleration = PawnMovementRef->GetMaxAcceleration();
+	if (!bOverrideSpeed)
+	{
+		return EBTNodeResult::InProgress;
+	}
 	PawnMovementRef->MaxFlySpeed = FlyingSpeed;
 	PawnMovementRef->MaxAcceleration *= AccelerationMultiPly;
 	return EBTNodeResult::InProgress;
@@ -88,7 +88,8 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 		if (FVector::Distance(AIRef->GetActorLocation(), TargetLocation) <= Acceptance)
 		{
-			AIRef->SetRotationAxis(FVector2D(0, 0));
+			//UE_LOG(LogTemp, Error, TEXT("Passe à 0"));
+			//AIRef->SetRotationAxis(FVector2D(0, 0));
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
 	}
@@ -115,20 +116,22 @@ void UBTT_FlyingTo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 
 void UBTT_FlyingTo::TickAddInputToPawn(float Deltatime, AFlyingAICharacter* BirdRef, FVector TargetLoc)
 {
+
+	// To give the rotation axis.
+	FVector Direction = TargetLocation - BirdRef->GetActorLocation();
+	Direction.Normalize();
+	FVector2D TargetInputRotation;
+	TargetInputRotation.X = UKismetMathLibrary::Dot_VectorVector(Direction, BirdRef->GetActorRightVector());
+	TargetInputRotation.Y = UKismetMathLibrary::Dot_VectorVector(Direction, BirdRef->GetActorForwardVector());
+	TargetInputRotation *= UKismetMathLibrary::NormalizeToRange(BirdRef->GetMovementComponent()->Velocity.Length(), 0, InitialSpeed);
+	BirdRef->SetRotationAxis(TargetInputRotation);
+
 	if (bUseOld)
 	{
 		BirdRef->GetMovementComponent()->AddInputVector(TargetLoc);
 	}
 	else
 	{
-		// To give the rotation axis.
-		FVector Direction = TargetLoc - BirdRef->GetActorLocation();
-		Direction.Normalize();
-		FVector2D TargetInputRotation;
-		TargetInputRotation.X = UKismetMathLibrary::Dot_VectorVector(Direction.GetSafeNormal2D(), BirdRef->GetActorRightVector().GetSafeNormal2D());
-		TargetInputRotation.Y = UKismetMathLibrary::Dot_VectorVector(Direction.GetSafeNormal2D(), BirdRef->GetActorForwardVector().GetSafeNormal2D());
-		BirdRef->SetRotationAxis(TargetInputRotation);
-
 		// Rotate the player. and move forward
 		const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(BirdRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(TargetLoc), Deltatime, RotationSpeed);
 		BirdRef->SetActorRotation(CurrentTargetRotation);
