@@ -368,7 +368,7 @@ private:
 
 	FVector TargetHorizontalJump = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
-	float DistanceHorizontalJump;
+	float DistanceHorizontalJump = 450.f;
 
 	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
 	void DoubleJump();
