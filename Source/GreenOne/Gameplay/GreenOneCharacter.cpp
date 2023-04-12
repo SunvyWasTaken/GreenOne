@@ -16,6 +16,8 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GreenOne/AI/BaseEnnemy.h"
 #include "Components/SceneComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
@@ -283,11 +285,23 @@ void AGreenOneCharacter::ShootRafale()
 	FHitResult OutHit;
 	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
 
+	if (!IsTouchSomething)
+	{
+		LocationToAim = FollowCamera->GetComponentLocation() + (FollowCamera->GetForwardVector() * ShootDistance);
+	}
+
 	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, LocationToAim, ECC_Camera))
 	{
-		if (DotDecal)
+		if(ShootParticule)
 		{
-			GetWorld()->SpawnActor<AActor>(DotDecal, OutHit.Location, OutHit.Normal.Rotation());
+			const FRotator ParticuleRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, LocationToAim);
+			UNiagaraComponent* CurrentShootPart = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ShootParticule, StartLocation, ParticuleRotation, FVector::One());
+			CurrentShootPart->SetFloatParameter("ShootDistance", FVector::Distance(StartLocation, OutHit.Location));
+			CurrentShootPart->SetColorParameter("ShootColor", FColor::White);
+		}
+		if (ImpactParticules)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactParticules, OutHit.Location, FRotator::ZeroRotator, FVector::One());
 		}
 		if (OutHit.GetActor() == nullptr)
 		{

@@ -182,6 +182,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
 	FName SocketMuzzle;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
+	class UNiagaraSystem* ShootParticule;
+
 	/**
 	 * Give if the player is attacking or not.
 	 */
@@ -219,7 +222,7 @@ public:
 	float ShootBloom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Decal dot ref d'impact"), Category = "Custom|Combat")
-	TSubclassOf<AActor> DotDecal;
+	class UNiagaraSystem* ImpactParticules;
 
 protected:
 

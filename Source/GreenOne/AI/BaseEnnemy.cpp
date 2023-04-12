@@ -21,6 +21,7 @@ ABaseEnnemy::ABaseEnnemy()
 	LifeBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LifeBar_DEBUG"));
 	LifeBarComponent->SetupAttachment(RootComponent);
 	LifeBarComponent->SetWidgetClass(LifeBarClass);
+	
 
 	DamageComp = CreateDefaultSubobject<UAC_DisplayDamage>(TEXT("DamageComp"));
 }
