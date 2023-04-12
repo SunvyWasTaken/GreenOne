@@ -260,8 +260,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 		bool IsCombatMode = false;
 
-#pragma endregion 
-	
+#pragma endregion
+
 #pragma region Pause
 
 public:
