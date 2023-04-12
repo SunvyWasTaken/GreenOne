@@ -382,6 +382,11 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 
 void AGreenOneCharacter::Dash()
 {
+	if(GetCharacterMovement()->IsFalling() && JumpCurrentCount > 0)
+	{
+		DoubleJump();
+	}
+	
 	if (GetCharacterMovement()->IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }
 	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
