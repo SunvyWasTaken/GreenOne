@@ -499,43 +499,21 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-
-
-
 void AGreenOneCharacter::CanRegenerate()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
-
 	if(Health >= MaxHealth)
 		return;
-		
 	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
 		IsCombatMode = false;
 		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
 	},CoolDown, false);
-	/*while(IsCombatMode == false && Health < 100 && CoolDown <= 5)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("+1 time"));
-		CoolDown++;
-		IsRegenerate();
-	}
-	CanEarnHp = true;
-	IsRegenerate();*/
 }
-
-//void AGreenOneCharacter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-/*{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	CanRegenerate(DeltaTime);
-}*/
-
 
 void AGreenOneCharacter::Regenerate(float DeltaSeconds)
 {
 	if(IsCombatMode) return;
-	
 	if(Health < MaxHealth)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("+10 health"));

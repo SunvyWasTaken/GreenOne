@@ -253,10 +253,8 @@ private:
 
 #pragma region Mode
 public:
-
 	// Called every frame
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
 	
 	UFUNCTION(BlueprintCallable)
 	void CanRegenerate();
@@ -264,7 +262,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 	bool IsCombatMode = false;
 	
-
 	UFUNCTION(BlueprintCallable)
 	void Regenerate(float DeltaSeconds);
 
@@ -273,7 +270,6 @@ public:
 	
 private:
 	FTimerHandle TimerRegen;
-	
 	/** Valeur d'incrémentation du cooldown après chaque attaque */
 	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
 	float CoolDown = 5.f;
