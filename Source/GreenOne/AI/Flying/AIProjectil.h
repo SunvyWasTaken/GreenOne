@@ -23,6 +23,8 @@ public:
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
+
+class USphereComponent* blalbla;
 #endif
 
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "DrawDebug"), Category = "Custom|Debug")

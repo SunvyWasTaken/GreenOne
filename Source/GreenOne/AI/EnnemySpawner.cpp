@@ -67,6 +67,7 @@ void AEnnemySpawner::OnComponentActivate(UPrimitiveComponent* OverlappedComponen
 		TriggerSpawnEntity();
 		SetPlayerRefToEntitys(PlayerRef);
 	}
+	SetAI();
 }
 
 /*void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
