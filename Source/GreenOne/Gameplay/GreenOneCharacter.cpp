@@ -189,7 +189,11 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	bool bIsJumping = Value.Get<bool>();
 	if (bIsJumping)
 	{
-		//Jump();
+		//	Jump();
+		if(HorizontalJumpDirection == FVector2D::ZeroVector)
+			JumpMaxCount = 1;
+		else
+			JumpMaxCount = 2;
 		DoubleJump();
 	}
 	else
@@ -466,10 +470,19 @@ void AGreenOneCharacter::TurnCamera()
 
 void AGreenOneCharacter::DoubleJump()
 {
+
+	UE_LOG(LogTemp, Warning, TEXT("JumpCurrent %d"),JumpCurrentCount);
+	
 	if(bHorizontalJump) return;
+
 	
 	bPressedJump = true;
-	FVector Target = GetActorForwardVector();
+	FVector Forward = FollowCamera->GetForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
+	FVector Right = FollowCamera->GetRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
+	FVector Direction = Forward + Right;
+	Direction.Normalize();
+	
+	FVector Target = Direction;
 	if(bManualHorizontalVelocity)
 	{
 		Target *= HorizontalJumpVelocity;
@@ -481,12 +494,13 @@ void AGreenOneCharacter::DoubleJump()
 	
 	if(JumpCurrentCount == 1 && GetCharacterMovement()->IsFalling())
 	{
+		
 		GetCharacterMovement()->GravityScale = 0.f;
 		UE_LOG(LogTemp, Warning, TEXT("Horizontal"));
 		
-		TargetHorizontalJump = GetActorLocation() + GetActorForwardVector() * DistanceHorizontalJump;
+		TargetHorizontalJump = GetActorLocation() + Direction * DistanceHorizontalJump;
 		LaunchCharacter(Target,true, true);
-		DrawDebugCapsule(GetWorld(),TargetHorizontalJump, 8,25, FQuat::Identity, FColor::Purple, false, 3);
+		DrawDebugCapsule(GetWorld(), TargetHorizontalJump, 8,25, FQuat::Identity, FColor::Purple, false, 3);
 		
 		bHorizontalJump = true;
 	}
@@ -497,11 +511,13 @@ void AGreenOneCharacter::HorizontalJump()
 	if(!bHorizontalJump) return;
 
 	float TargetDistance = FVector::Distance(GetActorLocation(), TargetHorizontalJump);
+	UE_LOG(LogTemp, Warning, TEXT("Horizontal %f"),TargetDistance);
 	if(TargetDistance <= 50.f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("End"));
 		bHorizontalJump = false;
 		GetCharacterMovement()->GravityScale = 1.75f;
+		HorizontalJumpDirection = FVector2D::ZeroVector;
 	}
 }
 
@@ -510,6 +526,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	if(bHorizontalJump) return;
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
+	HorizontalJumpDirection = MovementVector;
 
 	if (Controller != nullptr)
 	{

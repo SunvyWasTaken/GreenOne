@@ -364,11 +364,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
 	float HorizontalJumpVelocity = 450.f;
 	bool bHorizontalJump;
+	int32 JumpCount = 0;
 
 	FVector TargetHorizontalJump = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
 	float DistanceHorizontalJump;
-	
+
+	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
 	void DoubleJump();
 	void HorizontalJump();
 
