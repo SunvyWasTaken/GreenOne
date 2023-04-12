@@ -175,11 +175,11 @@ void AGreenOneCharacter::BeginPlay()
 
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
-	
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
 	DashTick(DeltaSeconds);
 	CooldownDash(DeltaSeconds);
+	Regenerate(DeltaSeconds);
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
@@ -246,6 +246,8 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName Bon
 	if(Immortal) return;
 	
 	Health -= damage;
+	UE_LOG(LogTemp, Warning, TEXT("loose life"));
+	IsCombatMode = true;
 	if (Health <= 0)
 	if(!Invisible) Health -= damage;
 	if(Health <= 0)
@@ -253,6 +255,7 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName Bon
 		PlayerDead();
 		Health = 0.f;
 	}
+	CanRegenerate();
 	OnTakeDamage.Broadcast();
 }
 
@@ -273,9 +276,10 @@ void AGreenOneCharacter::Shoot()
 
 void AGreenOneCharacter::StopShoot()
 {
-	IsRegenerate();
 	if (ShootHandler.IsValid())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("stop"));
+		CanRegenerate();
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
 	}
 }
@@ -309,6 +313,8 @@ void AGreenOneCharacter::ShootRafale()
 		}
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
+			IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
@@ -494,12 +500,51 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 }
 
 
-void AGreenOneCharacter::IsRegenerate()
+
+
+void AGreenOneCharacter::CanRegenerate()
 {
-	if(IsCombatMode)
+	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
+
+	if(Health >= MaxHealth)
+		return;
+		
+	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
-		Health = Health + 10;
+		IsCombatMode = false;
+		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
+	},CoolDown, false);
+	/*while(IsCombatMode == false && Health < 100 && CoolDown <= 5)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("+1 time"));
+		CoolDown++;
+		IsRegenerate();
 	}
-	
+	CanEarnHp = true;
+	IsRegenerate();*/
 }
 
+//void AGreenOneCharacter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+/*{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	CanRegenerate(DeltaTime);
+}*/
+
+
+void AGreenOneCharacter::Regenerate(float DeltaSeconds)
+{
+	if(IsCombatMode) return;
+	
+	if(Health < MaxHealth)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("+10 health"));
+		Health += 10*DeltaSeconds;
+		UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
+		if(Health >= MaxHealth)
+		{
+			Health = MaxHealth;
+		}
+		OnRegen.Broadcast();
+	}
+}

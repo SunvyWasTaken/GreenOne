@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
@@ -17,6 +18,8 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	GENERATED_BODY()
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamage);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRegen);
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
@@ -112,7 +115,8 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 
-	float MaxHealth = 0;
+	UPROPERTY(EditAnywhere, Category = "Health");
+	float MaxHealth = 100;
 
 	/** 
 	 * Called via input to turn at a given rate. 
@@ -248,18 +252,31 @@ private:
 #pragma endregion
 
 #pragma region Mode
-
-
 public:
 
+	// Called every frame
+	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	
 	UFUNCTION(BlueprintCallable)
-	void IsRegenerate();
+	void CanRegenerate();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 	bool IsCombatMode = false;
+	
+
+	UFUNCTION(BlueprintCallable)
+	void Regenerate(float DeltaSeconds);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRegen OnRegen;
+	
 private:
-
-
+	FTimerHandle TimerRegen;
+	
+	/** Valeur d'incrémentation du cooldown après chaque attaque */
+	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
+	float CoolDown = 5.f;
 #pragma endregion 
 
 #pragma region Dash
