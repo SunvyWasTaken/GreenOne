@@ -26,9 +26,7 @@ public:
 #endif
 
 public:
-
-	UFUNCTION(BlueprintImplementableEvent)
-		void SetAI();
+	
 	
 	UPROPERTY(EditAnywhere)
 		class USphereComponent* SphereCollisionActivation;
