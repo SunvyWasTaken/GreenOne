@@ -340,13 +340,13 @@ private:
 
 #pragma endregion 
 
-#pragma region Test
+#pragma region Fertilizer
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Test")
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer")
 	TMap<FertilizerType, TSubclassOf<UFertilizerBase>> Effects;
 	
-	UPROPERTY(EditAnywhere, Category = "Test")
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer")
 	FertilizerType EFertilizerType;
 
 	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);

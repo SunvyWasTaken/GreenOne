@@ -27,10 +27,7 @@ AFlyingAICharacter::AFlyingAICharacter()
 void AFlyingAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxFlySpeed = MaxSpeed;
-	}
+	UpdateMaxSpeed(MaxSpeed);
 }
 
 // Called every frame
@@ -59,10 +56,11 @@ void AFlyingAICharacter::Shoot()
 
 void AFlyingAICharacter::UpdateMaxSpeed(float NewSpeed)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Update Speed"));
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->MaxFlySpeed = NewSpeed;
+		UE_LOG(LogActor, Warning, TEXT("Vitesse : %f"), GetCharacterMovement()->MaxFlySpeed);
+
 	}
 }
 

@@ -5,6 +5,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"	
 #include "NiagaraFunctionLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AMeleeAICharacter::AMeleeAICharacter()
@@ -21,6 +22,7 @@ AMeleeAICharacter::AMeleeAICharacter()
 void AMeleeAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	UpdateMaxSpeed(MaxSpeed);
 	//OnTakeDamage.AddDynamic(this, &AMeleeAICharacter::OnDamage);
 }
 
@@ -39,7 +41,8 @@ void AMeleeAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 }
 
 
-/*void AMeleeAICharacter::AttackMeleeOK()
+/*
+ void AMeleeAICharacter::AttackMeleeOK()
 {
 	//Create an array to store the results of the trace
 	TArray<FHitResult> Outhits;
@@ -85,7 +88,8 @@ void AMeleeAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	FHitResult Outhit;
 	//IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
 
-}*/
+}
+*/
 
 
 void AMeleeAICharacter::Collision()
@@ -116,8 +120,21 @@ void AMeleeAICharacter::Collision()
 			break;
 		}
 	}
-}	
+}
 
+void AMeleeAICharacter::UpdateMaxSpeed(float NewSpeed)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+		UE_LOG(LogActor, Warning, TEXT("Vitesse : %f"), GetCharacterMovement()->MaxWalkSpeed);
+	}
+}
+
+void AMeleeAICharacter::ResetEffect(const float DelayToReset)
+{
+	Super::ResetEffect(DelayToReset);
+}
 
 
 /*void AMeleeAICharacter::OnDamage(float value)

@@ -5,7 +5,6 @@
 #include "Navigation/CrowdFollowingComponent.h"
 #include "CoreMinimal.h"
 #include "GreenOne/AI/BaseEnnemy.h"
-#include "GameFramework/Character.h"
 #include "MeleeAICharacter.generated.h"
 
 UCLASS()
@@ -34,7 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Collision();
 
-
+	UFUNCTION(BlueprintCallable)
+	virtual void UpdateMaxSpeed(float Speed) override;
+	virtual void ResetEffect(const float DelayToReset) override;
 
 
 
@@ -49,32 +50,30 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Offset de la zone de détection")
 	FVector DetectionOffset;
 
+	/*
+	UFUNCTION(BlueprintCallable)
+	void AttackMeleeOK();
+	*/
 
-	// blabla
-	
-	//UFUNCTION(BlueprintCallable)
-	//void AttackMeleeOK();
-
-
-	// blabla
 	UPROPERTY(EditAnywhere, Category = "Custom|Explosion")
 	class UNiagaraSystem* ExplosionParticule;
 	
-	/**
-	 * Radius de l'explosion.
-	 */
-	//UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, meta = (DisplayName = "Radius d'explosion", ClampMin = 0), Category = "Custom|Explosion")
-	//float ExploRadius;
-
-	/**
-	 * valeur de damage appliquer au player si in range.
+	// Radius de l'explosion. 
+	/*
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, meta = (DisplayName = "Radius d'explosion", ClampMin = 0), Category = "Custom|Explosion")
+	float ExploRadius;
+	*/
+	
+	/* valeur de damage appliquer au player si in range.
 	 * Default one 20% of the player max health.
 	 */
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage de l'explosion", ClampMin = 0), Category = "Custom|Explosion")
 	float ExploDmg;
 
-	//UFUNCTION()
-	//void OnDamage(float value);
+	/*
+	UFUNCTION()
+	void OnDamage(float value);
+	*/
 
 	
 };
