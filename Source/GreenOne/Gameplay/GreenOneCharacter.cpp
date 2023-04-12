@@ -20,7 +20,7 @@
 #include "NiagaraComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
-#include "GreenOne/Gameplay/Common/DashComponent.h"
+#include "GreenOne/Gameplay/Common/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 
@@ -86,6 +86,7 @@ AGreenOneCharacter::AGreenOneCharacter()
 		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
 	}
 
+	/*
 	// Add DashComponent
 	DashComponent = CreateDefaultSubobject<UDashComponent>(TEXT("DashComponent"));
 	if (!DashComponent)
@@ -93,6 +94,14 @@ AGreenOneCharacter::AGreenOneCharacter()
 		UE_LOG(LogTemp, Error, TEXT("No DashComponent Found"));
 	}
 	DashComponent->SetCharacter(this);
+	*/
+
+	// Add CustomCharacterMovementComponent
+	CustomCharacterMovementComponent = CreateDefaultSubobject<UCustomCharacterMovementComponent>(TEXT("CustomCharacterMovementComponent"));
+	if (!CustomCharacterMovementComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No CustomCharacterMovementComponent Found"));
+	}
 	
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
 	TargetMuzzle->SetupAttachment(GetMesh());
@@ -127,7 +136,7 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, DashComponent, &UDashComponent::Dash);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::Dash);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AGreenOneCharacter::Shoot);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AGreenOneCharacter::StopShoot);

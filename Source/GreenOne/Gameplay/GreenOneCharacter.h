@@ -63,8 +63,10 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	UPROPERTY(EditAnywhere)
 	class UAttackMelee* AttackMeleeComponent;
 
-	UPROPERTY(EditAnywhere)
-	class UDashComponent* DashComponent;
+protected:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Mouvement")
+	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
 	
 public:
 

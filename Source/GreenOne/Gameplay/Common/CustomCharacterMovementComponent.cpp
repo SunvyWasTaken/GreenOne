@@ -1,10 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "DashComponent.h"
+#include "CustomCharacterMovementComponent.h"
+#include "GreenOne/Gameplay/GreenOneCharacter.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
-UDashComponent::UDashComponent()
+UCustomCharacterMovementComponent::UCustomCharacterMovementComponent()
 {
 	DashDistance = 1000.f;
 	DashTime = 0.8f;
@@ -13,10 +15,10 @@ UDashComponent::UDashComponent()
 	bIsDashing = false;
 }
 
-void UDashComponent::Dash()
+void UCustomCharacterMovementComponent::Dash()
 {
 	if (Character == nullptr) { return; }
-	
+
 	if (Character->GetCharacterMovement()->IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }
 	Character->GetCharacterMovement()->SetMovementMode(MOVE_Custom);
@@ -26,7 +28,7 @@ void UDashComponent::Dash()
 	bIsDashing = true;
 }
 
-void UDashComponent::DashTick(float deltatime)
+void UCustomCharacterMovementComponent::DashTick(float deltatime)
 {
 	if (!bIsDashing || bDashOnCooldown) { return; }
 
@@ -46,7 +48,7 @@ void UDashComponent::DashTick(float deltatime)
 	return;
 }
 
-void UDashComponent::CooldownDash(float deltatime)
+void UCustomCharacterMovementComponent::CooldownDash(float deltatime)
 {
 	if (!bDashOnCooldown) { return; }
 	CurrentDashCooldown -= deltatime;
@@ -56,15 +58,17 @@ void UDashComponent::CooldownDash(float deltatime)
 	}
 }
 
-void UDashComponent::BeginPlay()
+void UCustomCharacterMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Character = Cast<AGreenOneCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
-void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
+
 	DashTick(DeltaTime);
 	CooldownDash(DeltaTime);
 }
