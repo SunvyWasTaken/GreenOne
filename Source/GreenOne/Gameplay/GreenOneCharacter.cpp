@@ -323,6 +323,9 @@ void AGreenOneCharacter::ShootRafale()
 			}
 		}
 	}
+	const FRotator ParticuleRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, LocationToAim);
+	UNiagaraComponent* CurrentShootPart = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ShootParticule, StartLocation, ParticuleRotation, FVector::One());
+	CurrentShootPart->SetFloatParameter("ShootDistance", ShootDistance);
 }
 
 void AGreenOneCharacter::ShootTick(float deltatime)

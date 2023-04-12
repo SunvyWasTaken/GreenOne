@@ -80,7 +80,7 @@ private:
 	float ConeHeight = 10.f;
 	
 	UFUNCTION()
-	void Conetrace(TArray<FHitResult>& TargetHits);
+	bool Conetrace(TArray<FHitResult>& TargetHits);
  
 	void DetectActors();
 	void ApplyImpulseForce(TArray<FHitResult>& ActorsHit);

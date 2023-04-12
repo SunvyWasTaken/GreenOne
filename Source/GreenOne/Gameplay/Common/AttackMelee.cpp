@@ -40,36 +40,37 @@ void UAttackMelee::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	SetDelayToResetCoolDown(DeltaTime);
 
 #if WITH_EDITOR
-	
-	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("CoolDown %f"), CoolDownTimer), true, FVector2d(1.5,1.5));
-	GEngine->AddOnScreenDebugMessage(2, 1.0f, FColor::Red, FString::Printf(TEXT("CoolDownValue %f"), CoolDown), true, FVector2d(1.5,1.5));
 
-	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Green, FString::Printf(TEXT("DelayToResetCoolDown %f"), DelayToResetCoolDownTimer), true, FVector2d(1.5,1.5));
-	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Yellow, FString::Printf(TEXT("DelayToResetCoolDownValue %f"), DelayToResetCoolDown), true, FVector2d(1.5,1.5));
+	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("CoolDown %f"), CoolDownTimer), true, FVector2d(1.5, 1.5));
+	GEngine->AddOnScreenDebugMessage(2, 1.0f, FColor::Red, FString::Printf(TEXT("CoolDownValue %f"), CoolDown), true, FVector2d(1.5, 1.5));
 
-	GEngine->AddOnScreenDebugMessage(5, 1.0f, FColor::Magenta, FString::Printf(TEXT("ImpulseForce %f"), ImpulseForceTemp), true, FVector2d(1.5,1.5));
+	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Green, FString::Printf(TEXT("DelayToResetCoolDown %f"), DelayToResetCoolDownTimer), true, FVector2d(1.5, 1.5));
+	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Yellow, FString::Printf(TEXT("DelayToResetCoolDownValue %f"), DelayToResetCoolDown), true, FVector2d(1.5, 1.5));
+
+	GEngine->AddOnScreenDebugMessage(5, 1.0f, FColor::Magenta, FString::Printf(TEXT("ImpulseForce %f"), ImpulseForceTemp), true, FVector2d(1.5, 1.5));
 
 #endif
 }
 
 void UAttackMelee::Attack()
 {
-	if(AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
+	if (AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
 	{
 		Character->IsAtk = true;
-		
+
 	}
-	
-	if(!bActiveCoolDown)
+
+	if (!bActiveCoolDown)
 		bActiveCoolDown = true;
 	else
 		return;
-	
+
 	DetectActors();
 }
 
-void UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
+bool UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
 {
+	bool bConeHit = false;
 	const unsigned Iteration = 5;
 	const float TraceSize = (TraceDistance / Iteration);
 	const FVector StartPosition = GetOwner()->GetActorLocation();
@@ -81,12 +82,39 @@ void UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
 	{
 		float CurrentAlpha = UKismetMathLibrary::NormalizeToRange((TraceSize * i), 0, TraceDistance);
 		float BoxSize = UKismetMathLibrary::Lerp(0, ConeRadius, CurrentAlpha);
-		FVector CurrentPos = StartPosition + (ForwardActor * (TraceSize*2) * i+1);
+		FVector CurrentPos = StartPosition + (ForwardActor * (TraceSize * 2) * i + 1);
 		FVector Box = FVector(TraceSize, BoxSize, ConeHeight);
 		TArray<FHitResult> CurrentHits;
-		UKismetSystemLibrary::BoxTraceMulti(GetWorld(), CurrentPos, CurrentPos, Box, ActorRotation, UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, ActorToIgnore, EDrawDebugTrace::Persistent, CurrentHits, true);
-		TargetHits += CurrentHits;
+		if (UKismetSystemLibrary::BoxTraceMulti(GetWorld(), CurrentPos, CurrentPos, Box, ActorRotation, UCollisionProfile::Get()->ConvertToTraceType(ECC_GameTraceChannel1), false, ActorToIgnore, EDrawDebugTrace::Persistent, CurrentHits, true))
+		{
+			bConeHit = true;
+			if (TargetHits.IsEmpty())
+			{
+				for (const FHitResult& hit : CurrentHits)
+				{
+					TargetHits.Add(hit);
+				}
+			}
+			else
+			{
+				for (FHitResult& hit : CurrentHits)
+				{
+					for (int j = 0; j < TargetHits.Num(); ++j)
+					{
+						if (CurrentHits[j].GetActor() == hit.GetActor())
+						{
+							continue;
+						}
+						else if (j == CurrentHits.Num() - 1)
+						{
+							TargetHits.Add(hit);
+						}
+					}
+				}
+			}
+		}
 	}
+	return bConeHit;
 }
 
 void UAttackMelee::DetectActors()
@@ -94,28 +122,27 @@ void UAttackMelee::DetectActors()
 	TArray<FHitResult> ActorsHit;
 	TArray<AActor*> ActorsIgnores;
 	ActorsIgnores.Push(GetOwner());
-	
+
 	FVector Start = GetOwner()->GetActorLocation();
 	FVector	End = Start + GetOwner()->GetActorForwardVector() * DetectionOffset;
-	
-	FCollisionShape DetectionConeShape = FCollisionShape::MakeSphere(DetectionRadius);
-	Conetrace(ActorsHit);
-	bool bActorsHit = false;
-	// bool bActorsHit = GetWorld()->SweepMultiByChannel(ActorsHit, End, End, FQuat::Identity, ECC_GameTraceChannel1, DetectionConeShape);
-	DrawDebugSphere(GetWorld(), End, DetectionRadius, 8, FColor::Red, false, 2);
 
-	if(bDelayToResetCoolDown)
+	FCollisionShape DetectionConeShape = FCollisionShape::MakeSphere(DetectionRadius);
+	const bool bActorsHit = Conetrace(ActorsHit);
+	// bool bActorsHit = GetWorld()->SweepMultiByChannel(ActorsHit, End, End, FQuat::Identity, ECC_GameTraceChannel1, DetectionConeShape);
+	//DrawDebugSphere(GetWorld(), End, DetectionRadius, 8, FColor::Red, false, 2);
+
+	if (bDelayToResetCoolDown)
 		ResetCoolDownValues();
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("CoolDown %f"), CoolDownTimer);
-	
-	if(bActorsHit)
+
+	if (bActorsHit)
 		ApplyImpulseForce(ActorsHit);
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("Numbers of actors hit : %d"), ActorsHit.Num());
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("Attack in component"));
-	if(AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
+	if (AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
 	{
 		Character->IsAtk = false;
 	}
@@ -123,27 +150,31 @@ void UAttackMelee::DetectActors()
 
 void UAttackMelee::ApplyImpulseForce(TArray<FHitResult>& ActorsHit)
 {
-	for (auto& Actor: ActorsHit)
+	for (auto& Actor : ActorsHit)
 	{
-		if(Actor.GetActor() == GetOwner()) continue;
-		
+		if (Actor.GetActor() == GetOwner()) continue;
+
 		UE_LOG(LogTemp, Warning, TEXT("Actor to impulse : %s"), *Actor.GetActor()->GetName());
-		if(UCharacterMovementComponent* Comp = Cast<UCharacterMovementComponent>(Cast<ACharacter>(Actor.GetActor())->GetCharacterMovement()))
+		if (ACharacter* Character = Cast<ACharacter>(Actor.GetActor()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Impulse %s"), *Actor.GetActor()->GetName());
-			Comp->AddImpulse(GetOwner()->GetActorForwardVector() * ImpulseForceTemp, true);
+			if (UCharacterMovementComponent* Comp = Character->GetCharacterMovement())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Impulse %s"), *Actor.GetActor()->GetName());
+				Comp->AddImpulse(GetOwner()->GetActorForwardVector() * ImpulseForceTemp, true);
+			}
 		}
 	}
 }
 
 void UAttackMelee::SetCoolDown(float DeltaTime)
 {
-	if(bActiveCoolDown)
+	if (bActiveCoolDown)
 	{
-		if(CoolDown < CoolDownTimer)
+		if (CoolDown < CoolDownTimer)
 		{
 			CoolDown += DeltaTime;
-		}else
+		}
+		else
 		{
 			CoolDown = 0;
 			bActiveCoolDown = false;
@@ -153,12 +184,13 @@ void UAttackMelee::SetCoolDown(float DeltaTime)
 
 void UAttackMelee::SetDelayToResetCoolDown(float DeltaTime)
 {
-	if(bActiveDelayToResetCoolDown)
+	if (bActiveDelayToResetCoolDown)
 	{
-		if(DelayToResetCoolDown < DelayToResetCoolDownTimer)
+		if (DelayToResetCoolDown < DelayToResetCoolDownTimer)
 		{
 			DelayToResetCoolDown += DeltaTime;
-		}else
+		}
+		else
 		{
 			DelayToResetCoolDown = 0;
 			CoolDownTimer = MinCoolDown;
@@ -170,17 +202,18 @@ void UAttackMelee::SetDelayToResetCoolDown(float DeltaTime)
 
 void UAttackMelee::ResetCoolDownValues()
 {
-	if(bActiveDelayToResetCoolDown)
+	if (bActiveDelayToResetCoolDown)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("DelayCoolDown %f"), DelayToResetCoolDown);
 		CoolDownTimer += CoolDownIncrease;
-		if(CoolDownTimer > DelayToResetCoolDownTimer-1)
+		if (CoolDownTimer > DelayToResetCoolDownTimer - 1)
 		{
-			CoolDownTimer = DelayToResetCoolDownTimer-1;
+			CoolDownTimer = DelayToResetCoolDownTimer - 1;
 		}
 		DelayToResetCoolDown = 0;
 		ReduceImpusleForce();
-	}else
+	}
+	else
 	{
 		bActiveDelayToResetCoolDown = true;
 	}
@@ -188,5 +221,5 @@ void UAttackMelee::ResetCoolDownValues()
 
 void UAttackMelee::ReduceImpusleForce()
 {
-	ImpulseForceTemp<=0?0:ImpulseForceTemp -= ImpulseForceReduce;
+	ImpulseForceTemp <= 0 ? 0 : ImpulseForceTemp -= ImpulseForceReduce;
 }
