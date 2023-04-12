@@ -376,9 +376,6 @@ private:
 
 #pragma endregion 
 	
-protected:
-
-	void Move(const FInputActionValue& Value);
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Test")
