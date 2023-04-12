@@ -497,8 +497,18 @@ void AGreenOneCharacter::DoubleJump()
 		
 		GetCharacterMovement()->GravityScale = 0.f;
 		UE_LOG(LogTemp, Warning, TEXT("Horizontal"));
-		
+
 		TargetHorizontalJump = GetActorLocation() + Direction * DistanceHorizontalJump;
+		
+		FHitResult ObstacleHit;
+		bool bObstacleHit = GetWorld()->LineTraceSingleByChannel(ObstacleHit,GetActorLocation(),TargetHorizontalJump,ECC_Visibility);
+		if(bObstacleHit)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Impact object %s"), *ObstacleHit.GetActor()->GetName());
+			TargetHorizontalJump = ObstacleHit.ImpactPoint;
+		}
+		
+		
 		LaunchCharacter(Target,true, true);
 		DrawDebugCapsule(GetWorld(), TargetHorizontalJump, 8,25, FQuat::Identity, FColor::Purple, false, 3);
 		
@@ -510,6 +520,7 @@ void AGreenOneCharacter::HorizontalJump()
 {
 	if(!bHorizontalJump) return;
 
+	
 	float TargetDistance = FVector::Distance(GetActorLocation(), TargetHorizontalJump);
 	UE_LOG(LogTemp, Warning, TEXT("Horizontal %f"),TargetDistance);
 	if(TargetDistance <= 50.f)
