@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DEFINE.h"
 #include "Components/ActorComponent.h"
 #include "AttackMelee.generated.h"
 

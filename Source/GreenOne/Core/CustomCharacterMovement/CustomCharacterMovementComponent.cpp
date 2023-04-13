@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CustomCharacterMovementComponent.h"
@@ -51,7 +51,15 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	DashTick(DeltaTime);
-	CooldownDash(DeltaTime);
+	CooldownTick(DeltaTime);
+
+
+#if WITH_EDITOR && (DEBUG_MESSAGE_DASH == AVAILABLE)
+
+	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("Dash CoolDown %f"), CurrentDashCooldown), true, FVector2d(1.5, 1.5));
+	GEngine->AddOnScreenDebugMessage(2, 1.0f, FColor::Red, FString::Printf(TEXT("Dash CoolDownValue %f"), DashCooldown), true, FVector2d(1.5, 1.5));
+
+#endif
 }
 
 bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const
@@ -61,24 +69,44 @@ bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode
 
 void UCustomCharacterMovementComponent::Dash()
 {
+	// Securite
 	if (GreenOneCharacter == nullptr) { return; }
-
 	if (GreenOneCharacter->GetCharacterMovement()->IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }
+	// 
+
 	GreenOneCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Custom);
-	StartDashLocation = GetActorLocation();
-	TargetDashLocation = StartDashLocation + GreenOneCharacter->GetActorForwardVector() * DashDistance;
+	StartDashLocation = GreenOneCharacter->GetActorLocation();
+
+	// TODO : Selon l'input du joueur, on change la direction du dash
+	FVector DirectionVector = GreenOneCharacter->GetActorForwardVector();
+
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+
+	TargetDashLocation = StartDashLocation + DirectionVector * DashDistance;
+
+	// On verifie si le dash est en collision avec un objet
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartDashLocation, TargetDashLocation, ECC_Visibility, CollisionParams);
+
+	// Si le dash est en collision avec un objet, on reduit la distance du dash
+	if (bIsHit)
+	{
+		TargetDashLocation = StartDashLocation + (DirectionVector * (HitResult.Distance - 50.f));
+	}
+
 	CurrentDashAlpha = 0.f;
 	bIsDashing = true;
 }
 
 void UCustomCharacterMovementComponent::DashTick(float deltatime)
 {
+	// Securite
 	if (!bIsDashing || bDashOnCooldown) { return; }
-
 	if (GreenOneCharacter == nullptr) { return; }
+	// 
 
-	CurrentDashAlpha += (1 / DashTime) * deltatime;
+	CurrentDashAlpha += (1 * DashTime) * deltatime;
 	if (CurrentDashAlpha >= 1)
 	{
 		CurrentDashAlpha = 1;
@@ -87,17 +115,21 @@ void UCustomCharacterMovementComponent::DashTick(float deltatime)
 		bDashOnCooldown = true;
 		GreenOneCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	}
+
 	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
 	GreenOneCharacter->SetActorLocation(TargetLocation);
+
 	return;
 }
 
-void UCustomCharacterMovementComponent::CooldownDash(float deltatime)
+void UCustomCharacterMovementComponent::CooldownTick(float deltatime)
 {
 	if (!bDashOnCooldown) { return; }
 	CurrentDashCooldown -= deltatime;
+
 	if (CurrentDashCooldown <= 0.f)
 	{
+		CurrentDashCooldown = 0.f;
 		bDashOnCooldown = false;
 	}
 }

@@ -86,26 +86,8 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	{
 		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
 	}
-
-	/*
-	// Add DashComponent
-	DashComponent = CreateDefaultSubobject<UDashComponent>(TEXT("DashComponent"));
-	if (!DashComponent)
-	{
-		UE_LOG(LogTemp, Error, TEXT("No DashComponent Found"));
-	}
-	DashComponent->SetCharacter(this);
-	*/
-
-	/*
-	// Add CustomCharacterMovementComponent
-	CustomCharacterMovementComponent = CreateDefaultSubobject<UCustomCharacterMovementComponent>(TEXT("CustomCharacterMovementComponent"));
-	if (!CustomCharacterMovementComponent)
-	{
-		UE_LOG(LogTemp, Error, TEXT("No CustomCharacterMovementComponent Found"));
-	}
-	*/
 	
+	// Add TargetMuzzle
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
 	TargetMuzzle->SetupAttachment(GetMesh());
 	

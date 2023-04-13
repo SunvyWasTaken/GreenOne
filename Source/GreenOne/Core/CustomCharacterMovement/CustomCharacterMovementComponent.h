@@ -1,8 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DEFINE.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CustomCharacterMovementComponent.generated.h"
 
@@ -15,7 +16,6 @@ enum ECustomMovementMode
 	CMOVE_MAX	UMETA(Hidden),
 };
 
-
 /**
  * 
  */
@@ -23,53 +23,6 @@ UCLASS()
 class GREENONE_API UCustomCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
-		
-public:
-	
-	// Dash dans la direction de l'input mouvement.
-	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
-		void Dash();
-
-	// Distance du dash
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
-		float DashDistance;
-
-	// Le temps que va prendre le dash pour attendre ça destination.
-	// Le temps est en secondes.
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
-		float DashTime;
-
-	// Temps que va prendre le dash à revenir après utilisation.
-	// Le temps est en secondes.
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
-		float DashCooldown;
-
-	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
-		bool bIsDashing;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
-		bool bDashOnCooldown;
-
-	/**
-	 * Return the remaining time of the dash cooldown.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
-		float GetRemainingDashTime() { return CurrentDashCooldown; };
-
-private:
-
-	// Utiliser pour placer le player pendant le Dash
-	void DashTick(float deltatime);
-
-	void CooldownDash(float deltatime);
-
-	FVector TargetDashLocation;
-
-	FVector StartDashLocation;
-
-	float CurrentDashAlpha;
-
-	float CurrentDashCooldown;
 
 	UPROPERTY(Transient)
 	class AGreenOneCharacter* GreenOneCharacter;
@@ -92,5 +45,58 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
+
+
+#pragma region Dash
+public:
+
+	// Dash dans la direction de l'input mouvement.
+	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
+		void Dash();
+
+	// Distance du dash
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
+		float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
+
+	// Le temps que va prendre le dash pour attendre ca destination.
+	// Le temps est en secondes.
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
+		float DashTime = 1.0f; // S
+
+	// Temps que va prendre le dash a revenir apres utilisation.
+	// Le temps est en secondes.
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
+		float DashCooldown = 3.0f; // S
+
+	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
+		bool bIsDashing = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
+		bool bDashOnCooldown = false;
+
+	/**
+	 * Return the remaining time of the dash cooldown.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
+		float GetRemainingDashTime() { return CurrentDashCooldown; };
+
+private:
+
+	// Utiliser pour placer le player pendant le Dash
+	void DashTick(float deltatime);
+
+	// Cooldown du Dash
+	void CooldownTick(float deltatime);
+
+	FVector TargetDashLocation;
+
+	FVector StartDashLocation;
+
+	float CurrentDashAlpha;
+
+	float CurrentDashCooldown;
+
+#pragma endregion Dash
+
 
 };
