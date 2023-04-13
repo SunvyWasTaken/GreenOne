@@ -200,10 +200,10 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	bool bIsJumping = Value.Get<bool>();
 	if (bIsJumping)
 	{
-		/*if(JumpMaxCount == 2)
+		if(JumpMaxCount == 2)
 			DoubleJump();
 		else
-			Jump();*/
+			Jump();
 	}
 	else
 	{
@@ -598,9 +598,6 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(RightDirection, MovementVectorX);
 	}
 }
-
-
-
 
 void AGreenOneCharacter::CanRegenerate()
 {

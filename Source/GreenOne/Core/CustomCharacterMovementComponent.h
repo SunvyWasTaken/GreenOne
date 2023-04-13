@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "CustomCharacterMovementComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -39,7 +38,7 @@ class GREENONE_API UCustomCharacterMovementComponent : public UCharacterMovement
 	};
 
 	UPROPERTY(Transient)
-	AGreenOneCharacter* GreenOneCharacter;
+	class AGreenOneCharacter* GreenOneCharacter;
 
 protected:
 	virtual void InitializeComponent() override;
@@ -54,4 +53,27 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
 	
+#pragma region VerticalJump
+
+private:
+
+	float CustomGravityScale; 
+	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical")
+	float VerticalJumpVelocity = 900.f;
+
+	
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void JumpAction(const FInputActionValue& Value);
+	bool VerticalJump();
+	virtual bool DoJump(bool bReplayingMoves) override;
+	
+	int32 JumpCount = 0;
+
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling")
+	float FallingGravity = 1.4f;
+
+#pragma endregion 
 };
