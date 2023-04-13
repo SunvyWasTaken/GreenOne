@@ -117,15 +117,21 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 {
 	if(bHorizontalJump) return false;
 	
-	FVector Direction = GetOwnerCharacter()->GetFollowCamera()->GetForwardVector().GetSafeNormal2D();
+	FVector Direction = GetOwnerCharacter()->GetActorForwardVector().GetSafeNormal2D();
 	FVector Target = Direction;
+
+	UE_LOG(LogTemp, Warning, TEXT("HorizontalJumpDirection = X : %f, Y : %f"),HorizontalJumpDirection.X,HorizontalJumpDirection.Y);
+	
 	if(HorizontalJumpDirection != FVector2D::ZeroVector)
 	{
-		FVector Forward = GetOwnerCharacter()->GetFollowCamera()->GetForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
-		FVector Right = GetOwnerCharacter()->GetFollowCamera()->GetRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
-		Direction = Forward + Right;
+		FVector Forward = GetOwnerCharacter()->GetActorForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
+		FVector Right = GetOwnerCharacter()->GetActorRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
+		Direction = Forward.GetSafeNormal() + Right.GetSafeNormal();
 		Direction.Normalize();
-	
+
+		UE_LOG(LogTemp, Warning, TEXT("Forward = X : %f, Y : %f, Z : %f"),GetOwnerCharacter()->GetOwnerFollowCamera()->GetForwardVector().GetSafeNormal2D().X,GetOwnerCharacter()->GetOwnerFollowCamera()->GetForwardVector().GetSafeNormal2D().Y, Forward.Z);
+		UE_LOG(LogTemp, Warning, TEXT("Right = X : %f, Y : %f, Z : %f"),Right.X,Right.Y, Right.Z);
+		UE_LOG(LogTemp, Warning, TEXT("Direction = X : %f, Y : %f, Z : %f"),Direction.X,Direction.Y, Direction.Z);
 		Target = Direction;
 	}
 	
@@ -142,17 +148,16 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		DistanceHorizontalJump = MaxDistanceHorizontalJump;
 		GravityScale = 0.f;
 
-		TargetHorizontalJump = GetActorLocation() + Direction * MaxDistanceHorizontalJump;
+		TargetHorizontalJump = GetOwnerCharacter()->GetActorLocation() + Direction * MaxDistanceHorizontalJump;
 		
 		FHitResult ObstacleHit;
 		float CapsuleRadius = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleRadius();
 		float CapsuleHalfHeight = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-		FCollisionShape DetectionConeShape = FCollisionShape::MakeCapsule(CapsuleRadius,CapsuleHalfHeight);
 
 		TArray<AActor*> ActorsIgnores;
 		ActorsIgnores.Push(GetOwnerCharacter());
 		
-		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),GetActorLocation(),
+		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),GetOwnerCharacter()->GetActorLocation(),
 			TargetHorizontalJump, CapsuleRadius,CapsuleHalfHeight,UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2),false,
 			ActorsIgnores,EDrawDebugTrace::ForDuration,ObstacleHit,true,FLinearColor::Red,FLinearColor::Blue,2);
 
@@ -162,7 +167,7 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 			DistanceHorizontalJump = ObstacleHit.Distance;
 		}
 		
-		CurrentLocation = GetActorLocation();
+		CurrentLocation = GetOwnerCharacter()->GetActorLocation();
 		GetOwnerCharacter()->LaunchCharacter(Target,true, true);
 		DrawDebugCapsule(GetWorld(), TargetHorizontalJump, CapsuleHalfHeight ,CapsuleRadius, FQuat::Identity, FColor::Purple, false, 3);
 		
@@ -178,19 +183,25 @@ bool UCustomCharacterMovementComponent::DoHorizontalJump() const
 	return bHorizontalJump;
 }
 
+
 void UCustomCharacterMovementComponent::ExecHorizontalJump()
 {
 	if(!bHorizontalJump) return;
 
-	TargetDistance += FVector::Distance(CurrentLocation, GetActorLocation());
+	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
 	UE_LOG(LogTemp, Warning, TEXT("Distance %f"), TargetDistance);
 	
 	if(TargetDistance > DistanceHorizontalJump)
 	{
 		bHorizontalJump = false;
 		GravityScale = CustomGravityScale;
-		HorizontalJumpDirection = FVector2D::ZeroVector;
+		// = FVector2D::ZeroVector;
 		TargetDistance = 0;
 	}
 	CurrentLocation = GetActorLocation();
+}
+
+void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& NewDirection)
+{
+	HorizontalJumpDirection = NewDirection;
 }

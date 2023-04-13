@@ -60,6 +60,7 @@ public:
 	
 #pragma region Jump/Falling
 
+	//Attributes//
 private:
 	float CustomGravityScale; 
 	
@@ -83,6 +84,14 @@ private:
 
 	FVector CurrentLocation;
 
+public:
+	int32 JumpCount = 0;
+
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling")
+	float FallingGravity = 1.4f;
+
+	//Functions//
+private:
 	bool VerticalJump();
 	bool HorizontalJump();
 	void ExecHorizontalJump();
@@ -92,11 +101,9 @@ public:
 	virtual bool DoJump(bool bReplayingMoves) override;
 	UFUNCTION(BlueprintCallable)
 	bool DoHorizontalJump() const;
-	
-	int32 JumpCount = 0;
 
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling")
-	float FallingGravity = 1.4f;
+	UFUNCTION(BlueprintCallable)
+	void SetHorizontalJumpDirection(FVector2D& NewDirection);
 
 #pragma endregion 
 };
