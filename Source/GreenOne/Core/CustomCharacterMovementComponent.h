@@ -53,4 +53,5 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
+	
 };

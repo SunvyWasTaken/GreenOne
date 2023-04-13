@@ -151,7 +151,7 @@ protected:
 
 private:
 
-	UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
+	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
 
 	bool bIsDead = false;
 

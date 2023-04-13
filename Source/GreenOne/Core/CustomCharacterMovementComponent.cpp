@@ -3,6 +3,11 @@
 
 #include "CustomCharacterMovementComponent.h"
 
+UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
 void UCustomCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
@@ -10,9 +15,20 @@ void UCustomCharacterMovementComponent::InitializeComponent()
 	GreenOneCharacter = Cast<AGreenOneCharacter>(GetOwner());
 }
 
-UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 {
+	Super::UpdateFromCompressedFlags(Flags);
+}
+
+void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation,
+	const FVector& OldVelocity)
+{
+	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
+}
+
+void UCustomCharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations)
+{
+	Super::PhysCustom(deltaTime, Iterations);
 }
 
 bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const
