@@ -3,7 +3,10 @@
 
 #include "CustomCharacterMovementComponent.h"
 
+#include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 DECLARE_CYCLE_STAT(TEXT("Char PhysFalling"), STAT_CharPhysFalling, STATGROUP_Character);
 
@@ -44,6 +47,14 @@ void UCustomCharacterMovementComponent::InitializeComponent()
 	GreenOneCharacter = Cast<AGreenOneCharacter>(GetOwner());
 }
 
+void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	ExecHorizontalJump();
+}
+
 void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 {
 	Super::UpdateFromCompressedFlags(Flags);
@@ -65,9 +76,25 @@ bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode
 	return MovementMode == MOVE_Custom && CustomMovementMode == InCustomMovementMode;
 }
 
-void UCustomCharacterMovementComponent::JumpAction(const FInputActionValue& Value)
+bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 {
-	bool bIsJumping = Value.Get<bool>();
+	UE_LOG(LogTemp, Warning, TEXT("DoJump"));
+	if(!IsFalling())
+		JumpCount = 0;
+	
+	JumpCount++;
+	
+	if (CharacterOwner && CharacterOwner->CanJump() )
+	{
+		if(JumpCount == 1)
+			return VerticalJump();
+		if(JumpCount == 2)
+			return HorizontalJump();
+		
+	}
+	
+	return false;
+	//return Super::DoJump(bReplayingMoves);
 }
 
 bool UCustomCharacterMovementComponent::VerticalJump()
@@ -86,21 +113,84 @@ bool UCustomCharacterMovementComponent::VerticalJump()
 	return false;
 }
 
-bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
+bool UCustomCharacterMovementComponent::HorizontalJump()
 {
-	UE_LOG(LogTemp, Warning, TEXT("DoJump"));
-	if(!IsFalling())
-		JumpCount = 0;
+	if(bHorizontalJump) return false;
 	
-	JumpCount++;
-	
-	if (CharacterOwner && CharacterOwner->CanJump() )
+	FVector Direction = GetOwnerCharacter()->GetFollowCamera()->GetForwardVector().GetSafeNormal2D();
+	FVector Target = Direction;
+	if(HorizontalJumpDirection != FVector2D::ZeroVector)
 	{
-		if(JumpCount == 1)
-			return VerticalJump();
+		FVector Forward = GetOwnerCharacter()->GetFollowCamera()->GetForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
+		FVector Right = GetOwnerCharacter()->GetFollowCamera()->GetRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
+		Direction = Forward + Right;
+		Direction.Normalize();
+	
+		Target = Direction;
+	}
+	
+	if(bManualHorizontalVelocity)
+	{
+		Target *= HorizontalJumpVelocity;
+	}else
+	{
+		Target *= JumpZVelocity;
+	}
+	
+	if(JumpCount == 2 && IsFalling())
+	{
+		DistanceHorizontalJump = MaxDistanceHorizontalJump;
+		GravityScale = 0.f;
+
+		TargetHorizontalJump = GetActorLocation() + Direction * MaxDistanceHorizontalJump;
 		
+		FHitResult ObstacleHit;
+		float CapsuleRadius = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleRadius();
+		float CapsuleHalfHeight = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+		FCollisionShape DetectionConeShape = FCollisionShape::MakeCapsule(CapsuleRadius,CapsuleHalfHeight);
+
+		TArray<AActor*> ActorsIgnores;
+		ActorsIgnores.Push(GetOwnerCharacter());
+		
+		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),GetActorLocation(),
+			TargetHorizontalJump, CapsuleRadius,CapsuleHalfHeight,UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2),false,
+			ActorsIgnores,EDrawDebugTrace::ForDuration,ObstacleHit,true,FLinearColor::Red,FLinearColor::Blue,2);
+
+		if(bObstacleHit)
+		{
+			TargetHorizontalJump = ObstacleHit.ImpactPoint;
+			DistanceHorizontalJump = ObstacleHit.Distance;
+		}
+		
+		CurrentLocation = GetActorLocation();
+		GetOwnerCharacter()->LaunchCharacter(Target,true, true);
+		DrawDebugCapsule(GetWorld(), TargetHorizontalJump, CapsuleHalfHeight ,CapsuleRadius, FQuat::Identity, FColor::Purple, false, 3);
+		
+		bHorizontalJump = true;
+		return true;
 	}
 	
 	return false;
-	//return Super::DoJump(bReplayingMoves);
+}
+
+bool UCustomCharacterMovementComponent::DoHorizontalJump() const
+{
+	return bHorizontalJump;
+}
+
+void UCustomCharacterMovementComponent::ExecHorizontalJump()
+{
+	if(!bHorizontalJump) return;
+
+	TargetDistance += FVector::Distance(CurrentLocation, GetActorLocation());
+	UE_LOG(LogTemp, Warning, TEXT("Distance %f"), TargetDistance);
+	
+	if(TargetDistance > DistanceHorizontalJump)
+	{
+		bHorizontalJump = false;
+		GravityScale = CustomGravityScale;
+		HorizontalJumpDirection = FVector2D::ZeroVector;
+		TargetDistance = 0;
+	}
+	CurrentLocation = GetActorLocation();
 }

@@ -40,8 +40,13 @@ class GREENONE_API UCustomCharacterMovementComponent : public UCharacterMovement
 	UPROPERTY(Transient)
 	class AGreenOneCharacter* GreenOneCharacter;
 
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE AGreenOneCharacter* GetOwnerCharacter() const { return GreenOneCharacter; }
+
 protected:
 	virtual void InitializeComponent() override;
+	
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
@@ -53,22 +58,40 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
 	
-#pragma region VerticalJump
+#pragma region Jump/Falling
 
 private:
-
 	float CustomGravityScale; 
 	
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical")
 	float VerticalJumpVelocity = 900.f;
 
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
+	bool bManualHorizontalVelocity = false;
+	/** Default value of horizontal jump is the same that jump velocity */
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
+	float HorizontalJumpVelocity = 450.f;
+	bool bHorizontalJump;
 	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
+	float MaxDistanceHorizontalJump = 450.f;
+	float DistanceHorizontalJump;
+	FVector TargetHorizontalJump = FVector::ZeroVector;
+
+	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
+	float TargetDistance = 0;
+
+	FVector CurrentLocation;
+
+	bool VerticalJump();
+	bool HorizontalJump();
+	void ExecHorizontalJump();
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void JumpAction(const FInputActionValue& Value);
-	bool VerticalJump();
 	virtual bool DoJump(bool bReplayingMoves) override;
+	UFUNCTION(BlueprintCallable)
+	bool DoHorizontalJump() const;
 	
 	int32 JumpCount = 0;
 

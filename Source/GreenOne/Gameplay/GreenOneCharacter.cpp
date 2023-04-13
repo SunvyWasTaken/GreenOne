@@ -200,9 +200,9 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	bool bIsJumping = Value.Get<bool>();
 	if (bIsJumping)
 	{
-		if(JumpMaxCount == 2)
-			DoubleJump();
-		else
+		//if(JumpMaxCount == 2)
+		//	DoubleJump();
+	//	else
 			Jump();
 	}
 	else
@@ -560,7 +560,7 @@ void AGreenOneCharacter::HorizontalJump()
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
-	if(bHorizontalJump) return;
+	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	HorizontalJumpDirection = MovementVector;
