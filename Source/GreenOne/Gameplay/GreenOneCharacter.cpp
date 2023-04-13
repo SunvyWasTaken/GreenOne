@@ -471,11 +471,7 @@ void AGreenOneCharacter::TurnCamera()
 
 void AGreenOneCharacter::DoubleJump()
 {
-
-	UE_LOG(LogTemp, Warning, TEXT("JumpCurrent %d"),JumpCurrentCount);
-	
 	if(bHorizontalJump) return;
-
 	
 	bPressedJump = true;
 	
@@ -491,7 +487,6 @@ void AGreenOneCharacter::DoubleJump()
 		Target = Direction;
 	}
 	
-	
 	if(bManualHorizontalVelocity)
 	{
 		Target *= HorizontalJumpVelocity;
@@ -500,14 +495,11 @@ void AGreenOneCharacter::DoubleJump()
 		Target *= GetCharacterMovement()->JumpZVelocity;
 	}
 	
-	
 	if(JumpCurrentCount == 1 && GetCharacterMovement()->IsFalling())
 	{
 		DistanceHorizontalJump = MaxDistanceHorizontalJump;
 		GetCharacterMovement()->GravityScale = 0.f;
-		UE_LOG(LogTemp, Warning, TEXT("Horizontal"));
 
-		HorizontalOriginRotation = GetActorRotation();
 		TargetHorizontalJump = GetActorLocation() + Direction * MaxDistanceHorizontalJump;
 		
 		FHitResult ObstacleHit;
@@ -517,15 +509,14 @@ void AGreenOneCharacter::DoubleJump()
 
 		TArray<AActor*> ActorsIgnores;
 		ActorsIgnores.Push(this);
+		
 		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),GetActorLocation(),
 			TargetHorizontalJump, CapsuleRadius,CapsuleHalfHeight,UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2),false,
 			ActorsIgnores,EDrawDebugTrace::ForDuration,ObstacleHit,true,FLinearColor::Red,FLinearColor::Blue,2);
 
 		if(bObstacleHit)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Impact object %s"), *ObstacleHit.GetActor()->GetName());
 			TargetHorizontalJump = ObstacleHit.ImpactPoint;
-			UE_LOG(LogTemp, Warning, TEXT("Distance Obstacle %f"), ObstacleHit.Distance);
 			DistanceHorizontalJump = ObstacleHit.Distance;
 		}
 		
@@ -541,15 +532,11 @@ void AGreenOneCharacter::HorizontalJump()
 {
 	if(!bHorizontalJump) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("CurrentLocation.X %f, CurrentLocation.Y %f"), CurrentLocation.X, CurrentLocation.Y);
 	TargetDistance += FVector::Distance(CurrentLocation, GetActorLocation());
 	UE_LOG(LogTemp, Warning, TEXT("Distance %f"), TargetDistance);
 	
-	UE_LOG(LogTemp, Warning, TEXT("CurrentLocation.X %f, CurrentLocation.Y %f"), CurrentLocation.X, CurrentLocation.Y);
-	
 	if(TargetDistance > DistanceHorizontalJump)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("End"));
 		bHorizontalJump = false;
 		GetCharacterMovement()->GravityScale = 1.75f;
 		HorizontalJumpDirection = FVector2D::ZeroVector;

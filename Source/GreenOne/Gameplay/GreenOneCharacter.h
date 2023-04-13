@@ -359,24 +359,24 @@ private:
 
 #pragma region HorizontalJump
 	
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump", DisplayName = "Editer la rapidité du jump horizontal")
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
 	bool bManualHorizontalVelocity = false;
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
+	/** Default value of horizontal jump is the same that jump velocity */
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
 	float HorizontalJumpVelocity = 450.f;
 	bool bHorizontalJump;
-	int32 JumpCount = 0;
-
-	FVector TargetHorizontalJump = FVector::ZeroVector;
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
+	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
 	float MaxDistanceHorizontalJump = 450.f;
 	float DistanceHorizontalJump;
+	FVector TargetHorizontalJump = FVector::ZeroVector;
 
 	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
-	FRotator HorizontalOriginRotation;
 	float TargetDistance = 0;
 
 	FVector CurrentLocation;
-	
+
+	UFUNCTION(BlueprintCallable, Category = "Custom|Jump|Horizontal", DisplayName = "Double Jump")
 	void DoubleJump();
 	void HorizontalJump();
 
