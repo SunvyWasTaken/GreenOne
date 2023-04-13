@@ -20,7 +20,7 @@
 #include "NiagaraComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
-#include "GreenOne/Gameplay/Common/CustomCharacterMovementComponent.h"
+#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 
@@ -42,7 +42,8 @@ bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
 	return true;
 }
 
-AGreenOneCharacter::AGreenOneCharacter()
+AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -96,12 +97,14 @@ AGreenOneCharacter::AGreenOneCharacter()
 	DashComponent->SetCharacter(this);
 	*/
 
+	/*
 	// Add CustomCharacterMovementComponent
 	CustomCharacterMovementComponent = CreateDefaultSubobject<UCustomCharacterMovementComponent>(TEXT("CustomCharacterMovementComponent"));
 	if (!CustomCharacterMovementComponent)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No CustomCharacterMovementComponent Found"));
 	}
+	*/
 	
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
 	TargetMuzzle->SetupAttachment(GetMesh());
@@ -156,6 +159,12 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 
+}
+
+void AGreenOneCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
 }
 
 void AGreenOneCharacter::PlayerDead()

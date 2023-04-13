@@ -67,10 +67,12 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Mouvement")
 	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
+
+	virtual void PostInitializeComponents() override;
 	
 public:
 
-	AGreenOneCharacter();
+	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
@@ -169,6 +171,10 @@ private:
 
 public:
 
+	/** Returns CustomCharacterMovementComponent subobject **/
+	UFUNCTION(BlueprintCallable, Category = "Custom|Movement")
+	FORCEINLINE class UCustomCharacterMovementComponent* GetCustomCharacterMovement() const { return CustomCharacterMovementComponent; }
+	
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/

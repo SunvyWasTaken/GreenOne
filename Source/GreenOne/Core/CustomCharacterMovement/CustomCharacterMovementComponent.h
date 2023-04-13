@@ -6,6 +6,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CustomCharacterMovementComponent.generated.h"
 
+UENUM(BlueprintType)
+enum ECustomMovementMode
+{
+	CMOVE_NONE	UMETA(Hidden),
+	//TODO: Add Custom movement mode
+	CMOVE_DASH  UMETA(DisplayName = "Dash"),
+	CMOVE_MAX	UMETA(Hidden),
+};
+
+
 /**
  * 
  */
@@ -15,8 +25,6 @@ class GREENONE_API UCustomCharacterMovementComponent : public UCharacterMovement
 	GENERATED_BODY()
 		
 public:
-
-	UCustomCharacterMovementComponent();
 	
 	// Dash dans la direction de l'input mouvement.
 	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
@@ -63,12 +71,26 @@ private:
 
 	float CurrentDashCooldown;
 
-	class AGreenOneCharacter* Character;
+	UPROPERTY(Transient)
+	class AGreenOneCharacter* GreenOneCharacter;
+
+protected:
+	virtual void InitializeComponent() override;
+
+	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
+	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
+	virtual void PhysCustom(float deltaTime, int32 Iterations) override;
 
 protected:
 
 	virtual void BeginPlay() override;
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+public:
+	UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
 
 };
