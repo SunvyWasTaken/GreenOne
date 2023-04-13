@@ -45,9 +45,6 @@ EBTNodeResult::Type UBTT_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 	if (UKismetMathLibrary::RandomBool())
 	{
 		DodgeDirection *= -1.f;
-		FVector ori;
-		FVector Extend;
-		ControllerRef->GetPawn()->GetActorBounds(true, )
 	}
 	return EBTNodeResult::InProgress;
 }
