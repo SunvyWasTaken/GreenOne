@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Property")
 	float Health = 100.f;
 
+	/**
+	 * Damage general sur la quel le ratio sera calculer.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = 0), Category = "Custom|Property")
 	float Damage = 12.f;
 
@@ -38,6 +41,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Property", DisplayName = "Number of Hit");
 	float NumberOfHit = 0.f;
+
+	/**
+	 * Percentage de reduction damage when it's a ally that hit.
+	 */
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage reduction from ally", ClampMin = 0, ClampMax = 1, UIMin = 0, UIMax = 1), Category = "Custom|Property")
+	float PercentDamageReduct = 0.5;
+
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de vie de l'entity
 	 */
