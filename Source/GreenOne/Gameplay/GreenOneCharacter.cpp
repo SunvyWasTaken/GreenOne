@@ -101,6 +101,8 @@ AGreenOneCharacter::AGreenOneCharacter()
 	DashCooldown = 3.f;
 	bDashOnCooldown = false;
 	bIsDashing = false;
+
+	JumpMaxCount = 2;
 	
 }
 
@@ -189,8 +191,10 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	bool bIsJumping = Value.Get<bool>();
 	if (bIsJumping)
 	{
-		//	Jump();
-		DoubleJump();
+		if(JumpMaxCount == 2)
+			DoubleJump();
+		else
+			Jump();
 	}
 	else
 	{
