@@ -19,6 +19,7 @@
 #include "Components/SceneComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "GreenOne/Core/CustomCharacterMovementComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
@@ -42,7 +43,8 @@ bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
 	return true;
 }
 
-AGreenOneCharacter::AGreenOneCharacter()
+AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -56,6 +58,7 @@ AGreenOneCharacter::AGreenOneCharacter()
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
+
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
@@ -104,6 +107,12 @@ AGreenOneCharacter::AGreenOneCharacter()
 
 	JumpMaxCount = 2;
 	
+}
+
+void AGreenOneCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
 }
 
 #if WITH_EDITOR
@@ -191,6 +200,7 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	bool bIsJumping = Value.Get<bool>();
 	if (bIsJumping)
 	{
+		
 		if(JumpMaxCount == 2)
 			DoubleJump();
 		else

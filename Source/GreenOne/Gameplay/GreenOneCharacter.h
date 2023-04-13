@@ -68,10 +68,15 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	
 public:
 
-	AGreenOneCharacter();
+	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);
+
+	UFUNCTION(BlueprintCallable, Category = "Custom|Movement")
+	FORCEINLINE class UCustomCharacterMovementComponent* GetCustomCharacterMovement() const { return CustomCharacterMovementComponent; }
+
+	virtual void PostInitializeComponents() override;
 
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
@@ -145,6 +150,8 @@ protected:
 	virtual void BeginPlay();
 
 private:
+
+	UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
 
 	bool bIsDead = false;
 
