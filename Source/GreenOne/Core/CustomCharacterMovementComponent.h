@@ -78,7 +78,7 @@ private:
 	bool bManualVerticalVelocity;
 	/** Default value of vertical jump is the same that jump velocity */
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Force d'impulsion du jump vertical", meta = (ForceUnits = "cm/s",  EditCondition="bManualVerticalVelocity"))
-	float VerticalJumpVelocity = 700.f;
+	float VerticalJumpVelocity = 600.f;
 
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
 	bool bManualHorizontalVelocity = false;
@@ -103,7 +103,7 @@ public:
 	float JumpVelocity = 700.f;
 	
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Gravité de descente du jump vertical")
-	float FallingGravity = 1.4f;
+	float FallingGravity = .9f;
 
 	//Functions//
 private:

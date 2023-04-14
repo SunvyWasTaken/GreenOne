@@ -52,7 +52,7 @@ bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 {
 	if(IsMovingOnGround() && !IsFalling())
 	{
-		InJumpState = JS_Vertical;
+		InJumpState = JS_None;
 		GetOwnerCharacter()->JumpMaxCount = MaxJump;
 	}
 	
@@ -60,10 +60,10 @@ bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 	{
 		bool bJumped = false;
 		//Check the jumpState
-		if(InJumpState == JS_Vertical)
+		if(InJumpState == JS_None)
 		{
 			bJumped = VerticalJump();
-		}else if(InJumpState == JS_Horizontal)
+		}else if(InJumpState == JS_Vertical)
 		{
 			bJumped = HorizontalJump();
 		}
@@ -81,7 +81,7 @@ bool UCustomCharacterMovementComponent::CheckFall(const FFindFloorResult& OldFlo
 	GetOwnerCharacter()->JumpCurrentCount = 0;
 	GetCharacterOwner()->JumpCurrentCountPreJump = 0;
 	GetOwnerCharacter()->JumpMaxCount = MaxJump+1;
-	InJumpState = JS_Vertical;
+	InJumpState = JS_None;
 	return Super::CheckFall(OldFloor, Hit, Delta, OldLocation, remainingTime, timeTick, Iterations, bMustJump);
 }
 
@@ -99,10 +99,11 @@ bool UCustomCharacterMovementComponent::VerticalJump()
 	
 	if (!bConstrainToPlane || FMath::Abs(PlaneConstraintNormal.Z) != 1.f)
 	{
-		AddImpulse(FVector::UpVector * VelocityTemp, true);
+		//AddImpulse(FVector::UpVector * VelocityTemp, true);
+		GetOwnerCharacter()->LaunchCharacter(FVector::UpVector * VelocityTemp,false, false);
 		GravityScale = FallingGravity;
 		SetMovementMode(MOVE_Falling);
-		InJumpState = JS_Horizontal;
+		InJumpState = JS_Vertical;
 		return true;
 	}
 	return false;
@@ -134,7 +135,7 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		Target *= JumpZVelocity;
 	}
 	
-	if(InJumpState == JS_Horizontal && IsFalling())
+	if(InJumpState == JS_Vertical && IsFalling())
 	{
 		DistanceHorizontalJump = MaxDistanceHorizontalJump;
 		GravityScale = 0.f;
@@ -195,7 +196,7 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 		GravityScale = CustomGravityScale;
 		HorizontalJumpDirection = FVector2D::ZeroVector;
 		TargetDistance = 0;
-		InJumpState = JS_Vertical;
+		InJumpState = JS_None;
 	}
 	CurrentLocation = GetActorLocation();
 }
