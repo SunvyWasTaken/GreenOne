@@ -385,7 +385,7 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 
 void AGreenOneCharacter::Dash()
 {
-	if(GetCustomCharacterMovement()->IsFalling() && GetCustomCharacterMovement()->GetJumpCount() > 0)
+	if(GetCustomCharacterMovement()->IsFalling() && GetCustomCharacterMovement()->GetCurrentJumpState() == JS_Horizontal)
 	{
 		Jump();
 	}

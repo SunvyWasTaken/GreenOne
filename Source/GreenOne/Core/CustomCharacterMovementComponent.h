@@ -14,6 +14,14 @@ enum ECustomMovementMode
 	CMOVE_MAX	UMETA(Hidden),
 };
 
+UENUM()
+enum EJumpState
+{
+	JS_None,
+	JS_Vertical,
+	JS_Horizontal,
+};
+
 /**
  * 
  */
@@ -64,6 +72,8 @@ public:
 private:
 	float CustomGravityScale;
 	int32 MaxJump = 2;
+
+	EJumpState InJumpState = JS_None;
 	
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical")
 	float VerticalJumpVelocity = 900.f;
@@ -104,7 +114,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool DoHorizontalJump() const;
 	UFUNCTION(BlueprintCallable)
-	int32 GetJumpCount() const;
+	EJumpState GetCurrentJumpState() const;
 	UFUNCTION(BlueprintCallable)
 	void SetHorizontalJumpDirection(FVector2D& NewDirection);
 

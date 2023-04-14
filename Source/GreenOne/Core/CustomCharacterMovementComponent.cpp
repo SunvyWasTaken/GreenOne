@@ -52,23 +52,17 @@ bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 	
 	if(IsMovingOnGround() && !IsFalling())
 	{
-		JumpCount = 0;
+		InJumpState = JS_Vertical;
 		GetOwnerCharacter()->JumpMaxCount = MaxJump;
 	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("DoJump %d"),JumpCount);
-	
-	JumpCount++;
-
-	UE_LOG(LogTemp, Warning, TEXT("DoJump %d"),JumpCount);
 	
 	if (CharacterOwner && CharacterOwner->CanJump() )
 	{
 		bool bJumped = false;
-		if(JumpCount == 1)
+		if(InJumpState == JS_Vertical)
 		{
 			bJumped = VerticalJump();
-		}else if(JumpCount == 2)
+		}else if(InJumpState == JS_Horizontal)
 		{
 			bJumped = HorizontalJump();
 		}
@@ -87,7 +81,7 @@ bool UCustomCharacterMovementComponent::CheckFall(const FFindFloorResult& OldFlo
 	GetOwnerCharacter()->JumpCurrentCount = 0;
 	GetCharacterOwner()->JumpCurrentCountPreJump = 0;
 	GetOwnerCharacter()->JumpMaxCount = MaxJump+1;
-	JumpCount = 0;
+	InJumpState = JS_Vertical;
 	return Super::CheckFall(OldFloor, Hit, Delta, OldLocation, remainingTime, timeTick, Iterations, bMustJump);
 }
 
@@ -101,7 +95,7 @@ bool UCustomCharacterMovementComponent::VerticalJump()
 		AddImpulse(FVector::UpVector * VerticalJumpVelocity, true);
 		GravityScale = FallingGravity;
 		SetMovementMode(MOVE_Falling);
-
+		InJumpState = JS_Horizontal;
 		return true;
 	}
 	return false;
@@ -132,7 +126,7 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		Target *= JumpZVelocity;
 	}
 	
-	if(JumpCount == 2 && IsFalling())
+	if(InJumpState == JS_Horizontal && IsFalling())
 	{
 		DistanceHorizontalJump = MaxDistanceHorizontalJump;
 		GravityScale = 0.f;
@@ -172,9 +166,9 @@ bool UCustomCharacterMovementComponent::DoHorizontalJump() const
 	return bHorizontalJump;
 }
 
-int32 UCustomCharacterMovementComponent::GetJumpCount() const
+EJumpState UCustomCharacterMovementComponent::GetCurrentJumpState() const
 {
-	return JumpCount;
+	return InJumpState;
 }
 
 
@@ -191,7 +185,7 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 		GravityScale = CustomGravityScale;
 		// = FVector2D::ZeroVector;
 		TargetDistance = 0;
-		JumpCount = 0;
+		InJumpState = JS_Vertical;
 	}
 	CurrentLocation = GetActorLocation();
 }
