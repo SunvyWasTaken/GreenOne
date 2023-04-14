@@ -5,6 +5,17 @@
 
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 
+FertilizerTankStruct::FertilizerTankStruct()
+{
+	GaugeValue = MaxGaugeValue;
+}
+
+void FertilizerTankStruct::UpdateGauge()
+{
+	GaugeValue -= ReduceGaugeValue;
+	ClampGaugeValue();
+}
+
 void FertilizerTankStruct::ClampGaugeValue()
 {
 	if(GaugeValue >= MaxGaugeValue)
@@ -50,12 +61,29 @@ void UFertilizerTankComponent::BeginPlay()
 void UFertilizerTankComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	
 }
 
 void UFertilizerTankComponent::OnShoot(FertilizerType Type)
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnShoot Update Fertilizer Tank"));
+		
+	if(FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive(Type))
+	{
+		CurrentFertilizerTankActive->UpdateGauge();
+		UE_LOG(LogTemp, Warning, TEXT("Current Fertilizer Tank gauge value : %f"),CurrentFertilizerTankActive->GaugeValue);	
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Fertilizer Tank is not exist !"));
+	}
+}
+
+FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive(FertilizerType Type)
+{
+	if(Type == FertilizerType::None) return nullptr;
+
+	if(!FertilizerTanks.Contains(Type)) return nullptr;
+	
+	return FertilizerTanks.Find(Type);
 }
 
