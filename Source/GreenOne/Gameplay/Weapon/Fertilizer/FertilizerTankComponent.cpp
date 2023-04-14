@@ -3,6 +3,22 @@
 
 #include "FertilizerTankComponent.h"
 
+#include "GreenOne/Gameplay/GreenOneCharacter.h"
+
+void FertilizerTankStruct::ClampGaugeValue()
+{
+	if(GaugeValue >= MaxGaugeValue)
+	{
+		GaugeValue = MaxGaugeValue;
+		return;
+	}
+	
+	if(GaugeValue <= 0)
+	{
+		GaugeValue = 0;
+	}	
+}
+
 // Sets default values for this component's properties
 UFertilizerTankComponent::UFertilizerTankComponent()
 {
@@ -19,7 +35,13 @@ void UFertilizerTankComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	if(AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
+	{
+		Character->OnShootDelegate.AddDynamic(this, &UFertilizerTankComponent::OnShoot);
+	}else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Can't Cast GetOwner, GetOwner is maybe not find !"));
+	}
 	
 }
 
@@ -30,5 +52,10 @@ void UFertilizerTankComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UFertilizerTankComponent::OnShoot(FertilizerType Type)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnShoot Update Fertilizer Tank"));
 }
 

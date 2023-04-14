@@ -10,6 +10,9 @@
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 #include "GreenOneCharacter.generated.h"
 
+enum class FertilizerType : uint8;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, FertilizerType, Type);
+
 class UInputAction;
 UCLASS(config=Game)
 class AGreenOneCharacter : public ACharacter, public IEntityGame
@@ -206,7 +209,9 @@ public:
 #pragma region Shoot
 
 public:
-
+	UPROPERTY(BlueprintAssignable)
+	FOnShootSignature OnShootDelegate;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnHitEnnemy OnHitEnnemy;
 

@@ -11,18 +11,22 @@ USTRUCT(BlueprintType)
 struct FertilizerTankStruct
 {
 	GENERATED_BODY()
-
+	
 	UPROPERTY(EditAnywhere)
 	FertilizerType TankFertilizerType;
 	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100))
 	float MaxGaugeValue = 100;
-	float GaugeValue;
 	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100))
-	float ReduceGaugeValue = 10;
+	float ReduceGaugeValue = 5;
+
+private:
+	float GaugeValue;
+	void ClampGaugeValue();
 	
 };
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GREENONE_API UFertilizerTankComponent : public UActorComponent
@@ -44,4 +48,9 @@ public:
 private:
 	UPROPERTY(EditAnywhere)
 	TMap<FertilizerType,FertilizerTankStruct> FertilizerTanks;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void OnShoot(FertilizerType Type);
+
 };

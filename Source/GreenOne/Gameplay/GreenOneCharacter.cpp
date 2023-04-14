@@ -332,6 +332,7 @@ void AGreenOneCharacter::StopShoot()
 
 void AGreenOneCharacter::ShootRafale()
 {
+	OnShootDelegate.Broadcast(EFertilizerType);
 	FHitResult OutHit;
 	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
 
