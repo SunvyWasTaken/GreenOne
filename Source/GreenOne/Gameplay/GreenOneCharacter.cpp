@@ -196,19 +196,12 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 {
-	bool bIsJumping = Value.Get<bool>();
-	if (bIsJumping)
+	if (Value.Get<bool>())
 	{
-		//if(JumpMaxCount == 2)
-		//	DoubleJump();
-	//	else
-			Jump();
-		UE_LOG(LogTemp, Warning, TEXT("Forward2 = X : %f, Y : %f, Z : %f"), FollowCamera->GetForwardVector().X,FollowCamera->GetForwardVector().Y);
-
+		Jump();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Stop Jump"));
 		StopJumping();
 	}
 }
@@ -392,6 +385,10 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 
 void AGreenOneCharacter::Dash()
 {
+	if(GetCustomCharacterMovement()->IsFalling() && GetCustomCharacterMovement()->GetJumpCount() > 0)
+	{
+		Jump();
+	}
 	
 	if (GetCharacterMovement()->IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }

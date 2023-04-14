@@ -62,7 +62,8 @@ public:
 
 	//Attributes//
 private:
-	float CustomGravityScale; 
+	float CustomGravityScale;
+	int32 MaxJump = 2;
 	
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical")
 	float VerticalJumpVelocity = 900.f;
@@ -92,6 +93,7 @@ public:
 
 	//Functions//
 private:
+	virtual bool CheckFall(const FFindFloorResult& OldFloor, const FHitResult& Hit, const FVector& Delta, const FVector& OldLocation, float remainingTime, float timeTick, int32 Iterations, bool bMustJump) override;
 	bool VerticalJump();
 	bool HorizontalJump();
 	void ExecHorizontalJump();
@@ -101,7 +103,8 @@ public:
 	virtual bool DoJump(bool bReplayingMoves) override;
 	UFUNCTION(BlueprintCallable)
 	bool DoHorizontalJump() const;
-
+	UFUNCTION(BlueprintCallable)
+	int32 GetJumpCount() const;
 	UFUNCTION(BlueprintCallable)
 	void SetHorizontalJumpDirection(FVector2D& NewDirection);
 
