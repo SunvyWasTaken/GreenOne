@@ -8,6 +8,7 @@
 #include "Engine/CollisionProfile.h"
 #include "AIProjectil.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -21,7 +22,6 @@ AFlyingAICharacter::AFlyingAICharacter()
 
 	ExploDmg = Damage * RatioExploDmg;
 	ShootDmg = Damage * RatioDmgShoot;
-
 }
 
 // Called when the game starts or when spawned
@@ -32,6 +32,10 @@ void AFlyingAICharacter::BeginPlay()
 	{
 		GetCharacterMovement()->MaxFlySpeed = MaxSpeed;
 	}
+	this->OnTakeDamage.AddDynamic(this, &AFlyingAICharacter::OnShinderu);
+
+	UMaterialInstanceDynamic* InstanceMat = GetMesh()->CreateDynamicMaterialInstance(0, GetMesh()->GetMaterial(0));
+	InstanceMat->SetScalarParameterValue(FName("EmissiveIntensity"), 2000);
 }
 
 // Called every frame
@@ -81,10 +85,10 @@ void AFlyingAICharacter::SetRotationAxis(FVector2D TargetAxis)
 
 void AFlyingAICharacter::ResetEffect(float DelayToReset)
 {
-	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect,[&]()
-	{
-		UpdateMaxSpeed(MaxSpeed);
-	},DelayToReset,false);
+	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [&]()
+		{
+			UpdateMaxSpeed(MaxSpeed);
+		}, DelayToReset, false);
 }
 
 //This function is used to perform self-destruction of the AI character.
@@ -125,10 +129,30 @@ void AFlyingAICharacter::SelfDestruction()
 	if (ExplosionParticule != nullptr)
 	{
 		//Spawn the ExplosionParticule at the actor's location
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
+		UNiagaraComponent* CurrentExploParticule = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
+		CurrentExploParticule->SetVariableFloat("ExplosionRadius", ExploRadius);
 	}
 	//Call the DeadEntity function
 	DeadEntity();
+}
+
+void AFlyingAICharacter::OnShinderu(float NbrDamage)
+{
+	if (GetPercentHealth() <= ExploTreshold)
+	{
+		SpawnWarning();
+	}
+}
+
+void AFlyingAICharacter::SpawnWarning()
+{
+	UMaterialInstanceDynamic* InstanceMat = GetMesh()->CreateDynamicMaterialInstance(0, GetMesh()->GetMaterial(0));
+	InstanceMat->SetScalarParameterValue(FName("EmissiveIntensity"), 200000);
+	if (WarningExplosion != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Warning!!"));
+		UNiagaraFunctionLibrary::SpawnSystemAttached(WarningExplosion, GetMesh(), FName("SocketShinderu"), FVector::ZeroVector, GetActorRotation(), FVector::OneVector, EAttachLocation::SnapToTarget, true, ENCPoolMethod::AutoRelease);
+	}
 }
 
 //This function sets the IsInCooldown boolean to true and sets the TimeRemainingForShoot to 1 divided by the ShootRate. 
