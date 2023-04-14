@@ -9,19 +9,19 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObje
 	: Super(ObjectInitializer)
 {
 	CustomGravityScale = GravityScale;
+	JumpZVelocity = JumpVelocity;
+	MaxDistanceHorizontalJump = JumpZVelocity/2;
 }
 
 void UCustomCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-
 	GreenOneCharacter = Cast<AGreenOneCharacter>(GetOwner());
 }
 
 void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
 {
-
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	ExecHorizontalJump();
 }
@@ -47,9 +47,9 @@ bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode
 	return MovementMode == MOVE_Custom && CustomMovementMode == InCustomMovementMode;
 }
 
+#pragma region Jump/Falling
 bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 {
-	
 	if(IsMovingOnGround() && !IsFalling())
 	{
 		InJumpState = JS_Vertical;
@@ -59,6 +59,7 @@ bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 	if (CharacterOwner && CharacterOwner->CanJump() )
 	{
 		bool bJumped = false;
+		//Check the jumpState
 		if(InJumpState == JS_Vertical)
 		{
 			bJumped = VerticalJump();
@@ -66,9 +67,8 @@ bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 		{
 			bJumped = HorizontalJump();
 		}
-
-		return bJumped;
 		
+		return bJumped;
 	}
 	
 	return false;
@@ -87,12 +87,19 @@ bool UCustomCharacterMovementComponent::CheckFall(const FFindFloorResult& OldFlo
 
 bool UCustomCharacterMovementComponent::VerticalJump()
 {
-	UE_LOG(LogTemp, Warning, TEXT("VerticalJump"));
-	// Don't jump if we can't move up/down.
+	//Check if the vertical Jump is edit manually
+	float VelocityTemp;
+	if(bManualVerticalVelocity)
+	{
+		VelocityTemp = VerticalJumpVelocity;
+	}else
+	{
+		VelocityTemp = JumpZVelocity;
+	}
+	
 	if (!bConstrainToPlane || FMath::Abs(PlaneConstraintNormal.Z) != 1.f)
 	{
-		//Velocity.Z = VerticalJumpVelocity;
-		AddImpulse(FVector::UpVector * VerticalJumpVelocity, true);
+		AddImpulse(FVector::UpVector * VelocityTemp, true);
 		GravityScale = FallingGravity;
 		SetMovementMode(MOVE_Falling);
 		InJumpState = JS_Horizontal;
@@ -117,7 +124,8 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		
 		Target = Direction;
 	}
-	
+
+	//Check if the horizontal Jump is edit manually
 	if(bManualHorizontalVelocity)
 	{
 		Target *= HorizontalJumpVelocity;
@@ -139,7 +147,8 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 
 		TArray<AActor*> ActorsIgnores;
 		ActorsIgnores.Push(GetOwnerCharacter());
-		
+
+		//Check if the horizontalJump preview hit an obstacle
 		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),GetOwnerCharacter()->GetActorLocation(),
 			TargetHorizontalJump, CapsuleRadius,CapsuleHalfHeight,UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2),false,
 			ActorsIgnores,EDrawDebugTrace::ForDuration,ObstacleHit,true,FLinearColor::Red,FLinearColor::Blue,2);
@@ -161,6 +170,9 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 	return false;
 }
 
+/**
+ * Return if Character can jump horizontally
+ */
 bool UCustomCharacterMovementComponent::DoHorizontalJump() const
 {
 	return bHorizontalJump;
@@ -171,19 +183,17 @@ EJumpState UCustomCharacterMovementComponent::GetCurrentJumpState() const
 	return InJumpState;
 }
 
-
 void UCustomCharacterMovementComponent::ExecHorizontalJump()
 {
 	if(!bHorizontalJump) return;
 
 	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
-	UE_LOG(LogTemp, Warning, TEXT("Distance %f"), TargetDistance);
 	
 	if(TargetDistance > DistanceHorizontalJump)
 	{
 		bHorizontalJump = false;
 		GravityScale = CustomGravityScale;
-		// = FVector2D::ZeroVector;
+		HorizontalJumpDirection = FVector2D::ZeroVector;
 		TargetDistance = 0;
 		InJumpState = JS_Vertical;
 	}
@@ -194,3 +204,4 @@ void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& Ne
 {
 	HorizontalJumpDirection = NewDirection;
 }
+#pragma endregion 

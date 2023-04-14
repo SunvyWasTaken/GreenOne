@@ -67,26 +67,28 @@ public:
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
 	
 #pragma region Jump/Falling
-
 	//Attributes//
 private:
 	float CustomGravityScale;
 	int32 MaxJump = 2;
 
 	EJumpState InJumpState = JS_None;
-	
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical")
-	float VerticalJumpVelocity = 900.f;
+
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Editer la rapidité du jump vertical")
+	bool bManualVerticalVelocity;
+	/** Default value of vertical jump is the same that jump velocity */
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Force d'impulsion du jump vertical", meta = (ForceUnits = "cm/s",  EditCondition="bManualVerticalVelocity"))
+	float VerticalJumpVelocity = 700.f;
 
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
 	bool bManualHorizontalVelocity = false;
 	/** Default value of horizontal jump is the same that jump velocity */
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
-	float HorizontalJumpVelocity = 450.f;
+	float HorizontalJumpVelocity = 700.f;
 	bool bHorizontalJump;
 	
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
-	float MaxDistanceHorizontalJump = 450.f;
+	float MaxDistanceHorizontalJump = 350.f;
 	float DistanceHorizontalJump;
 	FVector TargetHorizontalJump = FVector::ZeroVector;
 
@@ -96,9 +98,11 @@ private:
 	FVector CurrentLocation;
 
 public:
-	int32 JumpCount = 0;
-
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling")
+	/** Commun a tous les jumps */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Jump/Falling", DisplayName = "Velocité général", meta = (ForceUnits = "cm/s"))
+	float JumpVelocity = 700.f;
+	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Gravité de descente du jump vertical")
 	float FallingGravity = 1.4f;
 
 	//Functions//

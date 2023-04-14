@@ -72,7 +72,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Movement")
 	FORCEINLINE class UCustomCharacterMovementComponent* GetCustomCharacterMovement() const { return CustomCharacterMovementComponent; }
 
-	virtual void PostInitializeComponents() override;
+	void InitializeCustomCharacterMovementComponent();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -87,9 +87,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 	float Health = 100.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Player")
-	float JumpVelocity = 700.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Player")
 	float WalkSpeed = 800.f;
