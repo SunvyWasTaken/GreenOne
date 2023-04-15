@@ -176,6 +176,11 @@ void AGreenOneCharacter::BeginPlay()
 	ShootCooldownRemaining = ShootCooldown;
 }
 
+void AGreenOneCharacter::FellOutOfWorld(const UDamageType& dmgType)
+{
+	Respawn();
+}
+
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -230,6 +235,15 @@ void AGreenOneCharacter::ChangeFertilizerType()
 void AGreenOneCharacter::Interact()
 {
 	// TODO
+}
+
+void AGreenOneCharacter::Respawn()
+{
+	SetActorLocation(LastTouchLocation);
+	if (this->Implements<UEntityGame>())
+	{
+		IEntityGame::Execute_EntityTakeDamage(this, MaxHealth*0.1f, FName("None"), this);
+	}
 }
 
 void AGreenOneCharacter::TurnAtRate(float Rate)

@@ -144,6 +144,8 @@ protected:
 
 	virtual void BeginPlay();
 
+	virtual void FellOutOfWorld(const class UDamageType& dmgType) override;
+
 private:
 
 	bool bIsDead = false;
@@ -165,6 +167,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool Immortal = false;
+
+	UFUNCTION()
+	void Respawn();
+
+	FVector LastTouchLocation;
 
 public:
 
