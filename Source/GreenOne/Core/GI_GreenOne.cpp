@@ -287,7 +287,7 @@ void UGI_GreenOne::SavedAudioSettings()
 		UE_LOG(LogTemp, Warning, TEXT("Attention save du sound la variable AudioSettingsRef nullptr"));
 		return;
 	}
-	if (!UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex))
+	else if (!UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Save audio FAILD!!!"));
 	}
@@ -295,7 +295,7 @@ void UGI_GreenOne::SavedAudioSettings()
 
 void UGI_GreenOne::ApplyAudioSettings()
 {
-	if (!AudioSettingsRef)
+	if (AudioSettingsRef == nullptr)
 	{
 		CreateAudioSave();
 	}
