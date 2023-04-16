@@ -277,31 +277,26 @@ public:
 
 	// Called every frame
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
-	
+
 	UFUNCTION(BlueprintCallable)
-	void CanRegenerate();
+		void CanRegenerate();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
-	bool IsCombatMode = false;
-	
+		bool IsCombatMode = false;
 
-#pragma endregion 
-
-#pragma region RegenerateHealth
-
-	float CoolDown = 5.f;
-	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
-	/** Valeur d'incrémentation du cooldown après chaque attaque */
-	
-	FTimerHandle TimerRegen;
-
-private:
-	
-	FOnRegen OnRegen;
 
 	UFUNCTION(BlueprintCallable)
-	void Regenerate(float DeltaSeconds);
+		void Regenerate(float DeltaSeconds);
+
+	UPROPERTY(BlueprintAssignable)
+		FOnRegen OnRegen;
+
+private:
+	FTimerHandle TimerRegen;
+
+	/** Valeur d'incrémentation du cooldown après chaque attaque */
+	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
+	float CoolDown = 5.f;
 
 #pragma endregion 
 
