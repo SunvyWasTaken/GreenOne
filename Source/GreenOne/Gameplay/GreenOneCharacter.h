@@ -66,6 +66,9 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	UPROPERTY(EditAnywhere)
 	class UAttackMelee* AttackMeleeComponent;
 	
+	UFUNCTION(BlueprintCallable)
+	void SetLastTouchLocation(FVector Location);
+	
 public:
 
 	AGreenOneCharacter();

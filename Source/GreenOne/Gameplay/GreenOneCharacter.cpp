@@ -181,6 +181,12 @@ void AGreenOneCharacter::FellOutOfWorld(const UDamageType& dmgType)
 	Respawn();
 }
 
+void AGreenOneCharacter::SetLastTouchLocation(FVector Location)
+{
+	LastTouchLocation = Location;
+	return;
+}
+
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -244,6 +250,7 @@ void AGreenOneCharacter::Respawn()
 	{
 		IEntityGame::Execute_EntityTakeDamage(this, MaxHealth*0.1f, FName("None"), this);
 	}
+	GetCharacterMovement()->StopMovementImmediately();
 }
 
 void AGreenOneCharacter::TurnAtRate(float Rate)
