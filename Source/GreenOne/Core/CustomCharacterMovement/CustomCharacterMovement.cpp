@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CustomCharacterMovementComponent.h"
+#include "CustomCharacterMovement.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -9,11 +9,6 @@
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	DashDistance = 1000.f;
-	DashTime = 0.8f;
-	DashCooldown = 2.f;
-	bDashOnCooldown = false;
-	bIsDashing = false;
 }
 
 void UCustomCharacterMovementComponent::InitializeComponent()

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "DEFINE.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "CustomCharacterMovementComponent.generated.h"
+#include "CustomCharacterMovement.generated.h"
 
 UENUM(BlueprintType)
 enum ECustomMovementMode
@@ -55,7 +55,7 @@ public:
 		void Dash();
 
 	// Distance du dash
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ClampMin = 0), Category = "Custom|Dash")
 		float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
 
 	// Le temps que va prendre le dash pour attendre ca destination.
