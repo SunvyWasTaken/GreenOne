@@ -287,29 +287,33 @@ public:
 	
 
 #pragma endregion 
+
+#pragma region RegenerateHealth
+
 	float CoolDown = 5.f;
 	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
 	/** Valeur d'incrémentation du cooldown après chaque attaque */
 	
 	FTimerHandle TimerRegen;
+
 private:
 	
 	FOnRegen OnRegen;
+
 	UFUNCTION(BlueprintCallable)
 	void Regenerate(float DeltaSeconds);
 
-	UPROPERTY(BlueprintAssignable)
-#pragma endregion
+#pragma endregion 
 
 #pragma region Pause
 
 public:
 
-	UFUNCTION(BlueprintCallable)
-		void TogglePauseGame();
+	UFUNCTION(BlueprintCallable, Category = "Custom|Pause")
+	void TogglePauseGame();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Pause")
-		TSubclassOf<UUserWidget> PauseWidgetClass;
+	TSubclassOf<UUserWidget> PauseWidgetClass;
 
 private:
 
