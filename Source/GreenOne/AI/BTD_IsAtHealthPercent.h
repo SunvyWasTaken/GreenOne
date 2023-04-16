@@ -18,9 +18,6 @@ public:
 
 	bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const;
 
-	UPROPERTY(EditAnywhere)
-	FBlackboardKeySelector SelfRef;
-
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0, UIMax = 1, ClampMin = 0, ClampMax = 1))
 	float HealthPercent;
 

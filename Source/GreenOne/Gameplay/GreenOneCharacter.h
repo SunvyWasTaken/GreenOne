@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
@@ -17,6 +18,8 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	GENERATED_BODY()
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamage);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRegen);
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
@@ -62,6 +65,9 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 
 	UPROPERTY(EditAnywhere)
 	class UAttackMelee* AttackMeleeComponent;
+	
+	UFUNCTION(BlueprintCallable)
+	void SetLastTouchLocation(FVector Location);
 
 protected:
 	
@@ -119,7 +125,8 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 
-	float MaxHealth = 0;
+	UPROPERTY(EditAnywhere, Category = "Health");
+	float MaxHealth = 100;
 
 	/** 
 	 * Called via input to turn at a given rate. 
@@ -147,6 +154,8 @@ protected:
 
 	virtual void BeginPlay();
 
+	virtual void FellOutOfWorld(const class UDamageType& dmgType) override;
+
 private:
 
 	bool bIsDead = false;
@@ -168,6 +177,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool Immortal = false;
+
+	UFUNCTION()
+	void Respawn();
+
+	FVector LastTouchLocation;
 
 public:
 
@@ -259,15 +273,32 @@ private:
 #pragma endregion
 
 #pragma region Mode
-
 public:
 
+	// Called every frame
+	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	
 	UFUNCTION(BlueprintCallable)
-		void IsRegenerate();
+	void CanRegenerate();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
-		bool IsCombatMode = false;
+	bool IsCombatMode = false;
+	
 
+#pragma endregion 
+	float CoolDown = 5.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
+	/** Valeur d'incrémentation du cooldown après chaque attaque */
+	
+	FTimerHandle TimerRegen;
+private:
+	
+	FOnRegen OnRegen;
+	UFUNCTION(BlueprintCallable)
+	void Regenerate(float DeltaSeconds);
+
+	UPROPERTY(BlueprintAssignable)
 #pragma endregion
 
 #pragma region Pause
@@ -297,7 +328,31 @@ private:
 
 #pragma endregion 
 
-#pragma region Test
+#pragma region HorizontalJump
+	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
+	bool bManualHorizontalVelocity = false;
+	/** Default value of horizontal jump is the same that jump velocity */
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
+	float HorizontalJumpVelocity = 450.f;
+	bool bHorizontalJump;
+	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
+	float MaxDistanceHorizontalJump = 450.f;
+	float DistanceHorizontalJump;
+	FVector TargetHorizontalJump = FVector::ZeroVector;
+
+	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
+	float TargetDistance = 0;
+
+	FVector CurrentLocation;
+
+	UFUNCTION(BlueprintCallable, Category = "Custom|Jump|Horizontal", DisplayName = "Double Jump")
+	void DoubleJump();
+	void HorizontalJump();
+
+#pragma endregion 
+	
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Test")

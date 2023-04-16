@@ -31,6 +31,9 @@ public:
 		// 1 Drone is behind the player.
 		float DodgeDistance = 0.4f;
 
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Should Get to safe distance to"))
+	bool bShouldGetSafeDistance = false;
+
 	/**
 	 * Distance at which the drone should reposition itself relative to the player
 	 */

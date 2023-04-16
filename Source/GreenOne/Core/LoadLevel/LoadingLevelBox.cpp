@@ -22,6 +22,7 @@ void ALoadingLevelBox::BeginPlay()
 	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ALoadingLevelBox::OnComponentOverlap);
 }
 
+#if WITH_EDITOR
 void ALoadingLevelBox::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(ALoadingLevelBox, CollisionSize))
@@ -29,6 +30,7 @@ void ALoadingLevelBox::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 		CollisionBox->SetBoxExtent(CollisionSize, true);
 	}
 }
+#endif
 
 void ALoadingLevelBox::OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

@@ -14,6 +14,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/AI/BaseEnnemy.h"
 #include "Components/SceneComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -97,6 +98,9 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	ShootCooldown = 1.f / 3.f;
 	ShootBloom = 0.f;
 	CanShoot = true;
+
+	JumpMaxCount = 2;
+	
 }
 
 #if WITH_EDITOR
@@ -175,11 +179,24 @@ void AGreenOneCharacter::BeginPlay()
 	ShootCooldownRemaining = ShootCooldown;
 }
 
+void AGreenOneCharacter::FellOutOfWorld(const UDamageType& dmgType)
+{
+	Respawn();
+}
+
+void AGreenOneCharacter::SetLastTouchLocation(FVector Location)
+{
+	LastTouchLocation = Location;
+	return;
+}
+
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
-	
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
+
+	Regenerate(DeltaSeconds);
+	HorizontalJump();
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
@@ -187,10 +204,14 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	bool bIsJumping = Value.Get<bool>();
 	if (bIsJumping)
 	{
-		Jump();
+		if(JumpMaxCount == 2)
+			DoubleJump();
+		else
+			Jump();
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Stop Jump"));
 		StopJumping();
 	}
 }
@@ -224,6 +245,16 @@ void AGreenOneCharacter::Interact()
 	// TODO
 }
 
+void AGreenOneCharacter::Respawn()
+{
+	SetActorLocation(LastTouchLocation);
+	if (this->Implements<UEntityGame>())
+	{
+		IEntityGame::Execute_EntityTakeDamage(this, MaxHealth*0.1f, FName("None"), this);
+	}
+	GetCharacterMovement()->StopMovementImmediately();
+}
+
 void AGreenOneCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
@@ -246,6 +277,8 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName Bon
 	if(Immortal) return;
 	
 	Health -= damage;
+	UE_LOG(LogTemp, Warning, TEXT("loose life"));
+	IsCombatMode = true;
 	if (Health <= 0)
 	if(!Invisible) Health -= damage;
 	if(Health <= 0)
@@ -253,6 +286,7 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName Bon
 		PlayerDead();
 		Health = 0.f;
 	}
+	CanRegenerate();
 	OnTakeDamage.Broadcast();
 }
 
@@ -273,9 +307,10 @@ void AGreenOneCharacter::Shoot()
 
 void AGreenOneCharacter::StopShoot()
 {
-	IsRegenerate();
 	if (ShootHandler.IsValid())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("stop"));
+		CanRegenerate();
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
 	}
 }
@@ -309,6 +344,8 @@ void AGreenOneCharacter::ShootRafale()
 		}
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
+			IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
@@ -415,10 +452,88 @@ void AGreenOneCharacter::TurnCamera()
 	SetActorRotation(FRotator(GetActorRotation().Roll, GetFollowCamera()->GetComponentRotation().Yaw, GetActorRotation().Pitch));
 }
 
+void AGreenOneCharacter::DoubleJump()
+{
+	if(bHorizontalJump) return;
+	
+	bPressedJump = true;
+	
+	FVector Direction = FollowCamera->GetForwardVector().GetSafeNormal2D();
+	FVector Target = Direction;
+	if(HorizontalJumpDirection != FVector2D::ZeroVector)
+	{
+		FVector Forward = FollowCamera->GetForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
+		FVector Right = FollowCamera->GetRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
+		Direction = Forward + Right;
+		Direction.Normalize();
+	
+		Target = Direction;
+	}
+	
+	if(bManualHorizontalVelocity)
+	{
+		Target *= HorizontalJumpVelocity;
+	}else
+	{
+		Target *= GetCharacterMovement()->JumpZVelocity;
+	}
+	
+	if(JumpCurrentCount == 1 && GetCharacterMovement()->IsFalling())
+	{
+		DistanceHorizontalJump = MaxDistanceHorizontalJump;
+		GetCharacterMovement()->GravityScale = 0.f;
+
+		TargetHorizontalJump = GetActorLocation() + Direction * MaxDistanceHorizontalJump;
+		
+		FHitResult ObstacleHit;
+		float CapsuleRadius = GetCapsuleComponent()->GetScaledCapsuleRadius();
+		float CapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+		FCollisionShape DetectionConeShape = FCollisionShape::MakeCapsule(CapsuleRadius,CapsuleHalfHeight);
+
+		TArray<AActor*> ActorsIgnores;
+		ActorsIgnores.Push(this);
+		
+		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),GetActorLocation(),
+			TargetHorizontalJump, CapsuleRadius,CapsuleHalfHeight,UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2),false,
+			ActorsIgnores,EDrawDebugTrace::ForDuration,ObstacleHit,true,FLinearColor::Red,FLinearColor::Blue,2);
+
+		if(bObstacleHit)
+		{
+			TargetHorizontalJump = ObstacleHit.ImpactPoint;
+			DistanceHorizontalJump = ObstacleHit.Distance;
+		}
+		
+		CurrentLocation = GetActorLocation();
+		LaunchCharacter(Target,true, true);
+		DrawDebugCapsule(GetWorld(), TargetHorizontalJump, CapsuleHalfHeight ,CapsuleRadius, FQuat::Identity, FColor::Purple, false, 3);
+		
+		bHorizontalJump = true;
+	}
+}
+
+void AGreenOneCharacter::HorizontalJump()
+{
+	if(!bHorizontalJump) return;
+
+	TargetDistance += FVector::Distance(CurrentLocation, GetActorLocation());
+	UE_LOG(LogTemp, Warning, TEXT("Distance %f"), TargetDistance);
+	
+	if(TargetDistance > DistanceHorizontalJump)
+	{
+		bHorizontalJump = false;
+		GetCharacterMovement()->GravityScale = 1.75f;
+		HorizontalJumpDirection = FVector2D::ZeroVector;
+		TargetDistance = 0;
+	}
+	CurrentLocation = GetActorLocation();
+}
+
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
+	if(bHorizontalJump) return;
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
+	HorizontalJumpDirection = MovementVector;
 
 	if (Controller != nullptr)
 	{
@@ -455,12 +570,51 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 }
 
 
-void AGreenOneCharacter::IsRegenerate()
+
+
+void AGreenOneCharacter::CanRegenerate()
 {
-	if(IsCombatMode)
+	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
+
+	if(Health >= MaxHealth)
+		return;
+		
+	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
-		Health = Health + 10;
+		IsCombatMode = false;
+		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
+	},CoolDown, false);
+	/*while(IsCombatMode == false && Health < 100 && CoolDown <= 5)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("+1 time"));
+		CoolDown++;
+		IsRegenerate();
 	}
-	
+	CanEarnHp = true;
+	IsRegenerate();*/
 }
 
+//void AGreenOneCharacter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+/*{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	CanRegenerate(DeltaTime);
+}*/
+
+
+void AGreenOneCharacter::Regenerate(float DeltaSeconds)
+{
+	if(IsCombatMode) return;
+	
+	if(Health < MaxHealth)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("+10 health"));
+		Health += 10*DeltaSeconds;
+		UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
+		if(Health >= MaxHealth)
+		{
+			Health = MaxHealth;
+		}
+		OnRegen.Broadcast();
+	}
+}
