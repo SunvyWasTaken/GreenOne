@@ -28,13 +28,6 @@ void AGreenOneGameMode::BeginPlay()
 	Cast<UGI_GreenOne>(UGameplayStatics::GetGameInstance(GetWorld()))->ApplySaveData();
 }
 
-void AGreenOneGameMode::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToUnload, TSoftObjectPtr<UWorld> LevelToLoad)
-{
-	FLatentActionInfo LatentInfo;
-	UGameplayStatics::UnloadStreamLevelBySoftObjectPtr(GetWorld(), LevelToUnload, LatentInfo, false);
-	UGameplayStatics::LoadStreamLevelBySoftObjectPtr(GetWorld(), LevelToLoad, true, true, LatentInfo);
-}
-
 void AGreenOneGameMode::DisplayGameOver()
 {
 	if (GameOverWidgetClass)
