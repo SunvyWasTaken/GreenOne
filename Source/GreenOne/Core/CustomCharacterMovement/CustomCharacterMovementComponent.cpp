@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CustomCharacterMovement.h"
+#include "CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"

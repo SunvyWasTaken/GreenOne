@@ -6,7 +6,7 @@
 #include "DEFINE.h"
 #include "MACRO.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "CustomCharacterMovement.generated.h"
+#include "CustomCharacterMovementComponent.generated.h"
 
 UENUM(BlueprintType)
 enum ECustomMovementMode
