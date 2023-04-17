@@ -309,7 +309,6 @@ void AGreenOneCharacter::StopShoot()
 {
 	if (ShootHandler.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("stop"));
 		CanRegenerate();
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
 	}

@@ -50,11 +50,8 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 
 
 #if WITH_EDITOR && (DEBUG_MESSAGE_DASH == AVAILABLE)
-
 	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("Dash CoolDown %f"), CurrentDashCooldown), true, FVector2d(1.5, 1.5));
 	GEngine->AddOnScreenDebugMessage(2, 1.0f, FColor::Red, FString::Printf(TEXT("Dash CoolDownValue %f"), DashCooldown), true, FVector2d(1.5, 1.5));
-	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Green, FString::Printf(TEXT("DashTick %f"), CurrentDashAlpha), true, FVector2d(1.5, 1.5));
-	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Purple, FString::Printf(TEXT("Tick %f"), DeltaTime), true, FVector2d(1.5, 1.5));
 #endif
 }
 
@@ -75,12 +72,28 @@ void UCustomCharacterMovementComponent::Dash()
 	StartDashLocation = GreenOneCharacter->GetActorLocation();
 
 	// TODO : Selon l'input du joueur, on change la direction du dash
-	FVector DirectionVector = GreenOneCharacter->GetActorForwardVector();
+
+	// Récupération de la direction du joueur
+	FVector DirectionVector = FVector(0.f, 0.f, 0.f);
+
+	if ( GreenOneCharacter->GetLastMovementInputVector() == DirectionVector)
+	{
+		DirectionVector = GreenOneCharacter->GetActorForwardVector();
+	}
+	else
+	{
+		DirectionVector = GreenOneCharacter->GetLastMovementInputVector();
+	}
 
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 
 	TargetDashLocation = StartDashLocation + DirectionVector * DashDistance;
+
+	UE_LOG(LogTemp, Warning, TEXT("Dash Start : %s"), *StartDashLocation.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Dash Direction : %s"), *DirectionVector.ToString());
+
+	UE_LOG(LogTemp, Warning, TEXT("Dash Location : %s"), *TargetDashLocation.ToString());
 
 	// On verifie si le dash est en collision avec un objet
 	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartDashLocation, TargetDashLocation, ECC_Visibility, CollisionParams);
