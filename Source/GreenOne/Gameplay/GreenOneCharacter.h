@@ -115,6 +115,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetHealthPercent();
 
+	FORCEINLINE FVector2D GetMovementVector() const { return this->MovementVector; }
+	FORCEINLINE FVector GetForwardDirection() const { return this->ForwardDirection; }
+	FORCEINLINE FVector GetRightDirection() const { return this->RightDirection; }
+
 	UPROPERTY(BlueprintAssignable)
 	FOnTakeDamage OnTakeDamage;
 
@@ -127,6 +131,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Health");
 	float MaxHealth = 100;
+
+	FVector2D MovementVector = FVector2D(0.f, 0.f);
+	FVector ForwardDirection = FVector(0.f, 0.f, 0.f);
+	FVector RightDirection = FVector(0.f, 0.f, 0.f);
 
 	/** 
 	 * Called via input to turn at a given rate. 

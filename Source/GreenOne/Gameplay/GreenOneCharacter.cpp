@@ -531,7 +531,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
 	if(bHorizontalJump) return;
 	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	MovementVector = Value.Get<FVector2D>();
 	HorizontalJumpDirection = MovementVector;
 
 	if (Controller != nullptr)
@@ -541,10 +541,10 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
 
@@ -565,11 +565,9 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVectorY);
 		AddMovementInput(RightDirection, MovementVectorX);
+
 	}
 }
-
-
-
 
 void AGreenOneCharacter::CanRegenerate()
 {

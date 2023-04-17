@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
+#define GC GreenOneCharacter
+
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -68,32 +70,27 @@ void UCustomCharacterMovementComponent::Dash()
 	if (bDashOnCooldown || bIsDashing) { return; }
 	// 
 
-	GreenOneCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Custom, (uint8)ECustomMovementMode::CMOVE_DASH);
+	GreenOneCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Custom, CMOVE_DASH);
 	StartDashLocation = GreenOneCharacter->GetActorLocation();
-
-	// TODO : Selon l'input du joueur, on change la direction du dash
 
 	// Récupération de la direction du joueur
 	FVector DirectionVector = FVector(0.f, 0.f, 0.f);
 
-	if ( GreenOneCharacter->GetLastMovementInputVector() == DirectionVector)
+	FVector TempDirection = FVector((GC->GetForwardDirection().X * GC->GetMovementVector().X), (GC->GetForwardDirection().Y * GC->GetMovementVector().Y), 0.f);
+
+	if ( TempDirection == FVector(0.f, 0.f, 0.f))
 	{
 		DirectionVector = GreenOneCharacter->GetActorForwardVector();
 	}
 	else
 	{
-		DirectionVector = GreenOneCharacter->GetLastMovementInputVector();
+		DirectionVector = TempDirection;
 	}
 
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 
 	TargetDashLocation = StartDashLocation + DirectionVector * DashDistance;
-
-	UE_LOG(LogTemp, Warning, TEXT("Dash Start : %s"), *StartDashLocation.ToString());
-	UE_LOG(LogTemp, Warning, TEXT("Dash Direction : %s"), *DirectionVector.ToString());
-
-	UE_LOG(LogTemp, Warning, TEXT("Dash Location : %s"), *TargetDashLocation.ToString());
 
 	// On verifie si le dash est en collision avec un objet
 	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartDashLocation, TargetDashLocation, ECC_Visibility, CollisionParams);
@@ -104,6 +101,8 @@ void UCustomCharacterMovementComponent::Dash()
 		TargetDashLocation = StartDashLocation + (DirectionVector * (HitResult.Distance - 50.f));
 	}
 
+	// DashTime
+	DashTime = (DashDistance / DashSpeed) * 1000;
 	CurrentDashAlpha = 0.f;
 	bIsDashing = true;
 }
@@ -113,9 +112,9 @@ void UCustomCharacterMovementComponent::DashTick(float deltatime)
 	// Securite
 	if (!bIsDashing || bDashOnCooldown) { return; }
 	if (GreenOneCharacter == nullptr) { return; }
-	// 
+	//
 
-	CurrentDashAlpha += (deltatime * 1000) / (DashTime * 100);
+	CurrentDashAlpha += (deltatime * 1000) / (DashTime);
 
 	if (CurrentDashAlpha >= 1)
 	{
@@ -128,7 +127,7 @@ void UCustomCharacterMovementComponent::DashTick(float deltatime)
 
 	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
 	GreenOneCharacter->SetActorLocation(TargetLocation);
-
+	
 }
 
 void UCustomCharacterMovementComponent::CooldownTick(float deltatime)

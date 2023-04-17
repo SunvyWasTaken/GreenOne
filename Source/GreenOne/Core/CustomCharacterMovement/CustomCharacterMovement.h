@@ -24,9 +24,6 @@ class GREENONE_API UCustomCharacterMovementComponent : public UCharacterMovement
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Transient)
-	class AGreenOneCharacter* GreenOneCharacter;
-
 protected:
 	virtual void InitializeComponent() override;
 
@@ -46,6 +43,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
 
+	UPROPERTY(Transient)
+	class AGreenOneCharacter* GreenOneCharacter;
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE AGreenOneCharacter* GetOwnerCharacter() const { return GreenOneCharacter; }
 
 #pragma region Dash
 public:
@@ -58,10 +60,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ClampMin = 0), Category = "Custom|Dash")
 		float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
 
-	// Le temps que va prendre le dash pour attendre ca destination.
-	// Le temps est en secondes.
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
-		float DashTime = 1.0f; // s
+	// Vitesse du Dash
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
+		float DashSpeed = 2000.f; // CM/s
 
 	// Temps que va prendre le dash a revenir apres utilisation.
 	// Le temps est en secondes.
@@ -88,13 +89,15 @@ private:
 	// Cooldown du Dash
 	void CooldownTick(float deltatime);
 
-	FVector TargetDashLocation;
+	FVector TargetDashLocation = FVector::ZeroVector;
 
-	FVector StartDashLocation;
+	FVector StartDashLocation = FVector::ZeroVector;
 
-	float CurrentDashAlpha;
+	float CurrentDashAlpha = 0.f;
 
-	float CurrentDashCooldown;
+	float CurrentDashCooldown = 0.f;
+
+	float DashTime = 0.f;
 
 #pragma endregion Dash
 
