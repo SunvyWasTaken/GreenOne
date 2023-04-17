@@ -26,7 +26,7 @@ public:
 	FRotator PlayerRotation = FRotator();
 
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|World")
-	FName MapName;
+	FName MapName = FName("L_Level1");
 
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
 	float PlayerLife = 0;

@@ -19,10 +19,6 @@ protected:
 
 	virtual void BeginPlay();
 
-	#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
-	#endif
-
 public:
 
 	UPROPERTY(EditDefaultsOnly)
@@ -31,14 +27,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UTextRenderComponent* LevelNameText;
 
-	UPROPERTY(EditAnywhere)
-	FName LevelName;
-
-	UPROPERTY(EditAnywhere)
-	FVector CollisionSize;
-
-	UPROPERTY(EditAnywhere)
-	bool ShouldUnload;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSoftObjectPtr<UWorld> LevelToLoad;
 
 private:
 
