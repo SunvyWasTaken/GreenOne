@@ -1,12 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "BTT_QuickMoveLOrR.h"
 #include "AIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "FlyingAICharacter.h"
+#include "GreenOne/AI/Melee/MeleeAICharacter.h"
+
 
 UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 {
@@ -18,6 +19,7 @@ UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 
 EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	SetDash(OwnerComp);
 	CurrentTime = MoveTime;
 	DirectionValue = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	OtherDirection = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
@@ -28,7 +30,7 @@ EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& Owne
 void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	CurrentTime -= DeltaSeconds;
-
+	
 	if (APawn* Pawn = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
 		FVector TargetDirection;
@@ -86,3 +88,15 @@ void UBTT_QuickMoveLOrR::SetFlyingRotation(APawn* RefOwner, FVector2D Axis)
 	}
 }
 
+void UBTT_QuickMoveLOrR::SetDash(UBehaviorTreeComponent& OwnerComp)
+{
+	AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn());
+	{
+		if(CanDash)
+		{	
+			PlayerRef->PlayAnimMontage(LeftDash, 1, NAME_None);
+		}
+	}
+	
+
+}
