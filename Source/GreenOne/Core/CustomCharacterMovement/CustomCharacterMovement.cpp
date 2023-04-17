@@ -53,7 +53,8 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 
 	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("Dash CoolDown %f"), CurrentDashCooldown), true, FVector2d(1.5, 1.5));
 	GEngine->AddOnScreenDebugMessage(2, 1.0f, FColor::Red, FString::Printf(TEXT("Dash CoolDownValue %f"), DashCooldown), true, FVector2d(1.5, 1.5));
-
+	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Green, FString::Printf(TEXT("DashTick %f"), CurrentDashAlpha), true, FVector2d(1.5, 1.5));
+	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Purple, FString::Printf(TEXT("Tick %f"), DeltaTime), true, FVector2d(1.5, 1.5));
 #endif
 }
 
@@ -70,7 +71,7 @@ void UCustomCharacterMovementComponent::Dash()
 	if (bDashOnCooldown || bIsDashing) { return; }
 	// 
 
-	GreenOneCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Custom);
+	GreenOneCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Custom, (uint8)ECustomMovementMode::CMOVE_DASH);
 	StartDashLocation = GreenOneCharacter->GetActorLocation();
 
 	// TODO : Selon l'input du joueur, on change la direction du dash
@@ -101,7 +102,8 @@ void UCustomCharacterMovementComponent::DashTick(float deltatime)
 	if (GreenOneCharacter == nullptr) { return; }
 	// 
 
-	CurrentDashAlpha += (1 * DashTime) * deltatime;
+	CurrentDashAlpha += (deltatime * 1000) / (DashTime * 100);
+
 	if (CurrentDashAlpha >= 1)
 	{
 		CurrentDashAlpha = 1;
@@ -114,7 +116,6 @@ void UCustomCharacterMovementComponent::DashTick(float deltatime)
 	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
 	GreenOneCharacter->SetActorLocation(TargetLocation);
 
-	return;
 }
 
 void UCustomCharacterMovementComponent::CooldownTick(float deltatime)

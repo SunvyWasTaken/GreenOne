@@ -61,7 +61,7 @@ public:
 	// Le temps que va prendre le dash pour attendre ca destination.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
-		float DashTime = 1.0f; // S
+		float DashTime = 1.0f; // s
 
 	// Temps que va prendre le dash a revenir apres utilisation.
 	// Le temps est en secondes.
