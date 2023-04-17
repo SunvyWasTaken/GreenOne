@@ -137,7 +137,17 @@ USG_GreenOne* UGI_GreenOne::CreateSave()
 void UGI_GreenOne::ApplySaveData()
 {
 	if (!CurrentSave) { return; }
-	if (CurrentSave->bIsFirstTime) { return; }
+	if (CurrentSave->bIsFirstTime)
+	{
+		DisplayLoadingScreen();
+		FLatentActionInfo LatentInfo;
+		LatentInfo.CallbackTarget = this;
+		LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
+		LatentInfo.Linkage = 0;
+		LatentInfo.UUID = 0;
+		UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
+		return;
+	}
 	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (!PlayerRef)
 	{
