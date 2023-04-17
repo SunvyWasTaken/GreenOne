@@ -6,8 +6,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
-#define GC GreenOneCharacter
-
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -31,9 +29,9 @@ void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, co
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
 }
 
-void UCustomCharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations)
+void UCustomCharacterMovementComponent::PhysCustom(float DeltaTime, int32 Iterations)
 {
-	Super::PhysCustom(deltaTime, Iterations);
+	Super::PhysCustom(DeltaTime, Iterations);
 }
 
 void UCustomCharacterMovementComponent::BeginPlay()
@@ -65,26 +63,32 @@ bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode
 void UCustomCharacterMovementComponent::Dash()
 {
 	// Securite
-	if (GreenOneCharacter == nullptr) { return; }
-	if (GreenOneCharacter->GetCharacterMovement()->IsFalling()) { return; }
+	if (GC == nullptr) { return; }
+	if (GC->GetCharacterMovement()->IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }
 	// 
 
-	GreenOneCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Custom, CMOVE_DASH);
-	StartDashLocation = GreenOneCharacter->GetActorLocation();
+	GC->GetCharacterMovement()->SetMovementMode(MOVE_Custom, CMOVE_DASH);
+	StartDashLocation = GC->GetActorLocation();
 
 	// Récupération de la direction du joueur
 	FVector DirectionVector = FVector(0.f, 0.f, 0.f);
 
-	FVector TempDirection = FVector((GC->GetForwardDirection().X * GC->GetMovementVector().X), (GC->GetForwardDirection().Y * GC->GetMovementVector().Y), 0.f);
+	FVector Direction = FVector::ZeroVector;
+	FVector Forward = GC->GetActorForwardVector().GetSafeNormal2D() * GC->GetMovementVector().Y;
+	FVector Right = GC->GetActorRightVector().GetSafeNormal2D() * GC->GetMovementVector().X;
+	Direction = Forward + Right;
+	Direction.Normalize();
 
-	if ( TempDirection == FVector(0.f, 0.f, 0.f))
+	Direction = FVector(Direction.X, Direction.Y, 0.f);
+
+	if (Direction == FVector::ZeroVector)
 	{
-		DirectionVector = GreenOneCharacter->GetActorForwardVector();
+		DirectionVector = GC->GetActorForwardVector();
 	}
 	else
 	{
-		DirectionVector = TempDirection;
+		DirectionVector = Direction;
 	}
 
 	FHitResult HitResult;
@@ -107,14 +111,14 @@ void UCustomCharacterMovementComponent::Dash()
 	bIsDashing = true;
 }
 
-void UCustomCharacterMovementComponent::DashTick(float deltatime)
+void UCustomCharacterMovementComponent::DashTick(float DeltaTime)
 {
 	// Securite
 	if (!bIsDashing || bDashOnCooldown) { return; }
 	if (GreenOneCharacter == nullptr) { return; }
 	//
 
-	CurrentDashAlpha += (deltatime * 1000) / (DashTime);
+	CurrentDashAlpha += (DeltaTime * 1000) / (DashTime);
 
 	if (CurrentDashAlpha >= 1)
 	{
@@ -130,10 +134,10 @@ void UCustomCharacterMovementComponent::DashTick(float deltatime)
 	
 }
 
-void UCustomCharacterMovementComponent::CooldownTick(float deltatime)
+void UCustomCharacterMovementComponent::CooldownTick(float DeltaTime)
 {
 	if (!bDashOnCooldown) { return; }
-	CurrentDashCooldown -= deltatime;
+	CurrentDashCooldown -= DeltaTime;
 
 	if (CurrentDashCooldown <= 0.f)
 	{

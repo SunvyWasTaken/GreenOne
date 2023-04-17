@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DEFINE.h"
+#include "MACRO.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CustomCharacterMovement.generated.h"
 
@@ -29,7 +30,7 @@ protected:
 
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
-	virtual void PhysCustom(float deltaTime, int32 Iterations) override;
+	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
 
 protected:
 
@@ -84,10 +85,10 @@ public:
 private:
 
 	// Utiliser pour placer le player pendant le Dash
-	void DashTick(float deltatime);
+	void DashTick(float DeltaTime);
 
 	// Cooldown du Dash
-	void CooldownTick(float deltatime);
+	void CooldownTick(float DeltaTime);
 
 	FVector TargetDashLocation = FVector::ZeroVector;
 
