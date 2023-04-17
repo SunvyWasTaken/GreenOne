@@ -80,7 +80,8 @@ private:
 	/** Default value of vertical jump is the same that jump velocity */
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Force d'impulsion du jump vertical", meta = (ForceUnits = "cm/s",  EditCondition="bManualVerticalVelocity"))
 	float VerticalJumpVelocity = 600.f;
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Hauter", meta = (ForceUnits = "cm/s",  EditCondition="bManualVerticalVelocity"))
+	float VelocityTemp;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Hauteur max", meta = (ForceUnits = "cm/s"))
 	float MaxVerticalHeight = 1000.f;
 	bool bVerticalJump;
 
@@ -94,13 +95,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
 	float MaxDistanceHorizontalJump = 350.f;
 	float DistanceHorizontalJump;
-	FVector TargetHorizontalJump = FVector::ZeroVector;
 
 	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
 	float TargetDistance = 0;
 
 	FVector CurrentLocation;
-	FVector TargetVerticalJumpLocation;
+	FVector TargetJumpLocation;
 
 	float JumpTime = 0;
 
