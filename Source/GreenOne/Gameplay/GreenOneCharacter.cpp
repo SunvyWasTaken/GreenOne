@@ -19,7 +19,7 @@
 #include "Components/SceneComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
-#include "GreenOne/Core/CustomCharacterMovementComponent.h"
+#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"

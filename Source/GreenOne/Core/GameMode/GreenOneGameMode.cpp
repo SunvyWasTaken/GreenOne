@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "GreenOne/Core/GI_GreenOne.h"
+#include "GreenOne/Core/Instance/GI_GreenOne.h"
 
 AGreenOneGameMode::AGreenOneGameMode()
 {
