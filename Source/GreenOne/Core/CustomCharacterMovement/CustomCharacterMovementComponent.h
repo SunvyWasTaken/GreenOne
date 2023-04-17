@@ -58,16 +58,16 @@ public:
 		void Dash();
 
 	// Distance du dash
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ClampMin = 0), Category = "Custom|Dash")
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ForceUnits = "cm/s", ClampMin = 0), Category = "Custom|Dash")
 		float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
 
 	// Vitesse du Dash
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ForceUnits = "cm/s", ClampMin = 0), Category = "Custom|Dash")
 		float DashSpeed = 2000.f; // CM/s
 
 	// Temps que va prendre le dash a revenir apres utilisation.
 	// Le temps est en secondes.
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash", ForceUnits = "s", ClampMin = 0), Category = "Custom|Dash")
 		float DashCooldown = 3.0f; // S
 
 	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
