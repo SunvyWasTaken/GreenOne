@@ -27,14 +27,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UTextRenderComponent* LevelNameText;
 
-	UPROPERTY(EditAnywhere)
-	bool ShouldUnload;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftObjectPtr<UWorld> LevelToLoad;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly	)
-	TSoftObjectPtr<UWorld> LevelToUnload;
 
 private:
 

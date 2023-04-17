@@ -47,7 +47,7 @@ void UGI_GreenOne::RemoveLoadingScreen()
 	CurrentLoadingScreen->RemoveFromParent();
 }
 
-void UGI_GreenOne::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToUnload, TSoftObjectPtr<UWorld> LevelToLoad, bool ShouldUnload)
+void UGI_GreenOne::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToLoad)
 {
 	if (!LevelToLoad)
 	{
@@ -56,20 +56,28 @@ void UGI_GreenOne::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToUnload, TSoftObjec
 	}
 	DisplayLoadingScreen();
 	FLatentActionInfo LatentInfo;
-	FLatentActionInfo LatentInfoUnload;
 	LatentInfo.CallbackTarget = this;
 	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
 	LatentInfo.Linkage = 0;
 	LatentInfo.UUID = 0;
-	UGameplayStatics::LoadStreamLevelBySoftObjectPtr(GetWorld(), LevelToLoad, true, true, LatentInfo);
-	if (ShouldUnload)
+	FName LevelToUnload;
+	for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
 	{
-		if (!LevelToUnload)
+		if (!CurrentLevel)
 		{
-			return;
+			UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
+			continue;
 		}
-		UGameplayStatics::UnloadStreamLevelBySoftObjectPtr(GetWorld(), LevelToUnload, LatentInfoUnload, true);
+		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+		{
+			LevelToUnload = CurrentLevel->GetWorldAssetPackageFName();
+			break;
+		}
 	}
+	FLatentActionInfo UnloadInfo;
+	UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
+	UGameplayStatics::LoadStreamLevelBySoftObjectPtr(GetWorld(), LevelToLoad, true, true, LatentInfo);
+
 }
 
 #pragma region Save

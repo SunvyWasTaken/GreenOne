@@ -35,7 +35,7 @@ void ALoadingLevelBox::OnComponentOverlap(UPrimitiveComponent* OverlappedCompone
 		UGI_GreenOne* GameInstanceRef = Cast<UGI_GreenOne>(GetWorld()->GetGameInstance());
 		if (GameInstanceRef != nullptr)
 		{
-			GameInstanceRef->LoadOneLevel(LevelToUnload, LevelToLoad, ShouldUnload);
+			GameInstanceRef->LoadOneLevel(LevelToLoad);
 		}
 	}
 }
