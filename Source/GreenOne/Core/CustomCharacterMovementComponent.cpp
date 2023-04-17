@@ -3,6 +3,7 @@
 #include "CustomCharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
@@ -10,7 +11,7 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObje
 {
 	CustomGravityScale = GravityScale;
 	JumpZVelocity = JumpVelocity;
-	MaxDistanceHorizontalJump = JumpZVelocity/2;
+	MaxDistanceHorizontalJump = JumpZVelocity / 2;
 }
 
 void UCustomCharacterMovementComponent::InitializeComponent()
@@ -20,10 +21,11 @@ void UCustomCharacterMovementComponent::InitializeComponent()
 }
 
 void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+                                                      FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	ExecHorizontalJump();
+	ExecVerticalJump(DeltaTime);
 }
 
 void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
@@ -32,9 +34,23 @@ void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 }
 
 void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation,
-	const FVector& OldVelocity)
+                                                          const FVector& OldVelocity)
 {
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
+}
+
+void UCustomCharacterMovementComponent::OnMovementModeChanged(EMovementMode PreviousMovementMode,
+	uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
+	if (IsMovingOnGround() && !IsFalling())
+	{
+		InJumpState = JS_None;
+		GetOwnerCharacter()->JumpMaxCount = MaxJump;
+		GravityScale = CustomGravityScale;
+		bVerticalJump = false;
+		bHorizontalJump = false;
+	}
 }
 
 void UCustomCharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations)
@@ -50,37 +66,34 @@ bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode
 #pragma region Jump/Falling
 bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 {
-	if(IsMovingOnGround() && !IsFalling())
-	{
-		InJumpState = JS_None;
-		GetOwnerCharacter()->JumpMaxCount = MaxJump;
-	}
-	
-	if (CharacterOwner && CharacterOwner->CanJump() )
+
+	if (CharacterOwner && CharacterOwner->CanJump())
 	{
 		bool bJumped = false;
 		//Check the jumpState
-		if(InJumpState == JS_None)
+		if (InJumpState == JS_None)
 		{
 			bJumped = VerticalJump();
-		}else if(InJumpState == JS_Vertical)
+		}
+		else if (InJumpState == JS_Vertical)
 		{
 			bJumped = HorizontalJump();
 		}
-		
+
 		return bJumped;
 	}
-	
+
 	return false;
 }
 
 bool UCustomCharacterMovementComponent::CheckFall(const FFindFloorResult& OldFloor, const FHitResult& Hit,
-	const FVector& Delta, const FVector& OldLocation, float remainingTime, float timeTick, int32 Iterations,
-	bool bMustJump)
+                                                  const FVector& Delta, const FVector& OldLocation, float remainingTime,
+                                                  float timeTick, int32 Iterations,
+                                                  bool bMustJump)
 {
 	GetOwnerCharacter()->JumpCurrentCount = 0;
 	GetCharacterOwner()->JumpCurrentCountPreJump = 0;
-	GetOwnerCharacter()->JumpMaxCount = MaxJump+1;
+	GetOwnerCharacter()->JumpMaxCount = MaxJump + 1;
 	InJumpState = JS_None;
 	return Super::CheckFall(OldFloor, Hit, Delta, OldLocation, remainingTime, timeTick, Iterations, bMustJump);
 }
@@ -89,21 +102,25 @@ bool UCustomCharacterMovementComponent::VerticalJump()
 {
 	//Check if the vertical Jump is edit manually
 	float VelocityTemp;
-	if(bManualVerticalVelocity)
+	if (bManualVerticalVelocity)
 	{
 		VelocityTemp = VerticalJumpVelocity;
-	}else
+	}
+	else
 	{
 		VelocityTemp = JumpZVelocity;
 	}
-	
+
 	if (!bConstrainToPlane || FMath::Abs(PlaneConstraintNormal.Z) != 1.f)
 	{
 		//AddImpulse(FVector::UpVector * VelocityTemp, true);
-		GetOwnerCharacter()->LaunchCharacter(FVector::UpVector * VelocityTemp,false, false);
-		GravityScale = FallingGravity;
+		//GetOwnerCharacter()->LaunchCharacter(FVector::UpVector * VelocityTemp,false, false);
 		SetMovementMode(MOVE_Falling);
 		InJumpState = JS_Vertical;
+		bVerticalJump = true;
+		TargetVerticalJumpLocation = GetOwnerCharacter()->GetActorLocation() + FVector::UpVector * MaxVerticalHeight;
+		CurrentLocation = GetOwnerCharacter()->GetActorLocation();
+		JumpTime = 0;
 		return true;
 	}
 	return false;
@@ -111,37 +128,39 @@ bool UCustomCharacterMovementComponent::VerticalJump()
 
 bool UCustomCharacterMovementComponent::HorizontalJump()
 {
-	if(bHorizontalJump) return false;
-	
+	if (bHorizontalJump) return false;
+
+	bVerticalJump = false;
 	FVector Direction = GetOwnerCharacter()->GetActorForwardVector().GetSafeNormal2D();
 	FVector Target = Direction;
-	
-	if(HorizontalJumpDirection != FVector2D::ZeroVector)
+
+	if (HorizontalJumpDirection != FVector2D::ZeroVector)
 	{
 		FVector Forward = GetOwnerCharacter()->GetActorForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
 		FVector Right = GetOwnerCharacter()->GetActorRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
 		Direction = Forward.GetSafeNormal() + Right.GetSafeNormal();
 		Direction.Normalize();
-		
+
 		Target = Direction;
 	}
 
 	//Check if the horizontal Jump is edit manually
-	if(bManualHorizontalVelocity)
+	if (bManualHorizontalVelocity)
 	{
 		Target *= HorizontalJumpVelocity;
-	}else
+	}
+	else
 	{
 		Target *= JumpZVelocity;
 	}
-	
-	if(InJumpState == JS_Vertical && IsFalling())
+
+	if (InJumpState == JS_Vertical && IsFalling())
 	{
 		DistanceHorizontalJump = MaxDistanceHorizontalJump;
 		GravityScale = 0.f;
 
 		TargetHorizontalJump = GetOwnerCharacter()->GetActorLocation() + Direction * MaxDistanceHorizontalJump;
-		
+
 		FHitResult ObstacleHit;
 		float CapsuleRadius = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleRadius();
 		float CapsuleHalfHeight = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
@@ -150,24 +169,27 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		ActorsIgnores.Push(GetOwnerCharacter());
 
 		//Check if the horizontalJump preview hit an obstacle
-		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),GetOwnerCharacter()->GetActorLocation(),
-			TargetHorizontalJump, CapsuleRadius,CapsuleHalfHeight,UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2),false,
-			ActorsIgnores,EDrawDebugTrace::ForDuration,ObstacleHit,true,FLinearColor::Red,FLinearColor::Blue,2);
+		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(
+			GetWorld(), GetOwnerCharacter()->GetActorLocation(),
+			TargetHorizontalJump, CapsuleRadius, CapsuleHalfHeight,
+			UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2), false,
+			ActorsIgnores, EDrawDebugTrace::ForDuration, ObstacleHit, true, FLinearColor::Red, FLinearColor::Blue, 2);
 
-		if(bObstacleHit)
+		if (bObstacleHit)
 		{
 			TargetHorizontalJump = ObstacleHit.ImpactPoint;
 			DistanceHorizontalJump = ObstacleHit.Distance;
 		}
-		
+
 		CurrentLocation = GetOwnerCharacter()->GetActorLocation();
-		GetOwnerCharacter()->LaunchCharacter(Target,true, true);
-		DrawDebugCapsule(GetWorld(), TargetHorizontalJump, CapsuleHalfHeight ,CapsuleRadius, FQuat::Identity, FColor::Purple, false, 3);
-		
+		GetOwnerCharacter()->LaunchCharacter(Target, true, true);
+		DrawDebugCapsule(GetWorld(), TargetHorizontalJump, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity,
+		                 FColor::Purple, false, 3);
+
 		bHorizontalJump = true;
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -186,11 +208,11 @@ EJumpState UCustomCharacterMovementComponent::GetCurrentJumpState() const
 
 void UCustomCharacterMovementComponent::ExecHorizontalJump()
 {
-	if(!bHorizontalJump) return;
+	if (!bHorizontalJump) return;
 
 	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
-	
-	if(TargetDistance > DistanceHorizontalJump)
+
+	if (TargetDistance > DistanceHorizontalJump)
 	{
 		bHorizontalJump = false;
 		GravityScale = CustomGravityScale;
@@ -201,8 +223,30 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 	CurrentLocation = GetActorLocation();
 }
 
+void UCustomCharacterMovementComponent::ExecVerticalJump(float DelatTime)
+{
+	if(!bVerticalJump) return;
+
+	JumpTime += DelatTime;
+
+	float TT = (VerticalJumpVelocity/MaxVerticalHeight)*JumpTime;
+	UE_LOG(LogTemp, Warning, TEXT("TT %f"),TT);
+
+	if(TT > 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TT >"));
+		bVerticalJump = false;
+		Velocity.Z = 0.f;
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("LA "));
+	float tempZ = UKismetMathLibrary::Ease(CurrentLocation.Z,TargetVerticalJumpLocation.Z, TT,EEasingFunc::EaseOut);
+	UE_LOG(LogTemp, Warning, TEXT("tempZ %f"),tempZ);
+	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X,GetOwnerCharacter()->GetActorLocation().Y,tempZ));
+}
+
 void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& NewDirection)
 {
 	HorizontalJumpDirection = NewDirection;
 }
-#pragma endregion 
+#pragma endregion

@@ -58,6 +58,7 @@ protected:
 	
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
+	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
 	virtual void PhysCustom(float deltaTime, int32 Iterations) override;
 	
 public:
@@ -79,6 +80,9 @@ private:
 	/** Default value of vertical jump is the same that jump velocity */
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Force d'impulsion du jump vertical", meta = (ForceUnits = "cm/s",  EditCondition="bManualVerticalVelocity"))
 	float VerticalJumpVelocity = 600.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Hauter", meta = (ForceUnits = "cm/s",  EditCondition="bManualVerticalVelocity"))
+	float MaxVerticalHeight = 1000.f;
+	bool bVerticalJump;
 
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
 	bool bManualHorizontalVelocity = false;
@@ -96,6 +100,9 @@ private:
 	float TargetDistance = 0;
 
 	FVector CurrentLocation;
+	FVector TargetVerticalJumpLocation;
+
+	float JumpTime = 0;
 
 public:
 	/** Commun a tous les jumps */
@@ -111,6 +118,7 @@ private:
 	bool VerticalJump();
 	bool HorizontalJump();
 	void ExecHorizontalJump();
+	void ExecVerticalJump(float DelatTime);
 
 public:
 	UFUNCTION(BlueprintCallable)
