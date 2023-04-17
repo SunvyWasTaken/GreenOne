@@ -533,6 +533,8 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	MovementVector = Value.Get<FVector2D>();
 
+	CustomCharacterMovementComponent->SetDashDirectionVector(MovementVector);
+
 	HorizontalJumpDirection = MovementVector;
 
 	if (Controller != nullptr)

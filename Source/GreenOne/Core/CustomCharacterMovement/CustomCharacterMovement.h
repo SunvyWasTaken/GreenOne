@@ -82,6 +82,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
 		float GetRemainingDashTime() { return CurrentDashCooldown; };
 
+	void SetDashDirectionVector(FVector2D& vector) { this->DashDirectionVector = vector; }
+
 private:
 
 	// Utiliser pour placer le player pendant le Dash
@@ -93,6 +95,8 @@ private:
 	FVector TargetDashLocation = FVector::ZeroVector;
 
 	FVector StartDashLocation = FVector::ZeroVector;
+
+	FVector2D DashDirectionVector = FVector2D::ZeroVector;
 
 	float CurrentDashAlpha = 0.f;
 
