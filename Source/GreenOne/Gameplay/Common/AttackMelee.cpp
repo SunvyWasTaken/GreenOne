@@ -78,6 +78,7 @@ bool UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
 	const FRotator ActorRotation = GetOwner()->GetActorRotation();
 	TArray<AActor*> ActorToIgnore;
 	ActorToIgnore.Add(GetOwner());
+	return false;
 	for (int i = 1; i <= Iteration; ++i)
 	{
 		float CurrentAlpha = UKismetMathLibrary::NormalizeToRange((TraceSize * i), 0, TraceDistance);

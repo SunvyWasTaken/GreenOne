@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
@@ -80,10 +79,15 @@ public:
 
 	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);
 
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
-#endif
+	UFUNCTION(BlueprintCallable, Category = "Custom|Movement")
+	FORCEINLINE class UCustomCharacterMovementComponent* GetCustomCharacterMovement() const { return CustomCharacterMovementComponent; }
 
+	void InitializeCustomCharacterMovementComponent();
+
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+	
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
@@ -93,9 +97,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
 	float Health = 100.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Player")
-	float JumpVelocity = 700.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Player")
 	float WalkSpeed = 800.f;
@@ -166,6 +167,8 @@ protected:
 
 private:
 
+	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
+
 	bool bIsDead = false;
 
 	void PlayerDead();
@@ -201,6 +204,7 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE UCameraComponent* GetOwnerFollowCamera() const { return FollowCamera; }
 
 #pragma region Shoot
 
@@ -333,32 +337,6 @@ private:
 	void TurnCamera();
 
 #pragma endregion 
-
-#pragma region HorizontalJump
-	
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
-	bool bManualHorizontalVelocity = false;
-	/** Default value of horizontal jump is the same that jump velocity */
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
-	float HorizontalJumpVelocity = 450.f;
-	bool bHorizontalJump;
-	
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
-	float MaxDistanceHorizontalJump = 450.f;
-	float DistanceHorizontalJump;
-	FVector TargetHorizontalJump = FVector::ZeroVector;
-
-	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
-	float TargetDistance = 0;
-
-	FVector CurrentLocation;
-
-	UFUNCTION(BlueprintCallable, Category = "Custom|Jump|Horizontal", DisplayName = "Double Jump")
-	void DoubleJump();
-	void HorizontalJump();
-
-#pragma endregion 
-	
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Test")

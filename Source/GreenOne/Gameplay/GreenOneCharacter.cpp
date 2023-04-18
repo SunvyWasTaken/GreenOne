@@ -19,6 +19,7 @@
 #include "Components/SceneComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
 #include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
@@ -46,6 +47,8 @@ bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
 AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
+	InitializeCustomCharacterMovementComponent();
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -58,17 +61,17 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
+	
+	GetCustomCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	GetCustomCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = JumpVelocity;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-	GetCharacterMovement()->bRequestedMoveUseAcceleration = false;
+	GetCustomCharacterMovement()->AirControl = 0.35f;
+	GetCustomCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCustomCharacterMovement()->MinAnalogWalkSpeed = 20.f;
+	GetCustomCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCustomCharacterMovement()->bRequestedMoveUseAcceleration = false;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -104,6 +107,11 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	MaxHealth = Health;
 	ShootCooldownRemaining = 1.f / ShootCooldown;
 	
+}
+
+void AGreenOneCharacter::InitializeCustomCharacterMovementComponent()
+{
+	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
 }
 
 #if WITH_EDITOR
@@ -201,22 +209,16 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 	ShootTick(DeltaSeconds);
 
 	Regenerate(DeltaSeconds);
-	HorizontalJump();
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 {
-	bool bIsJumping = Value.Get<bool>();
-	if (bIsJumping)
+	if (Value.Get<bool>())
 	{
-		if(JumpMaxCount == 2)
-			DoubleJump();
-		else
-			Jump();
+		Jump();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Stop Jump"));
 		StopJumping();
 	}
 }
@@ -456,92 +458,16 @@ void AGreenOneCharacter::TurnCamera()
 	SetActorRotation(FRotator(GetActorRotation().Roll, GetFollowCamera()->GetComponentRotation().Yaw, GetActorRotation().Pitch));
 }
 
-void AGreenOneCharacter::DoubleJump()
-{
-	if(bHorizontalJump) return;
-	
-	bPressedJump = true;
-	
-	FVector Direction = FollowCamera->GetForwardVector().GetSafeNormal2D();
-	FVector Target = Direction;
-	if(HorizontalJumpDirection != FVector2D::ZeroVector)
-	{
-		FVector Forward = FollowCamera->GetForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
-		FVector Right = FollowCamera->GetRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
-		Direction = Forward + Right;
-		Direction.Normalize();
-	
-		Target = Direction;
-	}
-	
-	if(bManualHorizontalVelocity)
-	{
-		Target *= HorizontalJumpVelocity;
-	}else
-	{
-		Target *= GetCharacterMovement()->JumpZVelocity;
-	}
-	
-	if(JumpCurrentCount == 1 && GetCharacterMovement()->IsFalling())
-	{
-		DistanceHorizontalJump = MaxDistanceHorizontalJump;
-		GetCharacterMovement()->GravityScale = 0.f;
-
-		TargetHorizontalJump = GetActorLocation() + Direction * MaxDistanceHorizontalJump;
-		
-		FHitResult ObstacleHit;
-		float CapsuleRadius = GetCapsuleComponent()->GetScaledCapsuleRadius();
-		float CapsuleHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-		FCollisionShape DetectionConeShape = FCollisionShape::MakeCapsule(CapsuleRadius,CapsuleHalfHeight);
-
-		TArray<AActor*> ActorsIgnores;
-		ActorsIgnores.Push(this);
-		
-		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),GetActorLocation(),
-			TargetHorizontalJump, CapsuleRadius,CapsuleHalfHeight,UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2),false,
-			ActorsIgnores,EDrawDebugTrace::ForDuration,ObstacleHit,true,FLinearColor::Red,FLinearColor::Blue,2);
-
-		if(bObstacleHit)
-		{
-			TargetHorizontalJump = ObstacleHit.ImpactPoint;
-			DistanceHorizontalJump = ObstacleHit.Distance;
-		}
-		
-		CurrentLocation = GetActorLocation();
-		LaunchCharacter(Target,true, true);
-		DrawDebugCapsule(GetWorld(), TargetHorizontalJump, CapsuleHalfHeight ,CapsuleRadius, FQuat::Identity, FColor::Purple, false, 3);
-		
-		bHorizontalJump = true;
-	}
-}
-
-void AGreenOneCharacter::HorizontalJump()
-{
-	if(!bHorizontalJump) return;
-
-	TargetDistance += FVector::Distance(CurrentLocation, GetActorLocation());
-	UE_LOG(LogTemp, Warning, TEXT("Distance %f"), TargetDistance);
-	
-	if(TargetDistance > DistanceHorizontalJump)
-	{
-		bHorizontalJump = false;
-		GetCharacterMovement()->GravityScale = 1.75f;
-		HorizontalJumpDirection = FVector2D::ZeroVector;
-		TargetDistance = 0;
-	}
-	CurrentLocation = GetActorLocation();
-}
-
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
-	if(bHorizontalJump) return;
+
 	// input is a Vector2D
 	MovementVector = Value.Get<FVector2D>();
-
 	CustomCharacterMovementComponent->SetDashDirectionVector(MovementVector);
+	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
 
-	HorizontalJumpDirection = MovementVector;
-
+	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
+	
 	if (Controller != nullptr)
 	{
 		// find out which way is forward
