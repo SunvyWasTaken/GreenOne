@@ -1,6 +1,6 @@
 #pragma once
 
-#define GC GreenOneCharacter
+#define GC GetOwnerCharacter()
 
 #define INT_ZERO 0	
 #define FLOAT_ZERO 0.f
