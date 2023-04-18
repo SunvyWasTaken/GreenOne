@@ -47,7 +47,7 @@ public:
 	 * Check if there is a collision in front of the AI before shooting and react according to the behavior if it can't shoot.
 	 */
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Check si il peut tiré"), Category = "CheckCollision")
-		bool bCheckCanShoot = true;
+		bool bCheckCanShoot = false;
 
 	/**
 	 * If there is a wall between the AI and the player, the AI's behavior will depend on the programming it has been given.

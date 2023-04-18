@@ -133,7 +133,7 @@ void UBTT_FlyingTo::TickAddInputToPawn(float Deltatime, AFlyingAICharacter* Bird
 	else
 	{
 		// Rotate the player. and move forward
-		const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(BirdRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(TargetLoc), Deltatime, RotationSpeed);
+		const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(BirdRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(TargetLoc.GetSafeNormal2D()), Deltatime, RotationSpeed);
 		BirdRef->SetActorRotation(CurrentTargetRotation);
 		BirdRef->GetMovementComponent()->AddInputVector(BirdRef->GetActorForwardVector());
 	}

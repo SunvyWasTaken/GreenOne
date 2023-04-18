@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (DisplayName = "Old System"))
 	bool bUseOld = true;
 
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Should Succeed"))
+	bool bHasToSucceed = true;
+
 private:
 
 	AActor* PlayerRefActor;

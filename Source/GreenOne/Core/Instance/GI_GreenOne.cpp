@@ -39,27 +39,19 @@ void UGI_GreenOne::DisplayLoadingScreen()
 
 void UGI_GreenOne::RemoveLoadingScreen()
 {
-	if (!CurrentLoadingScreen)
+	if (IsValid(CurrentLoadingScreen))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Wesh quelqu'un a try de remove le loading screen alors qu'il était déjà plus là."));
-		return;
+		CurrentLoadingScreen->RemoveFromParent();
 	}
-	CurrentLoadingScreen->RemoveFromParent();
 }
 
-void UGI_GreenOne::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToLoad)
+void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction)
 {
-	if (!LevelToLoad)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("T'as oublié de mettre un level à load."));
-		return;
-	}
 	DisplayLoadingScreen();
 	FLatentActionInfo LatentInfo;
-	LatentInfo.CallbackTarget = this;
-	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
+	LatentInfo.CallbackTarget = TargetRef;
+	LatentInfo.ExecutionFunction = CallFunction;
 	LatentInfo.Linkage = 0;
-	LatentInfo.UUID = 0;
 	FName LevelToUnload;
 	for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
 	{
@@ -76,8 +68,7 @@ void UGI_GreenOne::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToLoad)
 	}
 	FLatentActionInfo UnloadInfo;
 	UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
-	UGameplayStatics::LoadStreamLevelBySoftObjectPtr(GetWorld(), LevelToLoad, true, true, LatentInfo);
-
+	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelToLoad, true, true, LatentInfo);
 }
 
 #pragma region Save
@@ -176,7 +167,6 @@ void UGI_GreenOne::ApplySaveData()
 		LatentInfo.CallbackTarget = this;
 		LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
 		LatentInfo.Linkage = 0;
-		LatentInfo.UUID = 5;
 		UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
 		return;
 	}

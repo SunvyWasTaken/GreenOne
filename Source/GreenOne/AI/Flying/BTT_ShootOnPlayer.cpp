@@ -23,26 +23,21 @@ EBTNodeResult::Type UBTT_ShootOnPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 	PawnRef = Cast<AFlyingAICharacter>(OwnerComp.GetAIOwner()->GetPawn());
 	if (PawnRef != nullptr)
 	{
-		if (bCheckCanShoot)
-		{
-			if (CheckTargetVisible())
-			{
-				switch (ShootBehavior)
-				{
-				case EBehavior::Skip:
-					return EBTNodeResult::Succeeded;
-					break;
-				case EBehavior::Faild:
-					return EBTNodeResult::Failed;
-					break;
-				}
-			}
-		}
 		if (!PawnRef->CanShoot())
 		{
 			switch (CurrentBehavior)
 			{
 			case EBehavior::Wait:
+				if (bCheckCanShoot)
+				{
+					if (CheckTargetVisible())
+					{
+						if (ShootBehavior == EBehavior::Faild)
+						{
+							return EBTNodeResult::Failed;
+						}
+					}
+				}
 				return EBTNodeResult::InProgress;
 				break;
 			case EBehavior::Faild:

@@ -8,6 +8,7 @@
 #include "GreenOne/Core/Instance/GI_GreenOne.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/PlayerStart.h"
+#include "Engine/LevelStreaming.h"
 
 // Sets default values
 ALoadingLevelBox::ALoadingLevelBox()
@@ -19,7 +20,6 @@ ALoadingLevelBox::ALoadingLevelBox()
 	RootComponent = CollisionBox;
 	LevelNameText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("LevelNameText"));
 	LevelNameText->SetupAttachment(RootComponent);
-
 }
 
 void ALoadingLevelBox::BeginPlay()
@@ -28,20 +28,54 @@ void ALoadingLevelBox::BeginPlay()
 	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ALoadingLevelBox::OnComponentOverlap);
 }
 
+#if WITH_EDITOR
+
+void ALoadingLevelBox::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(ALoadingLevelBox, LevelToLoad))
+	{
+		LevelNameText->SetText(FText::FromString(LevelToLoad.GetAssetName()));
+	}
+}
+
+#endif // WITH_EDITOR
+
 void ALoadingLevelBox::OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// TODO Load un level ici. je pense.
-	if (Cast<AGreenOneCharacter>(OtherActor))
+	PlayerRef = Cast<AGreenOneCharacter>(OtherActor);
+	if (PlayerRef != nullptr)
 	{
 		UGI_GreenOne* GameInstanceRef = Cast<UGI_GreenOne>(GetWorld()->GetGameInstance());
 		if (GameInstanceRef != nullptr)
 		{
-			GameInstanceRef->LoadOneLevel(LevelToLoad);
-			if (PlayerStartRef != nullptr)
+			if (!LevelToLoad.IsNull())
 			{
-				OtherActor->SetActorLocation(PlayerStartRef->GetActorLocation());
+				const FName LevelName = FName(*FPackageName::ObjectPathToPackageName(LevelToLoad.ToString()));
+				UE_LOG(LogTemp, Warning, TEXT("Map to load %s"), *LevelName.ToString());
+				GameInstanceRef->LoadOneLevel(LevelName, this, FName("TpPlayer"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Je sais pas pourquoi t'es vide"));
 			}
 		}
+	}
+}
+
+void ALoadingLevelBox::TpPlayer()
+{
+	if (UGI_GreenOne* GameInstanceRef = Cast<UGI_GreenOne>(GetWorld()->GetGameInstance()))
+	{
+		if (!PlayerStartRef.IsNull())
+		{
+			if (AActor* TargetLocation = Cast<AActor>(PlayerStartRef.LoadSynchronous()))
+			{
+				FTimerHandle TimerTP;
+				GetWorld()->GetTimerManager().SetTimer(TimerTP, [=](){PlayerRef->SetActorLocation(TargetLocation->GetActorLocation()); }, 0.01f, false);
+				UE_LOG(LogTemp, Warning, TEXT("HHAHAHAHAHA ça n'a pas marcher."));
+			}
+		}
+		GameInstanceRef->RemoveLoadingScreen();
 	}
 }
 

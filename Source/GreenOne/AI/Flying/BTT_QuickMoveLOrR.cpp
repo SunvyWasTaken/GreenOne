@@ -13,7 +13,7 @@ UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 	bNotifyTick = true;
 	MoveTime = 1.f;
 	bCreateNodeInstance = true;
-	bNotifyTaskFinished = true;
+	//bNotifyTaskFinished = true;
 }
 
 EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -56,7 +56,8 @@ void UBTT_QuickMoveLOrR::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		}
 		if (const AActor* PlayerRef = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetRef.SelectedKeyName)))
 		{
-			const float dotPro = UKismetMathLibrary::Dot_VectorVector(Pawn->GetActorForwardVector(), PlayerRef->GetActorUpVector());
+			const FVector Upvec = UKismetMathLibrary::RotateAngleAxis(PlayerRef->GetActorUpVector(), -25.f, PlayerRef->GetActorRightVector());
+			const float dotPro = UKismetMathLibrary::Dot_VectorVector(Pawn->GetActorForwardVector(), Upvec);
 			if (abs(dotPro) >= PercentAlignment)
 			{
 				

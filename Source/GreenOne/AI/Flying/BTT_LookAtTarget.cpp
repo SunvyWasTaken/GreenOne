@@ -35,8 +35,11 @@ void UBTT_LookAtTarget::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	const FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(OwnerComp.GetAIOwner()->GetPawn()->GetActorLocation(), PlayerRefActor->GetActorLocation());
 	const FRotator CurrentRotation = UKismetMathLibrary::RInterpTo_Constant(OwnerComp.GetAIOwner()->GetPawn()->GetActorRotation(), TargetRotation, DeltaSeconds, RotationSpeed);
 	OwnerComp.GetAIOwner()->GetPawn()->SetActorRotation(CurrentRotation);
-	if (TargetRotation.Equals(CurrentRotation, RotationTolerance))
+	if (bHasToSucceed)
 	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		if (TargetRotation.Equals(CurrentRotation, RotationTolerance))
+		{
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
 	}
 }
