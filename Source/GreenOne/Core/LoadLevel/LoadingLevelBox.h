@@ -19,6 +19,7 @@ protected:
 
 	virtual void BeginPlay();
 
+
 public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
@@ -27,12 +28,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	class UTextRenderComponent* LevelNameText;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Level")
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Custom|Level")
 	TSoftObjectPtr<UWorld> LevelToLoad;
 
 	/** Please add a variable description */
 	UPROPERTY(BlueprintReadWrite, EditInstanceOnly, Category = "Custom|Level")
-	TObjectPtr<class APlayerStart> PlayerStartRef;
+	TSoftObjectPtr<class APlayerStart> PlayerStartRef;
 
 
 private:
