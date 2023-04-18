@@ -17,6 +17,16 @@ enum class EDimension : uint8
 	Alternate
 };
 
+/*UENUM(BlueprintType)
+enum EStates
+{
+	LeftDas,
+	RightDash,
+	WAlk,
+	Fight
+};*/
+
+
 // TODO ajouter un dot pour faire en sorte que le truc aille pas non plus au dessus du player Ou en dessous totalement de la map.
 
 /**
@@ -79,8 +89,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 		UAnimMontage* LeftDash;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
-		bool CanDash = false;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+		//bool CanDash = false;
 private:
 	
 		void SetDash(UBehaviorTreeComponent& OwnerComp);

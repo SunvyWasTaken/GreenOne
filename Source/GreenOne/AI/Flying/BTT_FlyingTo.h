@@ -57,7 +57,7 @@ public:
 	/**
 	 * Multiplier used to determine the speed at which AI will accelerate.
 	 */
-	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (EditCondition = bOverrideSpeed, DisplayName = "Multiplicateur d'accélération"))
+	UPROPERTY(EditAnywhere, AdvancedDisplay, meta = (EditCondition = bOverrideSpeed, DisplayName = "Multiplicateur d'accÃ©lÃ©ration"))
 		float AccelerationMultiPly = 2.f;
 
 	/**

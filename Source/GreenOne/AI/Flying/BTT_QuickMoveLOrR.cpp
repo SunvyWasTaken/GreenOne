@@ -9,6 +9,7 @@
 #include "GreenOne/AI/Melee/MeleeAICharacter.h"
 
 
+
 UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 {
 	bNotifyTick = true;
@@ -90,13 +91,37 @@ void UBTT_QuickMoveLOrR::SetFlyingRotation(APawn* RefOwner, FVector2D Axis)
 
 void UBTT_QuickMoveLOrR::SetDash(UBehaviorTreeComponent& OwnerComp)
 {
-	AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn());
+	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		if(CanDash)
-		{	
-			PlayerRef->PlayAnimMontage(LeftDash, 1, NAME_None);
+		if(DirectionValue == -1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("gauche"));
+			PlayerRef->CanLDash = true;
+			PlayerRef->CanRDash = false; 
 		}
+		else if(DirectionValue == 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("droite"));
+			PlayerRef->CanRDash = true;
+			PlayerRef->CanLDash = false; 
+			//PlayerRef->CanLDash = true; 
+		}
+		
 	}
+
+	/*if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	{
+		
+	}*/
+	
+		
+		//if(CanDash)
+		//{
+			//EStates EState = EStates::LeftDas;
+			//enum States { LeftDas };
+			//PlayerRef->PlayAnimMontage(LeftDash, 1, NAME_None);
+		//}
+	
 	
 
 }
