@@ -7,6 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GreenOne/Core/Instance/GI_GreenOne.h"
 #include "Components/TextRenderComponent.h"
+#include "GameFramework/PlayerStart.h"
 
 // Sets default values
 ALoadingLevelBox::ALoadingLevelBox()
@@ -36,6 +37,10 @@ void ALoadingLevelBox::OnComponentOverlap(UPrimitiveComponent* OverlappedCompone
 		if (GameInstanceRef != nullptr)
 		{
 			GameInstanceRef->LoadOneLevel(LevelToLoad);
+			if (PlayerStartRef != nullptr)
+			{
+				OtherActor->SetActorLocation(PlayerStartRef->GetActorLocation());
+			}
 		}
 	}
 }

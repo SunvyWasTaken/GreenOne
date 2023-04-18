@@ -21,14 +21,19 @@ protected:
 
 public:
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	class UBoxComponent* CollisionBox;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	class UTextRenderComponent* LevelNameText;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Level")
 	TSoftObjectPtr<UWorld> LevelToLoad;
+
+	/** Please add a variable description */
+	UPROPERTY(BlueprintReadWrite, EditInstanceOnly, Category = "Custom|Level")
+	TObjectPtr<class APlayerStart> PlayerStartRef;
+
 
 private:
 
