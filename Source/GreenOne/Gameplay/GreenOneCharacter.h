@@ -65,6 +65,9 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	UPROPERTY(EditAnywhere)
 	class UAttackMelee* AttackMeleeComponent;
 	
+	UFUNCTION(BlueprintCallable)
+	void SetLastTouchLocation(FVector Location);
+	
 public:
 
 	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);
@@ -145,6 +148,8 @@ protected:
 
 	virtual void BeginPlay();
 
+	virtual void FellOutOfWorld(const class UDamageType& dmgType) override;
+
 private:
 
 	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
@@ -168,6 +173,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool Immortal = false;
+
+	UFUNCTION()
+	void Respawn();
+
+	FVector LastTouchLocation;
 
 public:
 
@@ -209,10 +219,9 @@ public:
 	float DamagePlayer = 10.f;
 
 	/**
-	 * Cooldown entre chaque tire par default c'est 1/3;
-	 * c'est a dire 1 tire toutes les 3 secondes.
+	 * Cadence de tir nombre de ball par S.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0), Category = "Custom|Combat")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 0, DisplayName = "Cadence de tir"), Category = "Custom|Combat")
 	float ShootCooldown;
 
 	/**

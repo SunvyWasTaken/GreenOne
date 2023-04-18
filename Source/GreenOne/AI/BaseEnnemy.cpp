@@ -13,6 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "GreenOne/Gameplay/Ennemy/AC_DisplayDamage.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 ABaseEnnemy::ABaseEnnemy()
@@ -90,17 +91,21 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 			}
 		}
 	}
-	Health -= DamageApply * CurrentDamageMulti;
+	if (UKismetMathLibrary::ClassIsChildOf(DamageSource->StaticClass(), ABaseEnnemy::StaticClass()))
+	{
+		Health -= (DamageApply - DamageApply * PercentDamageReduct) * CurrentDamageMulti;
+	}
+	else
+	{
+		Health -= DamageApply * CurrentDamageMulti;
+	}
 	if (IsFriendlyFire)
 	{
 		Cast<AAIController>(Controller)->GetBlackboardComponent()->SetValueAsObject("TargetPlayer", DamageSource);
 	}
-	else
+	if (UKismetMathLibrary::ClassIsChildOf(DamageSource->StaticClass(), AGreenOneCharacter::StaticClass()))
 	{
-		if (UKismetMathLibrary::ClassIsChildOf(DamageSource->StaticClass(), AGreenOneCharacter::StaticClass()))
-		{
-			Cast<AAIController>(Controller)->GetBlackboardComponent()->SetValueAsObject("TargetPlayer", DamageSource);
-		}
+		Cast<AAIController>(Controller)->GetBlackboardComponent()->SetValueAsObject("TargetPlayer", DamageSource);
 	}
 	if (LifeTreshold.Num() == MatTreshold.Num())
 	{

@@ -23,6 +23,9 @@ public:
 
 	virtual void Init();
 
+	UFUNCTION(BlueprintCallable)
+		void LoadOneLevel(TSoftObjectPtr<UWorld> LevelToLoad);
+
 #pragma region Loading Screen
 
 	UPROPERTY(EditDefaultsOnly, Category = "Loading Screen")

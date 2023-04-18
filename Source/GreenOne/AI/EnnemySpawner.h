@@ -43,13 +43,22 @@ public:
 	UFUNCTION()
 		void RemoveEntityFromList(class ABaseEnnemy* entity);
 
+	/// <summary>
+	/// Spawns an entity in the game world.
+	/// </summary>
+	UFUNCTION(BlueprintCallable)
+		void SpawnEntity();
+
+	UFUNCTION(BlueprintCallable)
+		void SetPlayerRefToEntitys(AActor* ref);
+
 /************************************************************************/
 /* Spawner Property														*/
 /************************************************************************/
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom")
 		//This variable is used to store a reference to a subclass of the ABaseEnnemy class, which can then be used to spawn an instance of the subclass.
 		TSubclassOf<class ABaseEnnemy> EnnemyToSpawnClass;
 
@@ -77,16 +86,12 @@ public:
 		//This variable is used to store the minimum number of enemies that can be spawned in a game.
 		int MinNbrSpawnEnnemy;
 
+
 private:
 
 	FTimerHandle SpawnHandler;
 
 	void TriggerSpawnEntity();
-
-	/// <summary>
-	/// Spawns an entity in the game world.
-	/// </summary>
-	void SpawnEntity();
 
 	// for a intern cooldown
 	void SpawnTick(float deltaseconds);
@@ -98,7 +103,5 @@ private:
 	TArray<class ABaseEnnemy*> EntityList;
 
 	AActor* PlayerRef;
-
-	void SetPlayerRefToEntitys(AActor* ref);
 
 };

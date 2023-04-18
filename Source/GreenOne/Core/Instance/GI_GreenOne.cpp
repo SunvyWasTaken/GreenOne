@@ -8,11 +8,9 @@
 #include "GreenOne/Core/Audio/SG_AudioSettings.h"
 #include "Engine/LevelStreaming.h"
 
-
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
 	SaveClass = USG_GreenOne::StaticClass();
-
 }
 
 void UGI_GreenOne::Init()
@@ -47,6 +45,39 @@ void UGI_GreenOne::RemoveLoadingScreen()
 		return;
 	}
 	CurrentLoadingScreen->RemoveFromParent();
+}
+
+void UGI_GreenOne::LoadOneLevel(TSoftObjectPtr<UWorld> LevelToLoad)
+{
+	if (!LevelToLoad)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("T'as oublié de mettre un level à load."));
+		return;
+	}
+	DisplayLoadingScreen();
+	FLatentActionInfo LatentInfo;
+	LatentInfo.CallbackTarget = this;
+	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
+	LatentInfo.Linkage = 0;
+	LatentInfo.UUID = 0;
+	FName LevelToUnload;
+	for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
+	{
+		if (!CurrentLevel)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
+			continue;
+		}
+		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+		{
+			LevelToUnload = CurrentLevel->GetWorldAssetPackageFName();
+			break;
+		}
+	}
+	FLatentActionInfo UnloadInfo;
+	UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
+	UGameplayStatics::LoadStreamLevelBySoftObjectPtr(GetWorld(), LevelToLoad, true, true, LatentInfo);
+
 }
 
 #pragma region Save
@@ -138,7 +169,17 @@ USG_GreenOne* UGI_GreenOne::CreateSave()
 void UGI_GreenOne::ApplySaveData()
 {
 	if (!CurrentSave) { return; }
-	if (CurrentSave->bIsFirstTime) { return; }
+	if (CurrentSave->bIsFirstTime)
+	{
+		DisplayLoadingScreen();
+		FLatentActionInfo LatentInfo;
+		LatentInfo.CallbackTarget = this;
+		LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
+		LatentInfo.Linkage = 0;
+		LatentInfo.UUID = 5;
+		UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
+		return;
+	}
 	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (!PlayerRef)
 	{
@@ -152,18 +193,17 @@ void UGI_GreenOne::ApplySaveData()
 	LatentInfo.CallbackTarget = this;
 	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
 	LatentInfo.Linkage = 0;
-	LatentInfo.UUID = 0;
 	UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
 }
 
 void UGI_GreenOne::DisplaySaveScreen()
 {
-	if (!CurrenSaveScreen)
+	if (CurrenSaveScreen == nullptr)
 	{
 		CurrenSaveScreen = CreateWidget<UUserWidget>(GetWorld(), SaveScreenClass);
 		CurrenSaveScreen->AddToViewport();
 	}
-	else
+	else if(IsValid(CurrenSaveScreen))
 	{
 		CurrenSaveScreen->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
@@ -282,20 +322,25 @@ void UGI_GreenOne::LoadAudioSave()
 
 void UGI_GreenOne::SavedAudioSettings()
 {
-	if (AudioSettingsRef == nullptr)
+	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Attention save du sound la variable AudioSettingsRef nullptr"));
-		return;
+		if (AudioSettingsRef != nullptr)
+		{
+			UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
+			return;
+		}
 	}
-	if (!UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Save audio FAILD!!!"));
-	}
+	//CreateAudioSave();
+	//if (!)
+	//{
+	UE_LOG(LogTemp, Warning, TEXT("Attention save du sound la variable AudioSettingsRef nullptr"));
+	//	UE_LOG(LogTemp, Error, TEXT("Save audio FAILD!!!"));
+	//}
 }
 
 void UGI_GreenOne::ApplyAudioSettings()
 {
-	if (!AudioSettingsRef)
+	if (AudioSettingsRef == nullptr)
 	{
 		CreateAudioSave();
 	}

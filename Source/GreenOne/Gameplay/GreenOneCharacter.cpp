@@ -96,7 +96,7 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	ShootCooldown = 1.f / 3.f;
+	ShootCooldown = 3.f;
 	ShootBloom = 0.f;
 	CanShoot = true;
 
@@ -107,6 +107,9 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	bIsDashing = false;
 
 	JumpMaxCount = 2;
+
+	MaxHealth = Health;
+	ShootCooldownRemaining = 1.f / ShootCooldown;
 	
 }
 
@@ -122,9 +125,13 @@ void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	{
 		MaxHealth = Health;
 	}
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, SocketMuzzle))
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, ShootCooldown))
 	{
-		//TargetMuzzle->SetAttachSocketName(SocketMuzzle);
+		ShootCooldownRemaining = 1.f / ShootCooldown;
+	}
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, Health))
+	{
+		MaxHealth = Health;
 	}
 }
 #endif
@@ -181,8 +188,17 @@ void AGreenOneCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	MaxHealth = Health;
-	ShootCooldownRemaining = ShootCooldown;
+}
+
+void AGreenOneCharacter::FellOutOfWorld(const UDamageType& dmgType)
+{
+	Respawn();
+}
+
+void AGreenOneCharacter::SetLastTouchLocation(FVector Location)
+{
+	LastTouchLocation = Location;
+	return;
 }
 
 void AGreenOneCharacter::Tick(float DeltaSeconds)
@@ -235,6 +251,16 @@ void AGreenOneCharacter::Interact()
 	// TODO
 }
 
+void AGreenOneCharacter::Respawn()
+{
+	SetActorLocation(LastTouchLocation);
+	if (this->Implements<UEntityGame>())
+	{
+		IEntityGame::Execute_EntityTakeDamage(this, MaxHealth*0.1f, FName("None"), this);
+	}
+	GetCharacterMovement()->StopMovementImmediately();
+}
+
 void AGreenOneCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
@@ -281,7 +307,7 @@ void AGreenOneCharacter::Shoot()
 	if (!CanShoot) { return; }
 
 	CanShoot = false;
-	GetWorld()->GetTimerManager().SetTimer(ShootHandler, this, &AGreenOneCharacter::ShootRafale, ShootCooldown, true);
+	GetWorld()->GetTimerManager().SetTimer(ShootHandler, this, &AGreenOneCharacter::ShootRafale, 1/ShootCooldown, true);
 	ShootRafale();
 }
 
@@ -356,7 +382,7 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 		ShootCooldownRemaining -= deltatime;
 		if (ShootCooldownRemaining <= 0.f)
 		{
-			ShootCooldownRemaining = ShootCooldown;
+			ShootCooldownRemaining = 1/ShootCooldown;
 			CanShoot = true;
 		}
 	}

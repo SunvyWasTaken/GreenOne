@@ -53,7 +53,7 @@ void UBTT_Dodge::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 {
 	ControllerRef->GetPawn()->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(ControllerRef->GetPawn()->GetActorLocation(), PlayerRef->GetActorLocation()));
 	const double DistanceBetween = FVector::Distance(PlayerRef->GetActorLocation(), ControllerRef->GetPawn()->GetActorLocation());
-	FVector DodgeVelocity = ControllerRef->GetPawn()->GetActorRightVector() * DodgeDirection;
+	FVector DodgeVelocity = ControllerRef->GetPawn()->GetActorRightVector() * DodgeDirection + (ControllerRef->GetPawn()->GetActorForwardVector() * -1) * (DistanceBetween <= SafeDistance ? (1) : (0));
 	//Normalize the DodgeVelocity vector
 	DodgeVelocity.Normalize();
 
@@ -74,15 +74,32 @@ void UBTT_Dodge::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, 
 	}
 	// Calculates the dot product of the controller's pawn's forward vector and the player's forward vector.
 	const float DotPro = FVector::DotProduct(ControllerRef->GetPawn()->GetActorForwardVector(), PlayerRef->GetActorForwardVector());
-	if (DotPro >= DodgeDistance || DotPro >= DodgeDistance * -1)
+	if (bShouldGetSafeDistance)
 	{
-		// Set the maximum flying speed of the character movement component to the initial flying speed.
-		CharaMovementComp->MaxFlySpeed = FlyingSpeedInit;
+		if (DotPro >= DodgeDistance || DotPro >= DodgeDistance * -1 && DistanceBetween >= SafeDistance)
+		{
+			// Set the maximum flying speed of the character movement component to the initial flying speed.
+			CharaMovementComp->MaxFlySpeed = FlyingSpeedInit;
 
-		// Set the character movement component to orient the rotation to the movement. 
-		CharaMovementComp->bOrientRotationToMovement = true;
+			// Set the character movement component to orient the rotation to the movement. 
+			CharaMovementComp->bOrientRotationToMovement = true;
 
-		// Finish the latent task with a successful result. 
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+			// Finish the latent task with a successful result. 
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	}
+	else
+	{
+		if (DotPro >= DodgeDistance || DotPro >= DodgeDistance * -1 || DistanceBetween >= SafeDistance)
+		{
+			// Set the maximum flying speed of the character movement component to the initial flying speed.
+			CharaMovementComp->MaxFlySpeed = FlyingSpeedInit;
+
+			// Set the character movement component to orient the rotation to the movement. 
+			CharaMovementComp->bOrientRotationToMovement = true;
+
+			// Finish the latent task with a successful result. 
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
 	}
 }

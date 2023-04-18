@@ -19,26 +19,21 @@ protected:
 
 	virtual void BeginPlay();
 
-	#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
-	#endif
-
 public:
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	class UBoxComponent* CollisionBox;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	class UTextRenderComponent* LevelNameText;
 
-	UPROPERTY(EditAnywhere)
-	FName LevelName;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Level")
+	TSoftObjectPtr<UWorld> LevelToLoad;
 
-	UPROPERTY(EditAnywhere)
-	FVector CollisionSize;
+	/** Please add a variable description */
+	UPROPERTY(BlueprintReadWrite, EditInstanceOnly, Category = "Custom|Level")
+	TObjectPtr<class APlayerStart> PlayerStartRef;
 
-	UPROPERTY(EditAnywhere)
-	bool ShouldUnload;
 
 private:
 
