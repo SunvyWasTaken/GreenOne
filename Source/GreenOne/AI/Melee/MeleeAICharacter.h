@@ -79,6 +79,11 @@ private:
 
 #pragma region AnimationValue
 public:
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool CanDash() { return !IsDashing; };
+
+	bool IsDashing = false;
 	
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	//UAnimMontage* LeftDash;

@@ -20,11 +20,12 @@ UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 
 EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	SetDash(OwnerComp);
+	
 	CurrentTime = MoveTime;
 	DirectionValue = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	OtherDirection = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	IsHorizontal = UKismetMathLibrary::RandomBool();
+	SetDash(OwnerComp);
 	return EBTNodeResult::InProgress;
 }
 
@@ -86,6 +87,16 @@ void UBTT_QuickMoveLOrR::SetFlyingRotation(APawn* RefOwner, FVector2D Axis)
 	{
 		Oui->SetRotationAxis(Axis);
 	}
+}
+
+void UBTT_QuickMoveLOrR::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	{
+		PlayerRef->CanLDash = false;
+		PlayerRef->CanRDash = false;
+	}
+
 }
 
 void UBTT_QuickMoveLOrR::SetDash(UBehaviorTreeComponent& OwnerComp)
