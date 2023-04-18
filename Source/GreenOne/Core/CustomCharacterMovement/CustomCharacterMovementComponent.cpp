@@ -9,7 +9,7 @@
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	CustomGravityScale = GravityScale;
+	GravityScale = CustomGravityScale;
 	JumpZVelocity = JumpVelocity;
 	MaxDistanceHorizontalJump = JumpZVelocity / 2;
 }
@@ -239,11 +239,13 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
 			TargetJumpLocation.Z = VerticalJumpHitResult.ImpactPoint.Z;
 		}	
 	}
-	
+
+	float NewZVelocity = UKismetMathLibrary::Ease(VerticalJumpVelocity,0, CurveDeltaTime,VerticalJumpCurve);
+	Velocity.Z = NewZVelocity;
 	if(CurveDeltaTime > SafeZone)
 	{
 		bVerticalJump = false;
-		Velocity.Z = 0.f;
+		//Velocity.Z = 0.f;
 		return;
 	}
 	const float NewZLocation = UKismetMathLibrary::Ease(CurrentLocation.Z,TargetJumpLocation.Z, CurveDeltaTime,VerticalJumpCurve);

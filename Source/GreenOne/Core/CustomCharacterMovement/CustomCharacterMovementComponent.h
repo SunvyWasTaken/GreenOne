@@ -71,7 +71,6 @@ public:
 #pragma region Jump/Falling
 	//Attributes//
 private:
-	float CustomGravityScale;
 	int32 MaxJump = 2;
 
 	EJumpState InJumpState = JS_None;
@@ -115,6 +114,9 @@ public:
 	/** Commun a tous les jumps */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Jump/Falling", DisplayName = "Velocité général", meta = (ForceUnits = "cm/s"))
 	float JumpVelocity = 700.f;
+
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling", DisplayName = "Jump Gravité")
+	float CustomGravityScale = 1.75f;
 
 	//Functions//
 private:
