@@ -28,28 +28,54 @@ void ALoadingLevelBox::BeginPlay()
 	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ALoadingLevelBox::OnComponentOverlap);
 }
 
+#if WITH_EDITOR
+
+void ALoadingLevelBox::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(ALoadingLevelBox, LevelToLoad))
+	{
+		LevelNameText->SetText(FText::FromString(LevelToLoad.GetAssetName()));
+	}
+}
+
+#endif // WITH_EDITOR
+
 void ALoadingLevelBox::OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (Cast<AGreenOneCharacter>(OtherActor))
+	PlayerRef = Cast<AGreenOneCharacter>(OtherActor);
+	if (PlayerRef != nullptr)
 	{
 		UGI_GreenOne* GameInstanceRef = Cast<UGI_GreenOne>(GetWorld()->GetGameInstance());
 		if (GameInstanceRef != nullptr)
 		{
 			if (!LevelToLoad.IsNull())
 			{
-				FString MapName = LevelToLoad.GetAssetName();
-				UE_LOG(LogTemp, Warning, TEXT("Map to load %s"), *MapName);
-				GameInstanceRef->LoadOneLevel(MapName);
+				const FName LevelName = FName(*FPackageName::ObjectPathToPackageName(LevelToLoad.ToString()));
+				UE_LOG(LogTemp, Warning, TEXT("Map to load %s"), *LevelName.ToString());
+				GameInstanceRef->LoadOneLevel(LevelName, this, FName("TpPlayer"));
 			}
 			else
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Je sais pas pourquoi t'es vide"));
 			}
-			if (!PlayerStartRef.IsNull())
+		}
+	}
+}
+
+void ALoadingLevelBox::TpPlayer()
+{
+	if (UGI_GreenOne* GameInstanceRef = Cast<UGI_GreenOne>(GetWorld()->GetGameInstance()))
+	{
+		if (!PlayerStartRef.IsNull())
+		{
+			if (AActor* TargetLocation = Cast<AActor>(PlayerStartRef.LoadSynchronous()))
 			{
-				OtherActor->SetActorLocation(PlayerStartRef->GetActorLocation());
+				FTimerHandle TimerTP;
+				GetWorld()->GetTimerManager().SetTimer(TimerTP, [=](){PlayerRef->SetActorLocation(TargetLocation->GetActorLocation()); }, 0.01f, false);
+				UE_LOG(LogTemp, Warning, TEXT("HHAHAHAHAHA ça n'a pas marcher."));
 			}
 		}
+		GameInstanceRef->RemoveLoadingScreen();
 	}
 }
 

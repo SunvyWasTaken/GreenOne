@@ -19,6 +19,10 @@ protected:
 
 	virtual void BeginPlay();
 
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
+#endif // WITH_EDITOR
+
 
 public:
 
@@ -38,7 +42,12 @@ public:
 
 private:
 
+	AActor* PlayerRef;
+
 	UFUNCTION()
 	void OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void TpPlayer();
 
 };
