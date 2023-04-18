@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "CustomCharacterMovementComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -79,11 +80,17 @@ private:
 	bool bManualVerticalVelocity;
 	/** Default value of vertical jump is the same that jump velocity */
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Force d'impulsion du jump vertical", meta = (ForceUnits = "cm/s",  EditCondition="bManualVerticalVelocity"))
-	float VerticalJumpVelocity = 600.f;
+	float VerticalJumpVelocity = 1000.f;
 	float VelocityTemp;
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Hauteur max", meta = (ForceUnits = "cm/s"))
-	float MaxVerticalHeight = 1000.f;
+	float MaxVerticalHeight = 800.f;
 	bool bVerticalJump;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", meta = (ClampMin = 0.0f, ClampMax = 1.f))
+	float SafeZone = 1.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Type de curve de jump")
+	TEnumAsByte<EEasingFunc::Type> VerticalJumpCurve = EEasingFunc::CircularOut;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Activer la détection du plafond")
+	bool bActiveCheckRoof = false;
 
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
 	bool bManualHorizontalVelocity = false;
@@ -108,9 +115,6 @@ public:
 	/** Commun a tous les jumps */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Jump/Falling", DisplayName = "Velocité général", meta = (ForceUnits = "cm/s"))
 	float JumpVelocity = 700.f;
-	
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Gravité de descente du jump vertical")
-	float FallingGravity = .9f;
 
 	//Functions//
 private:
@@ -118,7 +122,7 @@ private:
 	bool VerticalJump();
 	bool HorizontalJump();
 	void ExecHorizontalJump();
-	void ExecVerticalJump(float DelatTime);
+	void ExecVerticalJump(const float DeltaTime);
 
 public:
 	UFUNCTION(BlueprintCallable)

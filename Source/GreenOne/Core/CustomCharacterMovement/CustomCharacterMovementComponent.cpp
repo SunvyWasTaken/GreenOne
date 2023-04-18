@@ -221,26 +221,33 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 	CurrentLocation = GetActorLocation();
 }
 
-void UCustomCharacterMovementComponent::ExecVerticalJump(float DelatTime)
+void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
 {
 	if(!bVerticalJump) return;
 
-	JumpTime += DelatTime;
+	JumpTime += DeltaTime;
 
 	const float CurveDeltaTime = (VelocityTemp/MaxVerticalHeight)*JumpTime;
-	UE_LOG(LogTemp, Warning, TEXT("TT %f"),CurveDeltaTime);
 
-	if(CurveDeltaTime > 1)
+	if(bActiveCheckRoof)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TT >"));
+		FHitResult VerticalJumpHitResult;
+		const bool bVerticalJumpHit = GetWorld()->LineTraceSingleByChannel(VerticalJumpHitResult,GetOwnerCharacter()->GetActorLocation(),GetOwnerCharacter()->GetActorLocation() + FVector::UpVector * 3, ECC_Visibility);
+		if(bVerticalJumpHit)
+		{
+			DrawDebugSphere(GetWorld(),VerticalJumpHitResult.ImpactPoint, 8, 10, FColor::Red,false, 2);
+			TargetJumpLocation.Z = VerticalJumpHitResult.ImpactPoint.Z;
+		}	
+	}
+	
+	if(CurveDeltaTime > SafeZone)
+	{
 		bVerticalJump = false;
 		Velocity.Z = 0.f;
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("LA "));
-	float tempZ = UKismetMathLibrary::Ease(CurrentLocation.Z,TargetJumpLocation.Z, CurveDeltaTime,EEasingFunc::EaseOut);
-	UE_LOG(LogTemp, Warning, TEXT("tempZ %f"),tempZ);
-	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X,GetOwnerCharacter()->GetActorLocation().Y,tempZ));
+	const float NewZLocation = UKismetMathLibrary::Ease(CurrentLocation.Z,TargetJumpLocation.Z, CurveDeltaTime,VerticalJumpCurve);
+	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X,GetOwnerCharacter()->GetActorLocation().Y,NewZLocation), true);
 }
 
 void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& NewDirection)
