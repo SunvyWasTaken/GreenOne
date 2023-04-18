@@ -35,11 +35,7 @@ UFertilizerTankComponent::UFertilizerTankComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
-
-#if WITH_EDITOR
-
-#endif
+	PrimaryComponentTick.bCanEverTick = true;
 
 }
 
@@ -64,6 +60,24 @@ void UFertilizerTankComponent::BeginPlay()
 void UFertilizerTankComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	
+#if WITH_EDITOR
+
+	if(bDrawDebugValues)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Red, FString::Printf(TEXT("Current Fertilizer Type : %s"),*GetFertilizerTypeName()), true, FVector2d(1.2, 1.2));
+		Struct = GetCurrentFertilizerTankActive(GetCurrentFertilizerType());
+		if(Struct)
+		{
+			GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Green, FString::Printf(TEXT("Fertilizer Max Gauge Value : %f"), Struct->MaxGaugeValue), true, FVector2d(1.2, 1.2));
+			GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Red, FString::Printf(TEXT("Fertilizer Reduce Gauge Value : %f"), Struct->ReduceGaugeValue), true, FVector2d(1.2, 1.2));
+			GEngine->AddOnScreenDebugMessage(4, .1f, FColor::Blue, FString::Printf(TEXT("Fertilizer Gauge Value : %f"), Struct->GaugeValue), true, FVector2d(1.2, 1.2));
+		}	
+	}
+
+
+#endif
 	
 }
 
@@ -133,5 +147,23 @@ FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive(F
 	if(!IsTypeExist(Type)) return nullptr;
 	
 	return FertilizerTanks.Find(Type);
+}
+
+FString UFertilizerTankComponent::GetFertilizerTypeName() const
+{
+	switch (EFertilizerType)
+	{
+	case FertilizerType::None:
+		return FString(TEXT("Aucun"));
+		break;
+	case FertilizerType::SlowDown:
+		return FString(TEXT("SlowDown"));
+		break;
+	case FertilizerType::AttackBonus:
+		return FString(TEXT("AttackBonus"));
+		break;
+	}
+
+	return FString(TEXT("Aucun"));
 }
 

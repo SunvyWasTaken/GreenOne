@@ -54,12 +54,13 @@ private:
 	TMap<FertilizerType,FertilizerTankStruct> FertilizerTanks;
 	bool IsTypeExist(const FertilizerType Type) const;
 
-	UPROPERTY(EditAnywhere, Category = "Test")
+	UPROPERTY(EditAnywhere, Category = "Debug")
 	FertilizerType EFertilizerType;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool bDrawDebugValues;
+	FertilizerTankStruct* Struct;
 #endif
 	
 	
@@ -78,6 +79,9 @@ public:
 	class UFertilizerBase* GetEffect(FertilizerType Type);
 	
 	FertilizerTankStruct* GetCurrentFertilizerTankActive(FertilizerType Type);
-	//TODO: L'effet de l'engrais est propres a son réservoir, si le reservoir est vide alors on ne creer plus d'effet
+	//TODO: L'effet de l'engrais est propres a son réservoir, si le reservoir est vide alors on ne creer plus d'effet = ok
+
+	/**Only Debug -> To Delete*/
+	FString GetFertilizerTypeName() const;
 	
 };
