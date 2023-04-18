@@ -349,7 +349,7 @@ void AGreenOneCharacter::ShootRafale()
 		}
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
+			// UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
 			IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
@@ -459,10 +459,9 @@ void AGreenOneCharacter::TurnCamera()
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
-
 	// input is a Vector2D
 	MovementVector = Value.Get<FVector2D>();
-	CustomCharacterMovementComponent->SetDashDirectionVector(MovementVector);
+	GetCustomCharacterMovement()->SetDashDirectionVector(MovementVector);
 	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
 
 	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
@@ -471,7 +470,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FRotator YawRotation = FRotator(0, Rotation.Yaw, 0);
 
 		// get forward vector
 		ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
@@ -504,7 +503,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 void AGreenOneCharacter::CanRegenerate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
+	// UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
 
 	if(Health >= MaxHealth)
 		return;
@@ -512,7 +511,7 @@ void AGreenOneCharacter::CanRegenerate()
 	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
 		IsCombatMode = false;
-		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
+		// UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
 	},CoolDown, false);
 	/*while(IsCombatMode == false && Health < 100 && CoolDown <= 5)
 	{
@@ -538,9 +537,9 @@ void AGreenOneCharacter::Regenerate(float DeltaSeconds)
 	
 	if(Health < MaxHealth)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("+10 health"));
+		// UE_LOG(LogTemp, Warning, TEXT("+10 health"));
 		Health += 10*DeltaSeconds;
-		UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
+		// UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
 		if(Health >= MaxHealth)
 		{
 			Health = MaxHealth;

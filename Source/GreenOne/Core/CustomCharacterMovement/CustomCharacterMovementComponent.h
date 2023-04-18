@@ -172,6 +172,10 @@ private:
 
 	FVector StartDashLocation = FVector::ZeroVector;
 
+	FRotator BeforeRotationCharacter = FRotator::ZeroRotator;
+
+	FRotator TempRotationCharacter = FRotator::ZeroRotator;
+
 	FVector2D DashDirectionVector = FVector2D::ZeroVector;
 
 	float CurrentDashAlpha = 0.f;

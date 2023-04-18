@@ -274,6 +274,7 @@ void UCustomCharacterMovementComponent::Dash()
 	if (bDashOnCooldown || bIsDashing) { return; }
 	// 
 
+	BeforeRotationCharacter = GC->GetActorRotation();
 	GC->GetCharacterMovement()->SetMovementMode(MOVE_Custom, CMOVE_DASH);
 	StartDashLocation = GC->GetActorLocation();
 
@@ -281,14 +282,18 @@ void UCustomCharacterMovementComponent::Dash()
 
 	// Récupération de la direction du joueur
 	FVector Direction = GC->GetActorForwardVector().GetSafeNormal2D();
-
-	if (DashDirectionVector != FVector2D::ZeroVector )
+	TempRotationCharacter = FRotator(0.f, Direction.Rotation().Yaw, 0.f);
+	
+	if ( DashDirectionVector != FVector2D::ZeroVector )
 	{
 		FVector Forward = GC->GetActorForwardVector().GetSafeNormal2D() * DashDirectionVector.Y;
 		FVector Right = GC->GetActorRightVector().GetSafeNormal2D() * DashDirectionVector.X;
 		Direction = Forward + Right;
 		Direction.Normalize();
 	}
+
+	float Yaw = ( Direction.Rotation().Yaw );
+	TempRotationCharacter = FRotator( 0.f, Yaw, 0.f);
 
 	Direction = FVector(Direction.X, Direction.Y, 0.f);
 
@@ -336,12 +341,13 @@ void UCustomCharacterMovementComponent::DashTick(float DeltaTime)
 		CurrentDashCooldown = DashCooldown;
 		bIsDashing = false;
 		bDashOnCooldown = true;
-		GreenOneCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		GC->SetActorRotation(BeforeRotationCharacter);
+		GC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	}
 
 	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
-	GreenOneCharacter->SetActorLocation(TargetLocation);
-	
+	GC->SetActorLocation(TargetLocation);
+	GC->SetActorRotation(TempRotationCharacter);
 }
 
 void UCustomCharacterMovementComponent::CooldownTick(float DeltaTime)
