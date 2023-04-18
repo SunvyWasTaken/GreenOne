@@ -47,6 +47,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanShoot() { return !IsInCooldown; };
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsShooting() { return bIsShooting; }
+
+	UFUNCTION(BlueprintCallable)
+	void TimerShoot();
+
 	/**
 	 * Correspond au nombre de tire par seconde
 	 * 2 = 2 tire par seconde
@@ -71,7 +77,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = bUseTrace), Category = "Custom|Tire|UseTrace")
 	float ShootRange = 5000.f;
 
+private:
+
+	bool bIsShooting = false;
+
 #pragma endregion
+
+public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void UpdateMaxSpeed(float Speed) override;
@@ -144,8 +156,6 @@ private:
 	bool IsInCooldown = false;
 
 	float TimeRemainingForShoot = 0;
-
-	void TimerShoot();
 
 	FTimerHandle ShootTimer;
 

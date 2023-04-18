@@ -65,7 +65,8 @@ void AFlyingAICharacter::Shoot()
 	//GetWorld()->GetTimerManager().SetTimer(ShootTimer, this, &AFlyingAICharacter::TimerShoot, ShootRate, true);
 	if (!IsInCooldown)
 	{
-		TimerShoot();
+		bIsShooting = true;
+		//TimerShoot();
 	}
 }
 
@@ -176,6 +177,7 @@ void AFlyingAICharacter::TickCooldown(float DeltaSeconds)
 
 void AFlyingAICharacter::TimerShoot()
 {
+	bIsShooting = false;
 	if (bUseTrace)
 	{
 		FHitResult Outhit;
