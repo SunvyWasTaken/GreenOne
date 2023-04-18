@@ -349,10 +349,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Test")
 	FertilizerType EFertilizerType;
 
-	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
-
-	bool IsCurrentEffectExist(FertilizerType Type);
-
 #pragma endregion 
 	
 };

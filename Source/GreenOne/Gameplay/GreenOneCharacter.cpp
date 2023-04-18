@@ -29,23 +29,7 @@
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
 
-TSubclassOf<UFertilizerBase> AGreenOneCharacter::GetCurrentEffect(FertilizerType Type)
-{
-	if (!Effects.Contains(Type))
-	{
-		return TSubclassOf<UFertilizerBase>();
-	}
-	return *Effects.Find(Type);
-}
-
-bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
-{
-	if(!Effects.Find(Type)) return false;
-	return true;
-}
-
-AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+AGreenOneCharacter::AGreenOneCharacter()
 {
 	InitializeCustomCharacterMovementComponent();
 	
@@ -243,21 +227,21 @@ void AGreenOneCharacter::EnableFertilizer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer Enable"));
 	
-	if(EFertilizerType == FertilizerType::None)
-		EFertilizerType = FertilizerType::SlowDown;
-	else if(EFertilizerType != FertilizerType::None)
-		EFertilizerType = FertilizerType::None;
+	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::None)
+		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
+	else if(FertilizerTankComponent->GetCurrentFertilizerType() != FertilizerType::None)
+		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::None);
 }
 
 void AGreenOneCharacter::ChangeFertilizerType()
 {
-	if(EFertilizerType == FertilizerType::AttackBonus)
+	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::AttackBonus)
 	{
-		EFertilizerType = FertilizerType::SlowDown;
+		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
 		UE_LOG(LogTemp, Warning, TEXT("Fertilizer SlowDown"));
-	}else if(EFertilizerType == FertilizerType::SlowDown)
+	}else if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::SlowDown)
 	{
-		EFertilizerType = FertilizerType::AttackBonus;
+		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::AttackBonus);
 		UE_LOG(LogTemp, Warning, TEXT("Fertilizer AttackBonus"));
 	}
 	
@@ -342,7 +326,7 @@ void AGreenOneCharacter::ShootRafale()
 	//OnShootDelegate.Broadcast(EFertilizerType);
 	if(FertilizerTankComponent)
 	{
-		FertilizerTankComponent->OnShoot(EFertilizerType);
+		FertilizerTankComponent->OnShoot();
 	}
 	
 	FHitResult OutHit;
@@ -377,16 +361,15 @@ void AGreenOneCharacter::ShootRafale()
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
-				if(IsCurrentEffectExist(EFertilizerType))
+				
+				if(FertilizerTankComponent && !FertilizerTankComponent->IsTankEmpty(EFertilizerType))
 				{
-					if(FertilizerTankComponent && !FertilizerTankComponent->IsTankEmpty(EFertilizerType))
+					if(UFertilizerBase* Fertilizer = FertilizerTankComponent->GetEffect(EFertilizerType))
 					{
-						if(UFertilizerBase* Fertilizer = FertilizerTankComponent->GetEffect(EFertilizerType))
-						{
-							IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer, this);
-						}	
-					}
+						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer, this);
+					}	
 				}
+				
 				OnHitEnnemy.Broadcast(CurrentTargetHit);
 			}
 		}

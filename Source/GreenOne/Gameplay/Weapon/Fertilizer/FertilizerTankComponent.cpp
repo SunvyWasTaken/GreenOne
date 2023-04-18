@@ -37,7 +37,10 @@ UFertilizerTankComponent::UFertilizerTankComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
+#if WITH_EDITOR
+
+#endif
+
 }
 
 
@@ -48,7 +51,7 @@ void UFertilizerTankComponent::BeginPlay()
 
 	if(AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
 	{
-		Character->OnShootDelegate.AddDynamic(this, &UFertilizerTankComponent::OnShoot);
+		//Character->OnShootDelegate.AddDynamic(this, &UFertilizerTankComponent::OnShoot);
 	}else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Can't Cast GetOwner, GetOwner is maybe not find !"));
@@ -74,11 +77,11 @@ bool UFertilizerTankComponent::IsTypeExist(const FertilizerType Type) const
 	
 }
 
-void UFertilizerTankComponent::OnShoot(FertilizerType Type)
+void UFertilizerTankComponent::OnShoot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnShoot Update Fertilizer Tank"));
 		
-	if(FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive(Type))
+	if(FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive(EFertilizerType))
 	{
 		CurrentFertilizerTankActive->UpdateGauge();
 		UE_LOG(LogTemp, Warning, TEXT("Current Fertilizer Tank gauge value : %f"),CurrentFertilizerTankActive->GaugeValue);	
@@ -98,6 +101,16 @@ bool UFertilizerTankComponent::IsTankEmpty(const FertilizerType Type)
 	}
 
 	return false;
+}
+
+void UFertilizerTankComponent::UpdateFertilizerType(FertilizerType Type)
+{
+	EFertilizerType = Type;
+}
+
+FertilizerType UFertilizerTankComponent::GetCurrentFertilizerType() const
+{
+	return EFertilizerType;
 }
 
 UFertilizerBase* UFertilizerTankComponent::GetEffect(const FertilizerType Type)
