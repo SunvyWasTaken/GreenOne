@@ -24,7 +24,7 @@ public:
 	virtual void Init();
 
 	UFUNCTION(BlueprintCallable)
-		void LoadOneLevel(TSoftObjectPtr<UWorld> LevelToLoad);
+		void LoadOneLevel(FString LevelToLoad);
 
 #pragma region Loading Screen
 
