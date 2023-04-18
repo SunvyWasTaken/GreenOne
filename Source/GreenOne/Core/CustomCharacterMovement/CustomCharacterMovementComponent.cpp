@@ -117,6 +117,7 @@ bool UCustomCharacterMovementComponent::VerticalJump()
 	{
 		SetMovementMode(MOVE_Falling);
 		InJumpState = JS_Vertical;
+		Velocity = GetOwnerCharacter()->GetVelocity();
 		bVerticalJump = true;
 		TargetJumpLocation = GetOwnerCharacter()->GetActorLocation() + FVector::UpVector * MaxVerticalHeight;
 		CurrentLocation = GetOwnerCharacter()->GetActorLocation();
@@ -243,7 +244,7 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
 			TargetJumpLocation.Z = VerticalJumpHitResult.ImpactPoint.Z;
 		}
 	}
-
+	
 	float NewZVelocity = UKismetMathLibrary::Ease(VerticalJumpVelocity, 0, CurveDeltaTime, VerticalJumpCurve);
 	Velocity.Z = NewZVelocity;
 	if (CurveDeltaTime > SafeZone)
@@ -262,24 +263,30 @@ void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& Ne
 {
 	HorizontalJumpDirection = NewDirection;
 }
+
 #pragma endregion
 
 #pragma region Dash
 
 void UCustomCharacterMovementComponent::Dash()
 {
+	if ( IsFalling() && GetCurrentJumpState() == JS_Vertical)
+	{
+		DoJump(false);
+	}
+	
 	// Securite
 	if (GC == nullptr) { return; }
 	if (GC->GetCharacterMovement()->IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }
 	// 
-
+	
 	BeforeRotationCharacter = GC->GetActorRotation();
 	GC->GetCharacterMovement()->SetMovementMode(MOVE_Custom, CMOVE_DASH);
 	StartDashLocation = GC->GetActorLocation();
 
 	FVector DirectionVector = FVector::ZeroVector;
-
+	
 	// Récupération de la direction du joueur
 	FVector Direction = GC->GetActorForwardVector().GetSafeNormal2D();
 	TempRotationCharacter = FRotator(0.f, Direction.Rotation().Yaw, 0.f);
@@ -305,32 +312,55 @@ void UCustomCharacterMovementComponent::Dash()
 	{
 		DirectionVector = Direction;
 	}
+	
+	FHitResult ObstacleHit;
+	float CapsuleRadius = GC->GetCapsuleComponent()->GetScaledCapsuleRadius();
+	float CapsuleHalfHeight = GC->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
-	FHitResult HitResult;
-	FCollisionQueryParams CollisionParams;
+	TArray<AActor*> ActorsIgnores;
+	ActorsIgnores.Push(GC);
 
 	TargetDashLocation = StartDashLocation + DirectionVector * DashDistance;
 
-	// On verifie si le dash est en collision avec un objet
-	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartDashLocation, TargetDashLocation, ECC_Visibility, CollisionParams);
-
+	bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(
+	GetWorld(), GetOwnerCharacter()->GetActorLocation(),
+	TargetDashLocation, CapsuleRadius, CapsuleHalfHeight,
+	UEngineTypes::ConvertToTraceType(ECC_Visibility), false,
+	ActorsIgnores, EDrawDebugTrace::ForDuration, ObstacleHit, true,
+	FLinearColor::Red, FLinearColor::Blue, 2);
+	
 	// Si le dash est en collision avec un objet, on reduit la distance du dash
-	if (bIsHit)
+	if (bObstacleHit)
 	{
-		TargetDashLocation = StartDashLocation + (DirectionVector * (HitResult.Distance - 50.f));
+		TargetDashLocation = StartDashLocation + (DirectionVector * (ObstacleHit.Distance - 50.f));
 	}
-
-	// DashTime
+	
 	DashTime = (DashDistance / DashSpeed) * 1000;
+
+	Velocity = (DirectionVector * DashSpeed);
+	
 	CurrentDashAlpha = 0.f;
 	bIsDashing = true;
+}
+
+void UCustomCharacterMovementComponent::CancelDash()
+{
+	if (bIsDashing)
+	{
+		bIsDashing = false;
+		bDashOnCooldown = true;
+		CurrentDashCooldown = DashCooldown;
+		GC->SetActorLocation(TempTargetLocation);
+		GC->SetActorRotation(BeforeRotationCharacter);
+		GC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
 }
 
 void UCustomCharacterMovementComponent::DashTick(float DeltaTime)
 {
 	// Securite
 	if (!bIsDashing || bDashOnCooldown) { return; }
-	if (GreenOneCharacter == nullptr) { return; }
+	if (GC == nullptr) { return; }
 	//
 
 	CurrentDashAlpha += (DeltaTime * 1000) / (DashTime);
@@ -345,8 +375,8 @@ void UCustomCharacterMovementComponent::DashTick(float DeltaTime)
 		GC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	}
 
-	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
-	GC->SetActorLocation(TargetLocation);
+	TempTargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
+	GC->SetActorLocation(TempTargetLocation);
 	GC->SetActorRotation(TempRotationCharacter);
 }
 

@@ -69,7 +69,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Force d'impulsion du jump vertical", meta = (ForceUnits = "cm/s",  EditCondition="bManualVerticalVelocity"))
 	float VerticalJumpVelocity = 1000.f;
 	float VelocityTemp;
-	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Hauteur max", meta = (ForceUnits = "cm/s"))
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", DisplayName = "Hauteur max", meta = (ForceUnits = "cm"))
 	float MaxVerticalHeight = 800.f;
 	bool bVerticalJump;
 	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|Vertical", meta = (ClampMin = 0.0f, ClampMax = 1.f))
@@ -133,8 +133,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
 		void Dash();
 
+	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
+		void CancelDash();
+
 	// Distance du dash
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ForceUnits = "cm/s", ClampMin = 0), Category = "Custom|Dash")
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ForceUnits = "cm", ClampMin = 0), Category = "Custom|Dash")
 		float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
 
 	// Vitesse du Dash
@@ -143,7 +146,7 @@ public:
 
 	// Temps que va prendre le dash a revenir apres utilisation.
 	// Le temps est en secondes.
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash", ForceUnits = "s", ClampMin = 0), Category = "Custom|Dash")
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash", ForceUnits = "secs", ClampMin = 0), Category = "Custom|Dash")
 		float DashCooldown = 3.0f; // S
 
 	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
@@ -177,6 +180,8 @@ private:
 	FRotator TempRotationCharacter = FRotator::ZeroRotator;
 
 	FVector2D DashDirectionVector = FVector2D::ZeroVector;
+
+	FVector TempTargetLocation = FVector::ZeroVector;
 
 	float CurrentDashAlpha = 0.f;
 

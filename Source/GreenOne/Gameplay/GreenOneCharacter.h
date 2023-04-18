@@ -127,6 +127,8 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 
+	void Dash();
+
 	UPROPERTY(EditAnywhere, Category = "Health");
 	float MaxHealth = 100;
 
