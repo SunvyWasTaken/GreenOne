@@ -167,10 +167,10 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		ActorsIgnores.Push(GetOwnerCharacter());
 
 		//Check if the horizontalJump preview hit an obstacle
-		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(
+		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(s
 			GetWorld(), GetOwnerCharacter()->GetActorLocation(),
 			TargetJumpLocation, CapsuleRadius, CapsuleHalfHeight,
-			UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2), false,
+			UEngineTypes::ConvertToTraceType(ECC_Visibility), false,
 			ActorsIgnores, EDrawDebugTrace::ForDuration, ObstacleHit, true, FLinearColor::Red, FLinearColor::Blue, 2);
 
 		if (bObstacleHit)
