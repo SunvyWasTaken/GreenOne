@@ -48,7 +48,7 @@ protected:
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
-	virtual void PhysCustom(float deltaTime, int32 Iterations) override;
+	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
 	
 public:
 	UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer);
@@ -99,7 +99,7 @@ private:
 	float JumpTime = 0;
 
 public:
-	/** Commun a tous les jumps */
+	/** Commun a tous les jumps **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Jump/Falling", DisplayName = "Velocité général", meta = (ForceUnits = "cm/s"))
 	float JumpVelocity = 700.f;
 

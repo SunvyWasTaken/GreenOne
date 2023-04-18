@@ -37,14 +37,12 @@ void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 	Super::UpdateFromCompressedFlags(Flags);
 }
 
-void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation,
-                                                          const FVector& OldVelocity)
+void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity)
 {
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
 }
 
-void UCustomCharacterMovementComponent::OnMovementModeChanged(EMovementMode PreviousMovementMode,
-                                                              uint8 PreviousCustomMode)
+void UCustomCharacterMovementComponent::OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)
 {
 	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
 	if (IsMovingOnGround() && !IsFalling())
@@ -58,9 +56,9 @@ void UCustomCharacterMovementComponent::OnMovementModeChanged(EMovementMode Prev
 	}
 }
 
-void UCustomCharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations)
+void UCustomCharacterMovementComponent::PhysCustom(float DeltaTime, int32 Iterations)
 {
-	Super::PhysCustom(deltaTime, Iterations);
+	Super::PhysCustom(DeltaTime, Iterations);
 }
 
 bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const
