@@ -40,7 +40,7 @@ void UCustomCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, co
 }
 
 void UCustomCharacterMovementComponent::OnMovementModeChanged(EMovementMode PreviousMovementMode,
-	uint8 PreviousCustomMode)
+                                                              uint8 PreviousCustomMode)
 {
 	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
 	if (IsMovingOnGround() && !IsFalling())
@@ -50,6 +50,7 @@ void UCustomCharacterMovementComponent::OnMovementModeChanged(EMovementMode Prev
 		GravityScale = CustomGravityScale;
 		bVerticalJump = false;
 		bHorizontalJump = false;
+		HorizontalJumpDirection = FVector2D::ZeroVector;
 	}
 }
 
@@ -66,7 +67,6 @@ bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode
 #pragma region Jump/Falling
 bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 {
-
 	if (CharacterOwner && CharacterOwner->CanJump())
 	{
 		bool bJumped = false;
@@ -101,7 +101,7 @@ bool UCustomCharacterMovementComponent::CheckFall(const FFindFloorResult& OldFlo
 bool UCustomCharacterMovementComponent::VerticalJump()
 {
 	//Check if the vertical Jump is edit manually
-	
+
 	if (bManualVerticalVelocity)
 	{
 		VelocityTemp = VerticalJumpVelocity;
@@ -167,7 +167,7 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		ActorsIgnores.Push(GetOwnerCharacter());
 
 		//Check if the horizontalJump preview hit an obstacle
-		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(s
+		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(
 			GetWorld(), GetOwnerCharacter()->GetActorLocation(),
 			TargetJumpLocation, CapsuleRadius, CapsuleHalfHeight,
 			UEngineTypes::ConvertToTraceType(ECC_Visibility), false,
@@ -223,33 +223,37 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 
 void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
 {
-	if(!bVerticalJump) return;
+	if (!bVerticalJump) return;
 
 	JumpTime += DeltaTime;
 
-	const float CurveDeltaTime = (VelocityTemp/MaxVerticalHeight)*JumpTime;
+	const float CurveDeltaTime = (VelocityTemp / MaxVerticalHeight) * JumpTime;
 
-	if(bActiveCheckRoof)
+	if (bActiveCheckRoof)
 	{
 		FHitResult VerticalJumpHitResult;
-		const bool bVerticalJumpHit = GetWorld()->LineTraceSingleByChannel(VerticalJumpHitResult,GetOwnerCharacter()->GetActorLocation(),GetOwnerCharacter()->GetActorLocation() + FVector::UpVector * 3, ECC_Visibility);
-		if(bVerticalJumpHit)
+		const bool bVerticalJumpHit = GetWorld()->LineTraceSingleByChannel(
+			VerticalJumpHitResult, GetOwnerCharacter()->GetActorLocation(),
+			GetOwnerCharacter()->GetActorLocation() + FVector::UpVector * 3, ECC_Visibility);
+		if (bVerticalJumpHit)
 		{
-			DrawDebugSphere(GetWorld(),VerticalJumpHitResult.ImpactPoint, 8, 10, FColor::Red,false, 2);
+			DrawDebugSphere(GetWorld(), VerticalJumpHitResult.ImpactPoint, 8, 10, FColor::Red, false, 2);
 			TargetJumpLocation.Z = VerticalJumpHitResult.ImpactPoint.Z;
-		}	
+		}
 	}
 
-	float NewZVelocity = UKismetMathLibrary::Ease(VerticalJumpVelocity,0, CurveDeltaTime,VerticalJumpCurve);
+	float NewZVelocity = UKismetMathLibrary::Ease(VerticalJumpVelocity, 0, CurveDeltaTime, VerticalJumpCurve);
 	Velocity.Z = NewZVelocity;
-	if(CurveDeltaTime > SafeZone)
+	if (CurveDeltaTime > SafeZone)
 	{
 		bVerticalJump = false;
 		//Velocity.Z = 0.f;
 		return;
 	}
-	const float NewZLocation = UKismetMathLibrary::Ease(CurrentLocation.Z,TargetJumpLocation.Z, CurveDeltaTime,VerticalJumpCurve);
-	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X,GetOwnerCharacter()->GetActorLocation().Y,NewZLocation), true);
+	const float NewZLocation = UKismetMathLibrary::Ease(CurrentLocation.Z, TargetJumpLocation.Z, CurveDeltaTime,
+	                                                    VerticalJumpCurve);
+	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X,
+	                                              GetOwnerCharacter()->GetActorLocation().Y, NewZLocation), true);
 }
 
 void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& NewDirection)

@@ -478,10 +478,12 @@ void AGreenOneCharacter::TurnCamera()
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
-	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
+
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
+
+	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
 	
 	if (Controller != nullptr)
 	{
