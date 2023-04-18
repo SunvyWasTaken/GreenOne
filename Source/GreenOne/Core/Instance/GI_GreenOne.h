@@ -24,7 +24,7 @@ public:
 	virtual void Init();
 
 	UFUNCTION(BlueprintCallable)
-		void LoadOneLevel(FString LevelToLoad);
+		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction);
 
 #pragma region Loading Screen
 
