@@ -45,17 +45,12 @@ void UGI_GreenOne::RemoveLoadingScreen()
 	}
 }
 
-void UGI_GreenOne::LoadOneLevel(FString LevelToLoad)
+void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction)
 {
-	if (LevelToLoad.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("T'as oublié de mettre un level to load."));
-		return;
-	}
 	DisplayLoadingScreen();
 	FLatentActionInfo LatentInfo;
-	LatentInfo.CallbackTarget = this;
-	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
+	LatentInfo.CallbackTarget = TargetRef;
+	LatentInfo.ExecutionFunction = CallFunction;
 	LatentInfo.Linkage = 0;
 	FName LevelToUnload;
 	for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
@@ -73,8 +68,7 @@ void UGI_GreenOne::LoadOneLevel(FString LevelToLoad)
 	}
 	FLatentActionInfo UnloadInfo;
 	UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
-	UGameplayStatics::LoadStreamLevel(GetWorld(), FName(*LevelToLoad), true, true, LatentInfo);
-
+	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelToLoad, true, true, LatentInfo);
 }
 
 #pragma region Save
