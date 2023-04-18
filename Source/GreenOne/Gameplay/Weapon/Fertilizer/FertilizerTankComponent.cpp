@@ -64,6 +64,16 @@ void UFertilizerTankComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	
 }
 
+bool UFertilizerTankComponent::IsTypeExist(const FertilizerType Type) const
+{
+	if(Type == FertilizerType::None) return false;
+
+	if(!FertilizerTanks.Contains(Type)) return false;
+
+	return true;
+	
+}
+
 void UFertilizerTankComponent::OnShoot(FertilizerType Type)
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnShoot Update Fertilizer Tank"));
@@ -78,11 +88,36 @@ void UFertilizerTankComponent::OnShoot(FertilizerType Type)
 	}
 }
 
+bool UFertilizerTankComponent::IsTankEmpty(const FertilizerType Type)
+{
+	if(Type == FertilizerType::None) return false;
+
+	if(const FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive(Type))
+	{
+		return CurrentFertilizerTankActive->GaugeValue <= 0 ? true : false;
+	}
+
+	return false;
+}
+
+UFertilizerBase* UFertilizerTankComponent::GetEffect(const FertilizerType Type)
+{
+	if(!IsTypeExist(Type)) return nullptr;
+
+	if(const FertilizerTankStruct* FertilizerTankStruct = GetCurrentFertilizerTankActive(Type))
+	{
+		if(!FertilizerTankStruct->Effect) return  nullptr;
+		
+		UFertilizerBase* FertilizerBase = FertilizerFactory::Factory(Type, FertilizerTankStruct->Effect);
+		return FertilizerBase;
+	}
+	
+	return nullptr;
+}
+
 FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive(FertilizerType Type)
 {
-	if(Type == FertilizerType::None) return nullptr;
-
-	if(!FertilizerTanks.Contains(Type)) return nullptr;
+	if(!IsTypeExist(Type)) return nullptr;
 	
 	return FertilizerTanks.Find(Type);
 }

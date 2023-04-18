@@ -24,6 +24,7 @@
 #include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
+#include "Weapon/Fertilizer/FertilizerTankComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
@@ -189,6 +190,12 @@ void AGreenOneCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	FertilizerTankComponent = FindComponentByClass<UFertilizerTankComponent>();
+	if(!FertilizerTankComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No FertilizerTankComponent Found"));
+	}
 }
 
 void AGreenOneCharacter::FellOutOfWorld(const UDamageType& dmgType)
@@ -332,7 +339,12 @@ void AGreenOneCharacter::StopShoot()
 
 void AGreenOneCharacter::ShootRafale()
 {
-	OnShootDelegate.Broadcast(EFertilizerType);
+	//OnShootDelegate.Broadcast(EFertilizerType);
+	if(FertilizerTankComponent)
+	{
+		FertilizerTankComponent->OnShoot(EFertilizerType);
+	}
+	
 	FHitResult OutHit;
 	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
 
@@ -367,10 +379,13 @@ void AGreenOneCharacter::ShootRafale()
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
 				if(IsCurrentEffectExist(EFertilizerType))
 				{
-					if(UFertilizerBase* Fertilizer = FertilizerFactory::Factory(EFertilizerType, GetCurrentEffect(EFertilizerType)))
+					if(FertilizerTankComponent && !FertilizerTankComponent->IsTankEmpty(EFertilizerType))
 					{
-						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer, this);	
-					}	
+						if(UFertilizerBase* Fertilizer = FertilizerTankComponent->GetEffect(EFertilizerType))
+						{
+							IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer, this);
+						}	
+					}
 				}
 				OnHitEnnemy.Broadcast(CurrentTargetHit);
 			}

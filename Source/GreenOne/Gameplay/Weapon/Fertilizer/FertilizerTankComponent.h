@@ -14,15 +14,15 @@ struct FertilizerTankStruct
 
 	FertilizerTankStruct();
 	
-	UPROPERTY(EditAnywhere)
-	FertilizerType TankFertilizerType;
-	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100))
 	float MaxGaugeValue = 100.f;
 	float GaugeValue = MaxGaugeValue;
 	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100))
 	float ReduceGaugeValue = 5.f;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UFertilizerBase> Effect;
 	
 	void UpdateGauge();
 	
@@ -52,11 +52,18 @@ public:
 private:
 	UPROPERTY(EditAnywhere)
 	TMap<FertilizerType,FertilizerTankStruct> FertilizerTanks;
+	bool IsTypeExist(const FertilizerType Type) const;
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	void OnShoot(FertilizerType Type);
+	void OnShoot(const FertilizerType Type);
 
+	UFUNCTION(BlueprintCallable)
+	bool IsTankEmpty(const FertilizerType Type);
+
+	UFUNCTION(BlueprintCallable)
+	class UFertilizerBase* GetEffect(FertilizerType Type);
+	
 	FertilizerTankStruct* GetCurrentFertilizerTankActive(FertilizerType Type);
 	//TODO: L'effet de l'engrais est propres a son réservoir, si le reservoir est vide alors on ne creer plus d'effet
 };

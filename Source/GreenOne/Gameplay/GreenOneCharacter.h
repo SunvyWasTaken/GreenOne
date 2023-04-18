@@ -224,6 +224,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
 	class UNiagaraSystem* ShootParticule;
 
+	class UFertilizerTankComponent* FertilizerTankComponent;
+
 	/**
 	 * Give if the player is attacking or not.
 	 */
