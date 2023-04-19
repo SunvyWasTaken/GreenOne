@@ -20,16 +20,17 @@ void UCustomCharacterMovementComponent::InitializeComponent()
 	GreenOneCharacter = Cast<AGreenOneCharacter>(GetOwner());
 }
 
-void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                                      FActorComponentTickFunction* ThisTickFunction)
+void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	ExecHorizontalJump();
 	ExecVerticalJump(DeltaTime);
     
     DashTick(DeltaTime);
-    CooldownTick(DeltaTime);    
-    
+    CooldownTick(DeltaTime);
+	
+	// Reset the DashDirectionVector
+	DashDirectionVector = FVector2D::ZeroVector;
 }
 
 void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
@@ -67,6 +68,7 @@ bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode
 }
 
 #pragma region Jump/Falling
+
 bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 {
 	if (CharacterOwner && CharacterOwner->CanJump())
@@ -253,10 +255,8 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
 		//Velocity.Z = 0.f;
 		return;
 	}
-	const float NewZLocation = UKismetMathLibrary::Ease(CurrentLocation.Z, TargetJumpLocation.Z, CurveDeltaTime,
-	                                                    VerticalJumpCurve);
-	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X,
-	                                              GetOwnerCharacter()->GetActorLocation().Y, NewZLocation), true);
+	const float NewZLocation = UKismetMathLibrary::Ease(CurrentLocation.Z, TargetJumpLocation.Z, CurveDeltaTime, VerticalJumpCurve);
+	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X, GetOwnerCharacter()->GetActorLocation().Y, NewZLocation), true);
 }
 
 void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& NewDirection)
@@ -350,6 +350,7 @@ void UCustomCharacterMovementComponent::CancelDash()
 		bIsDashing = false;
 		bDashOnCooldown = true;
 		CurrentDashCooldown = DashCooldown;
+		DashDirectionVector = FVector2D::ZeroVector;
 		GC->SetActorLocation(TempTargetLocation);
 		GC->SetActorRotation(BeforeRotationCharacter);
 		GC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
@@ -373,6 +374,7 @@ void UCustomCharacterMovementComponent::DashTick(float DeltaTime)
 		bDashOnCooldown = true;
 		GC->SetActorRotation(BeforeRotationCharacter);
 		GC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		DashDirectionVector = FVector2D::ZeroVector;
 	}
 
 	TempTargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
@@ -388,8 +390,8 @@ void UCustomCharacterMovementComponent::CooldownTick(float DeltaTime)
 	if (CurrentDashCooldown <= 0.f)
 	{
 		CurrentDashCooldown = 0.f;
-		DashDirectionVector = FVector2D::ZeroVector;
 		bDashOnCooldown = false;
+		DashDirectionVector = FVector2D::ZeroVector;
 	}
 }
 

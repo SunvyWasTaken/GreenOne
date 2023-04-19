@@ -208,6 +208,10 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 	ShootTick(DeltaSeconds);
 
 	Regenerate(DeltaSeconds);
+
+	// Reset Dash Vector Direction
+	// FVector2D reset = FVector2D(0, 0);
+	// GetCustomCharacterMovement()->SetDashDirectionVector(reset);
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
