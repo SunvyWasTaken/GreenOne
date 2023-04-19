@@ -6,8 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
+#include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
 #include "GreenOneCharacter.generated.h"
 
 enum class FertilizerType : uint8;

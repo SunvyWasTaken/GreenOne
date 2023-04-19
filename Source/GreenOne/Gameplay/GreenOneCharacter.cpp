@@ -23,7 +23,7 @@
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
 #include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
+#include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
 #include "Weapon/Fertilizer/FertilizerTankComponent.h"
 
 //////////////////////////////////////////////////////////////////////////

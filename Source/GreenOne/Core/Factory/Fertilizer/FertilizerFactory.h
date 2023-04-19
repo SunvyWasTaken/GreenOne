@@ -3,16 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FertilizerSlowDown.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 
 UENUM(BlueprintType)
 enum class FertilizerType : uint8
 {
-	None			UMETA(Hidden),
-	SlowDown		UMETA(DisplayName = "Ralentissement"),
-	AttackBonus		UMETA(DisplayName = "Bonus d'attaque"),
-	Other			UMETA(DisplayName = "Test Other"),
-	Size			UMETA(Hidden),
+	None UMETA(Hidden),
+	SlowDown UMETA(DisplayName = "Ralentissement"),
+	AttackBonus UMETA(DisplayName = "Bonus d'attaque"),
+	Other UMETA(DisplayName = "Test Other"),
+	Size UMETA(Hidden),
 };
 
 /**

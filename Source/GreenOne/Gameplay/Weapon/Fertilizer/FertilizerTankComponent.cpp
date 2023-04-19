@@ -2,7 +2,6 @@
 
 
 #include "FertilizerTankComponent.h"
-
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 
 FertilizerTankStruct::FertilizerTankStruct()
