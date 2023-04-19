@@ -340,15 +340,9 @@ private:
 	void TurnCamera();
 
 #pragma endregion 
-
-private:
-	UPROPERTY(EditAnywhere, Category = "Test")
-	TMap<FertilizerType, TSubclassOf<UFertilizerBase>> Effects;
 	
 	UPROPERTY(EditAnywhere, Category = "Test")
 	FertilizerType EFertilizerType;
-
-#pragma endregion 
 	
 };
 

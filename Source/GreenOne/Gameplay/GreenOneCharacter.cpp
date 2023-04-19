@@ -29,7 +29,8 @@
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
 
-AGreenOneCharacter::AGreenOneCharacter()
+AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	InitializeCustomCharacterMovementComponent();
 	
