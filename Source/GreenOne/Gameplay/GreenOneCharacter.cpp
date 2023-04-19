@@ -363,9 +363,9 @@ void AGreenOneCharacter::ShootRafale()
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
 				
-				if(FertilizerTankComponent && !FertilizerTankComponent->IsTankEmpty(EFertilizerType))
+				if(FertilizerTankComponent && !FertilizerTankComponent->IsTankEmpty(FertilizerTankComponent->GetCurrentFertilizerType()))
 				{
-					if(UFertilizerBase* Fertilizer = FertilizerTankComponent->GetEffect(EFertilizerType))
+					if(UFertilizerBase* Fertilizer = FertilizerTankComponent->GetEffect())
 					{
 						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer, this);
 					}	

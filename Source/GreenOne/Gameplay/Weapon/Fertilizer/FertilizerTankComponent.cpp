@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "FertilizerTankComponent.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 
@@ -66,7 +65,7 @@ void UFertilizerTankComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	if(bDrawDebugValues)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Red, FString::Printf(TEXT("Current Fertilizer Type : %s"),*GetFertilizerTypeName()), true, FVector2d(1.2, 1.2));
-		Struct = GetCurrentFertilizerTankActive(GetCurrentFertilizerType());
+		Struct = GetCurrentFertilizerTankActive();
 		if(Struct)
 		{
 			GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Green, FString::Printf(TEXT("Fertilizer Max Gauge Value : %f"), Struct->MaxGaugeValue), true, FVector2d(1.2, 1.2));
@@ -94,7 +93,7 @@ void UFertilizerTankComponent::OnShoot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnShoot Update Fertilizer Tank"));
 		
-	if(FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive(EFertilizerType))
+	if(FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
 	{
 		CurrentFertilizerTankActive->UpdateGauge();
 		UE_LOG(LogTemp, Warning, TEXT("Current Fertilizer Tank gauge value : %f"),CurrentFertilizerTankActive->GaugeValue);	
@@ -108,7 +107,7 @@ bool UFertilizerTankComponent::IsTankEmpty(const FertilizerType Type)
 {
 	if(Type == FertilizerType::None) return false;
 
-	if(const FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive(Type))
+	if(const FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
 	{
 		return CurrentFertilizerTankActive->GaugeValue <= 0 ? true : false;
 	}
@@ -126,26 +125,26 @@ FertilizerType UFertilizerTankComponent::GetCurrentFertilizerType() const
 	return EFertilizerType;
 }
 
-UFertilizerBase* UFertilizerTankComponent::GetEffect(const FertilizerType Type)
+UFertilizerBase* UFertilizerTankComponent::GetEffect()
 {
-	if(!IsTypeExist(Type)) return nullptr;
+	if(!IsTypeExist(EFertilizerType)) return nullptr;
 
-	if(const FertilizerTankStruct* FertilizerTankStruct = GetCurrentFertilizerTankActive(Type))
+	if(const FertilizerTankStruct* FertilizerTankStruct = GetCurrentFertilizerTankActive())
 	{
 		if(!FertilizerTankStruct->Effect) return  nullptr;
 		
-		UFertilizerBase* FertilizerBase = FertilizerFactory::Factory(Type, FertilizerTankStruct->Effect);
+		UFertilizerBase* FertilizerBase = FertilizerFactory::Factory(EFertilizerType, FertilizerTankStruct->Effect);
 		return FertilizerBase;
 	}
 	
 	return nullptr;
 }
 
-FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive(FertilizerType Type)
+FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive()
 {
-	if(!IsTypeExist(Type)) return nullptr;
+	if(!IsTypeExist(EFertilizerType)) return nullptr;
 	
-	return FertilizerTanks.Find(Type);
+	return FertilizerTanks.Find(EFertilizerType);
 }
 
 FString UFertilizerTankComponent::GetFertilizerTypeName() const
