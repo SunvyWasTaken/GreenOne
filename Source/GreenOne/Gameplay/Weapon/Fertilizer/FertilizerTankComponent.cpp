@@ -105,14 +105,14 @@ void UFertilizerTankComponent::OnShoot()
 
 bool UFertilizerTankComponent::IsTankEmpty(const FertilizerType Type)
 {
-	if(Type == FertilizerType::None) return false;
+	if(Type == FertilizerType::None) return true;
 
 	if(const FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
 	{
 		return CurrentFertilizerTankActive->GaugeValue <= 0 ? true : false;
 	}
 
-	return false;
+	return true;
 }
 
 void UFertilizerTankComponent::UpdateFertilizerType(FertilizerType Type)
@@ -133,8 +133,7 @@ UFertilizerBase* UFertilizerTankComponent::GetEffect()
 	{
 		if(!FertilizerTankStruct->Effect) return  nullptr;
 		
-		UFertilizerBase* FertilizerBase = FertilizerFactory::Factory(EFertilizerType, FertilizerTankStruct->Effect);
-		return FertilizerBase;
+		return FertilizerFactory::Factory(EFertilizerType, FertilizerTankStruct->Effect);
 	}
 	
 	return nullptr;

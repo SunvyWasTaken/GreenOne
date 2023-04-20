@@ -75,8 +75,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Mouvement")
 	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
 
-	virtual void PostInitializeComponents() override;
-	
 public:
 
 	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);

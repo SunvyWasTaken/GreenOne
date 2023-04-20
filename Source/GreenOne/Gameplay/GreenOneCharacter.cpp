@@ -147,12 +147,6 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 }
 
-void AGreenOneCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
-}
-
 void AGreenOneCharacter::PlayerDead()
 {
 	if (!bIsDead)
@@ -226,6 +220,7 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 
 void AGreenOneCharacter::EnableFertilizer()
 {
+	if(!FertilizerTankComponent) return;
 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer Enable"));
 	
 	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::None)
@@ -236,6 +231,8 @@ void AGreenOneCharacter::EnableFertilizer()
 
 void AGreenOneCharacter::ChangeFertilizerType()
 {
+	if(!FertilizerTankComponent) return;
+	
 	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::AttackBonus)
 	{
 		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
