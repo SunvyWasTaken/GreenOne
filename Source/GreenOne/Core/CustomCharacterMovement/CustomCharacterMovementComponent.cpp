@@ -272,7 +272,7 @@ void UCustomCharacterMovementComponent::Dash()
 {
 	if ( IsFalling() && GetCurrentJumpState() == JS_Vertical)
 	{
-		DoJump(false);
+		GetOwnerCharacter()->Jump();
 	}
 	
 	// Securite
