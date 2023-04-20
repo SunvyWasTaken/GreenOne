@@ -105,7 +105,7 @@ bool UGI_GreenOne::LoadSave()
 	}
 	if (!CurrentSave)
 	{
-		UE_LOG(LogTemp, Error, TEXT("La creation du save à fail."));
+		UE_LOG(LogTemp, Error, TEXT("La creation du save ï¿½ fail."));
 		return false;
 	}
 	return true;
@@ -288,7 +288,7 @@ void UGI_GreenOne::CreateAudioSave()
 	AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::CreateSaveGameObject(USG_AudioSettings::StaticClass()));
 	if (AudioSettingsRef == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("La creation du Sound Save à Fail!!!"));
+		UE_LOG(LogTemp, Warning, TEXT("La creation du Sound Save ï¿½ Fail!!!"));
 	}
 	SavedAudioSettings();
 }
@@ -300,7 +300,7 @@ void UGI_GreenOne::LoadAudioSave()
 		AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::LoadGameFromSlot(AudioSaveName, SaveIndex));
 		if (AudioSettingsRef == nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Le cast du get Sound Save à Fail!!!"));
+			UE_LOG(LogTemp, Warning, TEXT("Le cast du get Sound Save ï¿½ Fail!!!"));
 		}
 	}
 	else

@@ -19,9 +19,9 @@
 #include "Components/SceneComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
-#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
+#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 
@@ -89,9 +89,10 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	{
 		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
 	}
-
+	
+	// Add TargetMuzzle
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
-	TargetMuzzle->SetupAttachment(GetMesh());
+	TargetMuzzle->SetupAttachment(GetMesh(), FName("hand_rSocket"));
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -99,12 +100,6 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	ShootCooldown = 3.f;
 	ShootBloom = 0.f;
 	CanShoot = true;
-
-	DashDistance = 100.f;
-	DashTime = 0.5f;
-	DashCooldown = 3.f;
-	bDashOnCooldown = false;
-	bIsDashing = false;
 
 	JumpMaxCount = 2;
 
@@ -166,6 +161,12 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 }
 
+void AGreenOneCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
+}
+
 void AGreenOneCharacter::PlayerDead()
 {
 	if (!bIsDead)
@@ -205,13 +206,22 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
-	DashTick(DeltaSeconds);
-	CooldownDash(DeltaSeconds);
+
 	Regenerate(DeltaSeconds);
+
+	// Reset Dash Vector Direction
+	// FVector2D reset = FVector2D(0, 0);
+	// GetCustomCharacterMovement()->SetDashDirectionVector(reset);
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 {
+
+	if(GetCustomCharacterMovement()->bIsDashing)
+	{
+		GetCustomCharacterMovement()->CancelDash();
+	}
+	
 	if (Value.Get<bool>())
 	{
 		Jump();
@@ -315,7 +325,6 @@ void AGreenOneCharacter::StopShoot()
 {
 	if (ShootHandler.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("stop"));
 		CanRegenerate();
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
 	}
@@ -350,7 +359,7 @@ void AGreenOneCharacter::ShootRafale()
 		}
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
+			// UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
 			IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
@@ -409,50 +418,6 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 	}
 }
 
-void AGreenOneCharacter::Dash()
-{
-	if(GetCustomCharacterMovement()->IsFalling() && GetCustomCharacterMovement()->GetCurrentJumpState() == JS_Vertical)
-	{
-		Jump();
-	}
-	
-	if (GetCustomCharacterMovement()->IsFalling()) { return; }
-	if (bDashOnCooldown || bIsDashing) { return; }
-	GetCustomCharacterMovement()->SetMovementMode(MOVE_Custom);
-	StartDashLocation = GetActorLocation();
-	TargetDashLocation = StartDashLocation + GetActorForwardVector() * DashDistance;
-	CurrentDashAlpha = 0.f;
-	bIsDashing = true;
-}
-
-void AGreenOneCharacter::DashTick(float deltatime)
-{
-	if (!bIsDashing || bDashOnCooldown) { return; }
-
-	CurrentDashAlpha += (1 / DashTime) * deltatime;
-	if (CurrentDashAlpha >= 1)
-	{
-		CurrentDashAlpha = 1;
-		CurrentDashCooldown = DashCooldown;
-		bIsDashing = false;
-		bDashOnCooldown = true;
-		GetCustomCharacterMovement()->SetMovementMode(MOVE_Walking);
-	}
-	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
-	SetActorLocation(TargetLocation);
-	return;
-}
-
-void AGreenOneCharacter::CooldownDash(float deltatime)
-{
-	if (!bDashOnCooldown) { return; }
-	CurrentDashCooldown -= deltatime;
-	if (CurrentDashCooldown <= 0.f)
-	{
-		bDashOnCooldown = false;
-	}
-}
-
 //This function is used to toggle the pause state of the game. It first checks if a pause widget class has been set, and if not, it logs a warning. It then casts the
 // controller to a player controller and checks if it is valid. If it is, it checks if the world is paused. If it is, it creates a pause widget and adds it to the view
 //port, and sets the input mode to game and UI. If the world is not paused, it sets the visibility of the pause widget to collapsed and sets the input mode to game
@@ -504,9 +469,9 @@ void AGreenOneCharacter::TurnCamera()
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
-
 	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	MovementVector = Value.Get<FVector2D>();
+	GetCustomCharacterMovement()->SetDashDirectionVector(MovementVector);
 	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
 
 	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
@@ -515,13 +480,13 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FRotator YawRotation = FRotator(0, Rotation.Yaw, 0);
 
 		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
 
@@ -542,12 +507,18 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVectorY);
 		AddMovementInput(RightDirection, MovementVectorX);
+
 	}
+}
+
+void AGreenOneCharacter::Dash()
+{
+	GetCustomCharacterMovement()->Dash();
 }
 
 void AGreenOneCharacter::CanRegenerate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
+	// UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
 
 	if(Health >= MaxHealth)
 		return;
@@ -555,7 +526,7 @@ void AGreenOneCharacter::CanRegenerate()
 	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
 		IsCombatMode = false;
-		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
+		// UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
 	},CoolDown, false);
 	/*while(IsCombatMode == false && Health < 100 && CoolDown <= 5)
 	{
@@ -581,9 +552,9 @@ void AGreenOneCharacter::Regenerate(float DeltaSeconds)
 	
 	if(Health < MaxHealth)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("+10 health"));
+		// UE_LOG(LogTemp, Warning, TEXT("+10 health"));
 		Health += 10*DeltaSeconds;
-		UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
+		// UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
 		if(Health >= MaxHealth)
 		{
 			Health = MaxHealth;
