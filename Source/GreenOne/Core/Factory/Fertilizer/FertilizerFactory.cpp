@@ -3,8 +3,8 @@
 
 #include "FertilizerFactory.h"
 
-#include "FertilizerOther.h"
-#include "FertilizerAttackBonus.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerOther.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerSlowDown.h"
 
 FertilizerFactory::FertilizerFactory()
 {

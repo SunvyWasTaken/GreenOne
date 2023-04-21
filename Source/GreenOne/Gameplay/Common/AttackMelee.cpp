@@ -41,14 +41,14 @@ void UAttackMelee::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 #if WITH_EDITOR && (DEBUG_MESSAGE_ATTACK == AVAILABLE)
 
-	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("CoolDown %f"), CoolDownTimer), true, FVector2d(1.5, 1.5));
+	/*GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("CoolDown %f"), CoolDownTimer), true, FVector2d(1.5, 1.5));
 	GEngine->AddOnScreenDebugMessage(2, 1.0f, FColor::Red, FString::Printf(TEXT("CoolDownValue %f"), CoolDown), true, FVector2d(1.5, 1.5));
 
 	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Green, FString::Printf(TEXT("DelayToResetCoolDown %f"), DelayToResetCoolDownTimer), true, FVector2d(1.5, 1.5));
 	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Yellow, FString::Printf(TEXT("DelayToResetCoolDownValue %f"), DelayToResetCoolDown), true, FVector2d(1.5, 1.5));
 
 	GEngine->AddOnScreenDebugMessage(5, 1.0f, FColor::Magenta, FString::Printf(TEXT("ImpulseForce %f"), ImpulseForceTemp), true, FVector2d(1.5, 1.5));
-
+*/
 #endif
 }
 

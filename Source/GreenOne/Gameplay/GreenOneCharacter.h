@@ -6,9 +6,11 @@
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
+#include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
 #include "GreenOneCharacter.generated.h"
+
+enum class FertilizerType : uint8;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, FertilizerType, Type);
 
 class UInputAction;
 UCLASS(config=Game)
@@ -73,8 +75,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Mouvement")
 	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
 
-	virtual void PostInitializeComponents() override;
-	
 public:
 
 	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);
@@ -206,7 +206,9 @@ public:
 #pragma region Shoot
 
 public:
-
+	UPROPERTY(BlueprintAssignable)
+	FOnShootSignature OnShootDelegate;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnHitEnnemy OnHitEnnemy;
 
@@ -218,6 +220,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
 	class UNiagaraSystem* ShootParticule;
+
+	class UFertilizerTankComponent* FertilizerTankComponent;
 
 	/**
 	 * Give if the player is attacking or not.
@@ -334,19 +338,9 @@ private:
 	void TurnCamera();
 
 #pragma endregion 
-
-private:
-	UPROPERTY(EditAnywhere, Category = "Test")
-	TMap<FertilizerType, TSubclassOf<UFertilizerBase>> Effects;
 	
 	UPROPERTY(EditAnywhere, Category = "Test")
 	FertilizerType EFertilizerType;
-
-	TSubclassOf<UFertilizerBase> GetCurrentEffect(FertilizerType Type);
-
-	bool IsCurrentEffectExist(FertilizerType Type);
-
-#pragma endregion 
 	
 };
 
