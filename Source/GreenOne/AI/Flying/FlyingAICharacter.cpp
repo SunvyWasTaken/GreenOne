@@ -19,9 +19,6 @@ AFlyingAICharacter::AFlyingAICharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ExploRadius = 100.f;
-
-	ExploDmg = Damage * RatioExploDmg;
-	ShootDmg = Damage * RatioDmgShoot;
 }
 
 // Called when the game starts or when spawned
@@ -45,20 +42,6 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 	TickCooldown(DeltaTime);
 	TickRotation(DeltaTime);
 }
-
-#if WITH_EDITOR
-void AFlyingAICharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AFlyingAICharacter, RatioExploDmg))
-	{
-		ExploDmg = Damage * RatioExploDmg;
-	}
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AFlyingAICharacter, RatioDmgShoot))
-	{
-		ShootDmg = Damage * RatioDmgShoot;
-	}
-}
-#endif
 
 void AFlyingAICharacter::Shoot()
 {
@@ -117,7 +100,7 @@ void AFlyingAICharacter::SelfDestruction()
 			{
 				UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 				//Call the EntityTakeDamage function on the GreenOneCharacter
-				IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, ExploDmg, Outhit.BoneName, this);
+				IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage * RatioExploDmg, Outhit.BoneName, this);
 				//Break out of the loop
 				break;
 			}
@@ -202,7 +185,7 @@ void AFlyingAICharacter::TimerShoot()
 				{
 					//If so, activate the cooldown and execute the EntityTakeDamage function
 					ActiveCooldown();
-					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), ShootDmg, Outhit.BoneName, this);
+					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage * RatioDmgShoot, Outhit.BoneName, this);
 				}
 				//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
 			}
@@ -221,7 +204,8 @@ void AFlyingAICharacter::TimerShoot()
 		AAIProjectil* CurrentBullet = GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
 		if (CurrentBullet)
 		{
-			CurrentBullet->ProjectilDamage = ShootDmg;
+			UE_LOG(LogTemp, Warning, TEXT("Nbr Damage : %f"), Damage * RatioDmgShoot);
+			CurrentBullet->ProjectilDamage = Damage * RatioDmgShoot;
 		}
 	}
 }

@@ -38,6 +38,7 @@ void UAC_DisplayDamage::DisplayDamage(float NbrDamage)
 		return;
 	}
 	ATextRenderActor* CurrentText = GetWorld()->SpawnActor<ATextRenderActor>(TextDamage, GetOwner()->GetActorTransform());
+	CurrentText->InitialLifeSpan = 1.f;
 	CurrentText->GetTextRender()->SetText(FText::FromString(FString::FromInt(NbrDamage)));
 	AActor* PlayerRef = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	CurrentText->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(PlayerRef->GetActorLocation(), GetOwner()->GetActorLocation()));

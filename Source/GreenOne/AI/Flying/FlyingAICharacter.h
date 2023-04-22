@@ -23,10 +23,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
-#endif
-
 #pragma region Property
 
 
@@ -142,10 +138,6 @@ private:
 private:
 
 #pragma region Tire
-
-	float ShootDmg;
-
-	float ExploDmg;
 
 	// Activate the cooldown of the shoot.
 	void ActiveCooldown();

@@ -114,6 +114,10 @@ void AEnnemySpawner::TriggerSpawnEntity()
 	{
 		SpawnEntity();
 	}
+	if (!bShouldKillAllEnnemys && NbrWave <= 0)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
+	}
 }
 
 void AEnnemySpawner::SpawnEntity()
