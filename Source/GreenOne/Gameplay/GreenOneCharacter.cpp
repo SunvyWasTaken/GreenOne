@@ -194,7 +194,7 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 	ShootTick(DeltaSeconds);
 
 	Regenerate(DeltaSeconds);
-
+	
 	// Reset Dash Vector Direction
 	// FVector2D reset = FVector2D(0, 0);
 	// GetCustomCharacterMovement()->SetDashDirectionVector(reset);
@@ -468,6 +468,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	MovementVector = Value.Get<FVector2D>();
+	
 	GetCustomCharacterMovement()->SetDashDirectionVector(MovementVector);
 	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
 
