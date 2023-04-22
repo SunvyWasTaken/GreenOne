@@ -16,7 +16,7 @@ AEnnemySpawner::AEnnemySpawner()
 	RootComponent = Root;
 
 	TriggerArena = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger Box Arena"));
-	//TriggerArena->SetupAttachment(Root);
+	TriggerArena->SetupAttachment(Root);
 
 	/************************************************************************/
 	/* WALL - E																*/
@@ -32,7 +32,7 @@ AEnnemySpawner::AEnnemySpawner()
 	{
 		WallsComponents->SetMaterial(0, WallMaterialObject.Object);
 	}
-	//WallsComponents->SetupAttachment(Root);
+	WallsComponents->SetupAttachment(Root);
 	WallsComponents->SetHiddenInGame(true, true);
 	WallsComponents->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
@@ -41,7 +41,7 @@ AEnnemySpawner::AEnnemySpawner()
 	/************************************************************************/
 
 	SpawnPoints = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("SpawnPoints"));
-	//SpawnPoints->SetupAttachment(Root);
+	SpawnPoints->SetupAttachment(Root);
 	SpawnPoints->SetHiddenInGame(true, true);
 	SpawnPoints->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SpawnPointMesh(TEXT("/Engine/BasicShapes/Plane"));
