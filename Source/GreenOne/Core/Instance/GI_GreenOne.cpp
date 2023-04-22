@@ -16,6 +16,7 @@ UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 void UGI_GreenOne::Init()
 {
 	Super::Init();
+	UE_LOG(LogTemp, Warning, TEXT("Le Init est call just in case."));
 	LoadSave();
 	LoadAudioSave();
 	FTimerHandle AudioHandle;
@@ -255,11 +256,14 @@ void UGI_GreenOne::SetMasterVolume(float value)
 
 void UGI_GreenOne::SetMusicVolume(float value)
 {
-	if (!AudioSettingsRef)
+	if (AudioSettingsRef == nullptr)
 	{
 		CreateAudioSave();
 	}
-	AudioSettingsRef->MusicVolume = value;
+	else
+	{
+		AudioSettingsRef->MusicVolume = value;
+	}
 	if (!MusicSoundClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de MusicSoundClass assigner dans le game instance"))
@@ -290,7 +294,7 @@ void UGI_GreenOne::CreateAudioSave()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("La creation du Sound Save � Fail!!!"));
 	}
-	SavedAudioSettings();
+	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
 }
 
 void UGI_GreenOne::LoadAudioSave()
@@ -307,7 +311,6 @@ void UGI_GreenOne::LoadAudioSave()
 	{
 		CreateAudioSave();
 	}
-	ApplyAudioSettings();
 }
 
 void UGI_GreenOne::SavedAudioSettings()
@@ -320,7 +323,6 @@ void UGI_GreenOne::SavedAudioSettings()
 			return;
 		}
 	}
-	//CreateAudioSave();
 	//if (!)
 	//{
 	UE_LOG(LogTemp, Warning, TEXT("Attention save du sound la variable AudioSettingsRef nullptr"));
