@@ -46,29 +46,32 @@ void UGI_GreenOne::RemoveLoadingScreen()
 	}
 }
 
-void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction)
+void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload)
 {
 	DisplayLoadingScreen();
 	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = TargetRef;
 	LatentInfo.ExecutionFunction = CallFunction;
 	LatentInfo.Linkage = 0;
-	FName LevelToUnload;
-	for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
+	if (ShouldUnload)
 	{
-		if (!CurrentLevel)
+		FName LevelToUnload;
+		for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
-			continue;
+			if (!CurrentLevel)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
+				continue;
+			}
+			if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+			{
+				LevelToUnload = CurrentLevel->GetWorldAssetPackageFName();
+				break;
+			}
 		}
-		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
-		{
-			LevelToUnload = CurrentLevel->GetWorldAssetPackageFName();
-			break;
-		}
+		FLatentActionInfo UnloadInfo;
+		UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
 	}
-	FLatentActionInfo UnloadInfo;
-	UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
 	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelToLoad, true, true, LatentInfo);
 }
 
@@ -142,7 +145,6 @@ void UGI_GreenOne::UpdateSaveData()
 			CurrentSave->MapName = CurrentLevel->GetWorldAssetPackageFName();
 			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *CurrentSave->MapName.ToString());
 		}
-		//CurrentSave->MapName = CurrentLevel;
 	}
 }
 
@@ -160,31 +162,15 @@ USG_GreenOne* UGI_GreenOne::CreateSave()
 
 void UGI_GreenOne::ApplySaveData()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Apply Save."));
 	if (!CurrentSave) { return; }
+
 	if (CurrentSave->bIsFirstTime)
 	{
-		DisplayLoadingScreen();
-		FLatentActionInfo LatentInfo;
-		LatentInfo.CallbackTarget = this;
-		LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
-		LatentInfo.Linkage = 0;
-		UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
+		LoadOneLevel(CurrentSave->MapName, this, FName("RemoveLoadingScreen"), false);
 		return;
 	}
-	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (!PlayerRef)
-	{
-		return;
-	}
-	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
-	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
-
-	DisplayLoadingScreen();
-	FLatentActionInfo LatentInfo;
-	LatentInfo.CallbackTarget = this;
-	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
-	LatentInfo.Linkage = 0;
-	UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
+	LoadOneLevel(CurrentSave->MapName, this, FName("ApplyLocation"), false);
 }
 
 void UGI_GreenOne::DisplaySaveScreen()
@@ -206,6 +192,19 @@ void UGI_GreenOne::DeleteSaveScreen()
 {
 	CurrenSaveScreen->SetVisibility(ESlateVisibility::Collapsed);
 	return;
+}
+
+void UGI_GreenOne::ApplyLocation()
+{
+	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (!PlayerRef)
+	{
+		return;
+	}
+	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
+	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
+
+	RemoveLoadingScreen();
 }
 
 #pragma endregion
