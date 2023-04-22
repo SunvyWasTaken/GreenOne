@@ -196,38 +196,7 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 	return false;
 }
 
-/**
- * Return if Character can jump horizontally
- */
-bool UCustomCharacterMovementComponent::DoHorizontalJump() const
-{
-	return bHorizontalJump;
-}
-
-EJumpState UCustomCharacterMovementComponent::GetCurrentJumpState() const
-{
-	return InJumpState;
-}
-
-void UCustomCharacterMovementComponent::ExecHorizontalJump()
-{
-	if (!bHorizontalJump) return;
-
-	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
-
-	if (TargetDistance > DistanceHorizontalJump)
-	{
-		bHorizontalJump = false;
-		GravityScale = CustomGravityScale;
-		HorizontalJumpDirection = FVector2D::ZeroVector;
-		TargetDistance = 0;
-		InJumpState = JS_None;
-	}
-	CurrentLocation = GetActorLocation();
-}
-
-void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
-{
+void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime) {
 	if (!bVerticalJump) return;
 
 	JumpTime += DeltaTime;
@@ -257,6 +226,36 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
 	}
 	const float NewZLocation = UKismetMathLibrary::Ease(CurrentLocation.Z, TargetJumpLocation.Z, CurveDeltaTime, VerticalJumpCurve);
 	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X, GetOwnerCharacter()->GetActorLocation().Y, NewZLocation), true);
+}
+
+void UCustomCharacterMovementComponent::ExecHorizontalJump()
+{
+	if (!bHorizontalJump) return;
+
+	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
+
+	if (TargetDistance > DistanceHorizontalJump)
+	{
+		bHorizontalJump = false;
+		GravityScale = CustomGravityScale;
+		HorizontalJumpDirection = FVector2D::ZeroVector;
+		TargetDistance = 0;
+		InJumpState = JS_None;
+	}
+	CurrentLocation = GetActorLocation();
+}
+
+/**
+ * Return if Character can jump horizontally
+ */
+bool UCustomCharacterMovementComponent::DoHorizontalJump() const
+{
+	return bHorizontalJump;
+}
+
+EJumpState UCustomCharacterMovementComponent::GetCurrentJumpState() const
+{
+	return InJumpState;
 }
 
 void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& NewDirection)

@@ -111,8 +111,8 @@ private:
 	virtual bool CheckFall(const FFindFloorResult& OldFloor, const FHitResult& Hit, const FVector& Delta, const FVector& OldLocation, float remainingTime, float timeTick, int32 Iterations, bool bMustJump) override;
 	bool VerticalJump();
 	bool HorizontalJump();
-	void ExecHorizontalJump();
 	void ExecVerticalJump(const float DeltaTime);
+	void ExecHorizontalJump();
 
 public:
 	UFUNCTION(BlueprintCallable)
