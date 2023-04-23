@@ -100,7 +100,7 @@ void AEnnemySpawner::RemoveEntityFromList(ABaseEnnemy* entity)
 			GetWorld()->GetTimerManager().SetTimer(SpawnHandler, this, &AEnnemySpawner::TriggerSpawnEntity, DelayEachWave, false);
 		}
 	}
-	if (EntityList.Num() == 0)
+	if (NbrWave <= 0 && EntityList.Num() == 0)
 	{
 		Victory();
 	}
