@@ -133,7 +133,7 @@ UFertilizerBase* UFertilizerTankComponent::GetEffect()
 	{
 		if(!FertilizerTankStruct->Effect) return  nullptr;
 		
-		return FertilizerFactory::Factory(EFertilizerType, FertilizerTankStruct->Effect);
+		return FertilizerFactory::Factory(this, EFertilizerType, FertilizerTankStruct->Effect);
 	}
 	
 	return nullptr;

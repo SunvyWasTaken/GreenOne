@@ -17,7 +17,10 @@ class GREENONE_API UEffect : public UObject, public IEffectInterface
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 	float TimeEffect;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+	class UNiagaraSystem* NSParticleEffect;
+
 public:
 	UEffect();
 	

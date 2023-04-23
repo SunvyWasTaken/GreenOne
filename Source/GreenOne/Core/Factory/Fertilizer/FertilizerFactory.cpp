@@ -14,7 +14,7 @@ FertilizerFactory::~FertilizerFactory()
 {
 }
 
-UFertilizerBase* FertilizerFactory::Factory(FertilizerType Type, TSubclassOf<UFertilizerBase> FertilizerBase)
+UFertilizerBase* FertilizerFactory::Factory(UObject* Context, FertilizerType Type, TSubclassOf<UFertilizerBase> FertilizerBase)
 {
 	if(!FertilizerBase)
 		return nullptr;
@@ -23,13 +23,13 @@ UFertilizerBase* FertilizerFactory::Factory(FertilizerType Type, TSubclassOf<UFe
 	switch (Type)
 	{
 	case FertilizerType::SlowDown:
-		Fertilizer = InitFertilizer<UFertilizerSlowDown>(FertilizerBase);
+		Fertilizer = InitFertilizer<UFertilizerSlowDown>(Context,FertilizerBase);
 		break;
 	case FertilizerType::AttackBonus:
-		Fertilizer = InitFertilizer<UFertilizerBase>(FertilizerBase);
+		Fertilizer = InitFertilizer<UFertilizerBase>(Context,FertilizerBase);
 		break;
 	case FertilizerType::Other:
-		Fertilizer = InitFertilizer<UFertilizerOther>(FertilizerBase);
+		Fertilizer = InitFertilizer<UFertilizerOther>(Context,FertilizerBase);
 		default:
 			break;
 	}
