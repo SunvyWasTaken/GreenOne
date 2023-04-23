@@ -95,12 +95,14 @@ void AEnnemySpawner::RemoveEntityFromList(ABaseEnnemy* entity)
 	EntityList.Remove(entity);
 	if (bShouldKillAllEnnemys)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Current Nbr List : %d"), EntityList.Num());
 		if (EntityList.Num() == 0)
 		{
 			GetWorld()->GetTimerManager().SetTimer(SpawnHandler, this, &AEnnemySpawner::TriggerSpawnEntity, DelayEachWave, false);
-			Victory();
 		}
+	}
+	if (EntityList.Num() == 0)
+	{
+		Victory();
 	}
 }
 

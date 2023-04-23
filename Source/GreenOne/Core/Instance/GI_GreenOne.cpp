@@ -180,7 +180,7 @@ void UGI_GreenOne::DisplaySaveScreen()
 		CurrenSaveScreen = CreateWidget<UUserWidget>(GetWorld(), SaveScreenClass);
 		CurrenSaveScreen->AddToViewport();
 	}
-	else if(IsValid(CurrenSaveScreen))
+	else if (IsValid(CurrenSaveScreen))
 	{
 		CurrenSaveScreen->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}

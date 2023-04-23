@@ -137,6 +137,7 @@ protected:
 
 private:
 
+	UPROPERTY()
 	class UUserWidget* CurrenSaveScreen;
 
 	/// <summary>
