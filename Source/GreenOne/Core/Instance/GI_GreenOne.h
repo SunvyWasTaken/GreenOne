@@ -26,6 +26,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload = true);
 
+	FLatentActionInfo LatentInfo;
+
 #pragma region Loading Screen
 
 	UPROPERTY(EditDefaultsOnly, Category = "Loading Screen")
