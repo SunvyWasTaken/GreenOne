@@ -40,7 +40,7 @@ void UFertilizerSlowDown::ApplyEffect(AActor* Actor, AActor* Source)
 
 			if(bTimeEffect)
 			{
-				Ennemy->ResetEffect(GetTimeEffect());
+				Ennemy->ResetEffect(this,GetTimeEffect());
 			}
 		}		
 	}

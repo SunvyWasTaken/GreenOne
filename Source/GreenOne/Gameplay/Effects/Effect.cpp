@@ -4,6 +4,7 @@
 
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "GreenOne/AI/BaseEnnemy.h"
 
 UEffect::UEffect()
 {
@@ -16,7 +17,6 @@ void UEffect::ApplyEffect(AActor* Actor)
 
 void UEffect::ApplyEffect(AActor* Actor, AActor* Source)
 {
-	IEffectInterface::ApplyEffect(Actor, Source);
 	if(NSParticleEffect)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SpawnParticle"));
@@ -24,19 +24,28 @@ void UEffect::ApplyEffect(AActor* Actor, AActor* Source)
 	}
 }
 
-void UEffect::InstantiateParticleToActor(const AActor* Actor)
+void UEffect::InstantiateParticleToActor(AActor* Actor)
 {
-	UNiagaraComponent* NiagaraComponentTemp = UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
-				EName::None,Actor->GetActorLocation(),
-				Actor->GetActorRotation(),EAttachLocation::KeepWorldPosition,true);
-
-	if(bTimeEffect)
+	if(ABaseEnnemy* BaseEnnemy = Cast<ABaseEnnemy>(Actor))
 	{
-		FTimerHandle ParticleToDestroy;
-		GetWorld()->GetTimerManager().SetTimer(ParticleToDestroy,[=]()
+		NiagaraComponentTemp = UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
+			EName::None,Actor->GetActorLocation(),
+			Actor->GetActorRotation(),EAttachLocation::KeepWorldPosition,true);
+
+		if(BaseEnnemy->bIsParticleExist(GetParticleEffect()))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Already Exist"));
 			NiagaraComponentTemp->DestroyComponent();
-		},GetTimeEffect(),false);	
+			return;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Add particle"));
+		BaseEnnemy->AddParticle(GetParticleEffect(), NiagaraComponentTemp);
+
+		if(bTimeEffect)
+		{
+			BaseEnnemy->ResetEffect(this,GetTimeEffect());
+		}
 	}
 }
 
@@ -44,3 +53,26 @@ const float UEffect::GetTimeEffect()
 {
 	return TimeEffect;
 }
+
+UNiagaraSystem* UEffect::GetParticleEffect() const
+{
+	if(!NSParticleEffect) return nullptr;
+	
+	return NSParticleEffect;
+}
+
+UNiagaraComponent* UEffect::GetParticleComponent() const
+{
+	if(!NiagaraComponentTemp) return nullptr;
+	
+	return NiagaraComponentTemp;
+}
+
+void UEffect::DestroyParticleComponent()
+{
+	if(!NiagaraComponentTemp) return;
+
+	NiagaraComponentTemp->DestroyComponent();
+}
+
+

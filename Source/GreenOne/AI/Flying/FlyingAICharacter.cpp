@@ -67,14 +67,6 @@ void AFlyingAICharacter::SetRotationAxis(FVector2D TargetAxis)
 	TargetRotationInput = TargetAxis;
 }
 
-void AFlyingAICharacter::ResetEffect(float DelayToReset)
-{
-	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [&]()
-		{
-			UpdateMaxSpeed(MaxSpeed);
-		}, DelayToReset, false);
-}
-
 //This function is used to perform self-destruction of the AI character.
 void AFlyingAICharacter::SelfDestruction()
 {
