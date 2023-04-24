@@ -20,12 +20,23 @@ void UEffect::ApplyEffect(AActor* Actor, AActor* Source)
 	if(NSParticleEffect)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SpawnParticle"));
+		InstantiateParticleToActor(Actor);
+	}
+}
 
-		
-		UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
+void UEffect::InstantiateParticleToActor(const AActor* Actor)
+{
+	UNiagaraComponent* NiagaraComponentTemp = UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
 				EName::None,Actor->GetActorLocation(),
 				Actor->GetActorRotation(),EAttachLocation::KeepWorldPosition,true);
-	
+
+	if(bTimeEffect)
+	{
+		FTimerHandle ParticleToDestroy;
+		GetWorld()->GetTimerManager().SetTimer(ParticleToDestroy,[=]()
+		{
+			NiagaraComponentTemp->DestroyComponent();
+		},GetTimeEffect(),false);	
 	}
 }
 
