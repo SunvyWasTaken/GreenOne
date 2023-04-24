@@ -65,13 +65,13 @@ public:
 		void SaveGame();
 
 	/**
-	 * Load the save game mettre le nom de la save à load
+	 * Load the save game mettre le nom de la save Ã  load
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Custom|Save")
 		bool LoadSave();
 
 	/**
-	 * Delete la save à l'espace donner
+	 * Delete la save Ã  l'espace donner
 	 * TODO je sais pas si je dois vider la sauvegarde ou pas.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Custom|Save")
@@ -90,13 +90,13 @@ public:
 		FString SaveName = "GreenOneSaveData";
 
 	/**
-	 * class du fichier sauvegarde à mettre absolument.
+	 * class du fichier sauvegarde Ã  mettre absolument.
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Save")
 		TSubclassOf<class USaveGame> SaveClass;
 
 	/**
-	 * Class du widget à afficher lors de la sauvegarde.
+	 * Class du widget Ã  afficher lors de la sauvegarde.
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Loading Screen")
 		TSubclassOf<UUserWidget> SaveScreenClass;
@@ -123,7 +123,7 @@ protected:
 		void UpdateSaveData();
 
 	/**
-	 * Fonction à ne pas utiliser seul utiliser juste les fonctions
+	 * Fonction Ã  ne pas utiliser seul utiliser juste les fonctions
 	 * * Save Game
 	 * * Load Save
 	 * * Delete Save
