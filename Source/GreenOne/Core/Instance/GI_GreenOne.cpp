@@ -54,7 +54,6 @@ void UGI_GreenOne::RemoveLoadingScreen()
 
 void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload)
 {
-	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = TargetRef;
 	LatentInfo.ExecutionFunction = CallFunction;
 	LatentInfo.Linkage = 0;
