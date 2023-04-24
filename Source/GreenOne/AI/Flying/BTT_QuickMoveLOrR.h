@@ -6,6 +6,8 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTT_QuickMoveLOrR.generated.h"
 
+
+
 UENUM()
 enum class EDimension : uint8
 {
@@ -15,13 +17,23 @@ enum class EDimension : uint8
 	Alternate
 };
 
+/*UENUM(BlueprintType)
+enum EStates
+{
+	LeftDas,
+	RightDash,
+	WAlk,
+	Fight
+};*/
+
+
 // TODO ajouter un dot pour faire en sorte que le truc aille pas non plus au dessus du player Ou en dessous totalement de la map.
 
 /**
  *
  */
 UCLASS()
-class GREENONE_API UBTT_QuickMoveLOrR : public UBTTaskNode
+class GREENONE_API UBTT_QuickMoveLOrR : public UBTTaskNode 
 {
 	GENERATED_BODY()
 
@@ -32,7 +44,8 @@ public:
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 
 	void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
-
+	
+	void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult);
 public:
 
 	UPROPERTY(EditAnywhere)
@@ -52,6 +65,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float MoveTime;
 
+
+	
+	
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Pourcentage d'alignement", UIMin = 0, UIMax = 1, ClampMin = 0, ClampMax = 1))
 	float PercentAlignment;
 
@@ -67,4 +83,19 @@ private:
 
 	void SetFlyingRotation(APawn* RefOwner, FVector2D Axis);
 
+#pragma region Animation
+
+public:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+		UAnimMontage* LeftDash;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+		//bool CanDash = false;
+private:
+	
+		void SetDash(UBehaviorTreeComponent& OwnerComp);
+
+#pragma endregion	
+	
 };

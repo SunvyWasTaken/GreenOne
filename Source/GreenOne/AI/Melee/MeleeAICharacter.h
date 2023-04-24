@@ -76,5 +76,27 @@ private:
 	//UFUNCTION()
 	//void OnDamage(float value);
 
+
+#pragma region AnimationValue
+public:
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool CanDash() { return !IsDashing; };
+
+	bool IsDashing = false;
+	
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	//UAnimMontage* LeftDash;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanLDash = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanRDash = false;
+	//bool IsInCooldown = false;
+private:
+	
+	//void SetDash(UBehaviorTreeComponent& OwnerComp);
+
+#pragma endregion	
 	
 };
