@@ -48,11 +48,11 @@ void UGI_GreenOne::RemoveLoadingScreen()
 
 void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload)
 {
-	DisplayLoadingScreen();
 	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = TargetRef;
 	LatentInfo.ExecutionFunction = CallFunction;
 	LatentInfo.Linkage = 0;
+	DisplayLoadingScreen();
 	if (ShouldUnload)
 	{
 		FName LevelToUnload;
@@ -204,7 +204,8 @@ void UGI_GreenOne::ApplyLocation()
 	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
 	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
 
-	RemoveLoadingScreen();
+	FTimerHandle RemoveLoadingScreenHandle;
+	GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&](){ RemoveLoadingScreen();}, 2.f, false); 
 }
 
 #pragma endregion

@@ -75,7 +75,8 @@ void ALoadingLevelBox::TpPlayer()
 				UE_LOG(LogTemp, Warning, TEXT("HHAHAHAHAHA ça n'a pas marcher."));
 			}
 		}
-		GameInstanceRef->RemoveLoadingScreen();
+		FTimerHandle LoadHandle;
+		GetWorld()->GetTimerManager().SetTimer(LoadHandle, [=](){ GameInstanceRef->RemoveLoadingScreen(); }, 2.f, false);
 	}
 }
 
