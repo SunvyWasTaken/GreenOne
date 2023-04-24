@@ -21,23 +21,21 @@ public:
 	// Appelé chaque frame
 	virtual void Tick(float DeltaTime) override;
 
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+#endif
+
 public:
-
-	UPROPERTY(EditDefaultsOnly)
-		class USceneComponent* Root;
-
+	
+	
 	UPROPERTY(EditAnywhere)
-		class UBoxComponent* TriggerArena;
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		class UInstancedStaticMeshComponent* WallsComponents;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		class UInstancedStaticMeshComponent* SpawnPoints;;
+		class USphereComponent* SphereCollisionActivation;
 
 	//UPROPERTY(EditAnywhere)
 		//class USphereComponent* SphereCollisionDesactivation;
+
+	UFUNCTION()
+		void OnComponentActivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	//UFUNCTION()
 		//void OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
@@ -54,40 +52,39 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetPlayerRefToEntitys(AActor* ref);
 
-private:
-
-	UFUNCTION()
-		void OnComponentActivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	/************************************************************************/
-	/* Spawner Property														*/
-	/************************************************************************/
+/************************************************************************/
+/* Spawner Property														*/
+/************************************************************************/
 
 public:
 
-	//This variable is used to store a reference to a subclass of the ABaseEnnemy class, which can then be used to spawn an instance of the subclass.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom")
-		TArray<TSubclassOf<class ABaseEnnemy>> EnnemyToSpawnClass;
+		//This variable is used to store a reference to a subclass of the ABaseEnnemy class, which can then be used to spawn an instance of the subclass.
+		TSubclassOf<class ABaseEnnemy> EnnemyToSpawnClass;
 
-	// Enemy spawn ratio in the list above.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = 0, ClampMax = 100, UIMin = 0, UIMax = 100), Category = "Custom")
-		float EnnemyRatio = 50.f;
-
-	// Number of enemies per wave.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
-		int NbrEnnemyPerWave = 20;
+		//This variable is used to store the number of enemies that can appear on the screen at the same time.
+		int NbrEnnemySameTime;
 
-	// Is it that the player has to kill all the enemies before the next wave launches?
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "Kill All"), Category = "Custom")
-		bool bShouldKillAllEnnemys = true;
-
-	// Time between each wave.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
-		float DelayEachWave = 10.f;
+		//This variable is used to store the delay between each spawn of an object.
+		float DelayEachSpawn;
 
-	// Number of waves the Spawner will perform.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
-		int NbrWave = 2;
+		// Spawner range detection in cm.
+		float RangeDetection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
+		//This variable is used to store a float value that indicates whether range detection is disabled or not.
+		float RangeDetectionDisable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
+		//This variable is used to store the number of enemies that will be spawned in the game.
+		int NbrSpawnEnnemy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
+		//This variable is used to store the minimum number of enemies that can be spawned in a game.
+		int MinNbrSpawnEnnemy;
 
 
 private:
@@ -98,13 +95,6 @@ private:
 
 	// for a intern cooldown
 	void SpawnTick(float deltaseconds);
-
-	FVector GetSpawnLocation();
-
-	// Function to call when victory.
-	void Victory();
-
-	int CurrentSpawnInt = 0;
 
 	bool bCanSpawnEnnemy;
 
