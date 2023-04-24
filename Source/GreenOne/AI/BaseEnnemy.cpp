@@ -64,6 +64,38 @@ void ABaseEnnemy::EntityTakeEffect_Implementation(UEffect* Effect, AActor* Sourc
 	
 }
 
+void ABaseEnnemy::ResetEffect(UEffect* Effect,float DelayToReset)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Delay %f"), DelayToReset);
+	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [=]()
+		{
+			UpdateMaxSpeed(MaxSpeed);
+			if(UNiagaraComponent* ParticleComponent = Effect->GetParticleComponent())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Reset particle"));
+				EffectsOnActor.FindRef(Effect->GetParticleEffect())->DestroyComponent();
+				EffectsOnActor.Remove(Effect->GetParticleEffect());
+			}
+		}, DelayToReset, false);
+}
+
+void ABaseEnnemy::AddParticle(UNiagaraSystem* Particle, UNiagaraComponent* ParticleComp)
+{
+	if(!Particle) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("EA size %d"),EffectsOnActor.Num());
+	EffectsOnActor.Add(Particle,ParticleComp);
+	UE_LOG(LogTemp, Warning, TEXT("EA after size %d"),EffectsOnActor.Num());
+
+}
+
+bool ABaseEnnemy::bIsParticleExist(UNiagaraSystem* Particle)
+{
+	if(!Particle) return false;
+
+	return EffectsOnActor.Contains(Particle);
+}
+
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
 {
 	if (AAIController* AIController = Cast<AAIController>(Controller))

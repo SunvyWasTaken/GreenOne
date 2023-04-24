@@ -23,9 +23,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 	class UNiagaraSystem* NSParticleEffect;
+	class UNiagaraComponent* NiagaraComponentTemp = nullptr;
 	bool bAlreadySpawn = false;
 
-	void InstantiateParticleToActor(const AActor* Actor);
+	void InstantiateParticleToActor(AActor* Actor);
 
 public:
 	UEffect();
@@ -35,4 +36,10 @@ public:
 
 	UFUNCTION(BlueprintGetter)
 	const float GetTimeEffect();
+	UFUNCTION(BlueprintGetter)
+	UNiagaraSystem* GetParticleEffect() const;
+
+	class UNiagaraComponent* GetParticleComponent() const;
+	
+	void DestroyParticleComponent();
 };

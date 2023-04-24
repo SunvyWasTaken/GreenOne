@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "BaseEnnemy.generated.h"
@@ -63,7 +64,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void EntityTakeEffect(UEffect* Effect, AActor* Source = nullptr);
 	UFUNCTION(BlueprintCallable)
-	virtual void ResetEffect(float DelayToReset){};
+	virtual void ResetEffect(UEffect* Effect,float DelayToReset);
+	UFUNCTION(BlueprintCallable)
+	virtual void AddParticle(UNiagaraSystem* Particle, UNiagaraComponent* ParticleComp);
+	bool bIsParticleExist(UNiagaraSystem* Particle);
+	TMap<UNiagaraSystem*,UNiagaraComponent*> EffectsOnActor;
 	
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerRef(AActor* ref);
