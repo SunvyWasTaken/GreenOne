@@ -314,7 +314,7 @@ void AGreenOneCharacter::ShootRafale()
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
-			IsCombatMode = true;
+			//IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);

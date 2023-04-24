@@ -272,7 +272,7 @@ private:
 	FTimerHandle TimerRegen;
 	/** Valeur d'incrémentation du cooldown après chaque attaque */
 	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
-	float CoolDown = 5.f;
+	float CoolDown = 10.f;
 #pragma endregion 
 
 #pragma region Dash
