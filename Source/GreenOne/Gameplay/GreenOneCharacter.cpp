@@ -79,6 +79,10 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	// Add TargetMuzzle
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
 	TargetMuzzle->SetupAttachment(GetMesh(), FName("hand_rSocket"));
+
+	HealComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("HealComp"));
+	HealComponent->SetupAttachment(RootComponent);
+	HealComponent->Activate(false);
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -550,12 +554,14 @@ void AGreenOneCharacter::Regenerate(float DeltaSeconds)
 	
 	if(Health < MaxHealth)
 	{
+		HealComponent->Activate(false);
 		// UE_LOG(LogTemp, Warning, TEXT("+10 health"));
 		Health += 10*DeltaSeconds;
 		// UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
 		if(Health >= MaxHealth)
 		{
 			Health = MaxHealth;
+			HealComponent->Deactivate();
 		}
 		OnRegen.Broadcast();
 	}
