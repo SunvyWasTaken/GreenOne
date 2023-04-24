@@ -19,7 +19,6 @@ void UEffect::ApplyEffect(AActor* Actor, AActor* Source)
 {
 	if(NSParticleEffect)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SpawnParticle"));
 		InstantiateParticleToActor(Actor);
 	}
 }
@@ -34,12 +33,10 @@ void UEffect::InstantiateParticleToActor(AActor* Actor)
 
 		if(BaseEnnemy->bIsParticleExist(GetParticleEffect()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Already Exist"));
 			NiagaraComponentTemp->DestroyComponent();
 			return;
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Add particle"));
 		BaseEnnemy->AddParticle(GetParticleEffect(), NiagaraComponentTemp);
 
 		if(bTimeEffect)
