@@ -24,7 +24,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 	class UNiagaraSystem* NSParticleEffect;
 	class UNiagaraComponent* NiagaraComponentTemp = nullptr;
-	bool bAlreadySpawn = false;
 
 	void InstantiateParticleToActor(AActor* Actor);
 

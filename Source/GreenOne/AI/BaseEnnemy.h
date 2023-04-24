@@ -61,14 +61,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Custom|Damage")
 	void EntityTakeDamage(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr);
 
+#pragma region Effect
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void EntityTakeEffect(UEffect* Effect, AActor* Source = nullptr);
 	UFUNCTION(BlueprintCallable)
-	virtual void ResetEffect(UEffect* Effect,float DelayToReset);
+	virtual void ResetEffect(UEffect* Effect, const float DelayToReset);
 	UFUNCTION(BlueprintCallable)
 	virtual void AddParticle(UNiagaraSystem* Particle, UNiagaraComponent* ParticleComp);
 	bool bIsParticleExist(UNiagaraSystem* Particle);
 	TMap<UNiagaraSystem*,UNiagaraComponent*> EffectsOnActor;
+#pragma endregion 
 	
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerRef(AActor* ref);

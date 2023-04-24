@@ -21,7 +21,6 @@ void UFertilizerSlowDown::PostEditChangeProperty(FPropertyChangedEvent& Property
 void UFertilizerSlowDown::ApplyEffect(AActor* Actor, AActor* Source)
 {
 	Super::ApplyEffect(Actor, Source);
-	UE_LOG(LogTemp, Warning, TEXT("1 %d"), PercentSlowDown);
 	if(!Actor) return;
 
 	if(ABaseEnnemy* Ennemy = Cast<ABaseEnnemy>(Actor))
