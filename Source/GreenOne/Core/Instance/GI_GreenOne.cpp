@@ -7,6 +7,7 @@
 #include "GreenOne/Core/SaveGame/SG_GreenOne.h"
 #include "GreenOne/Core/Audio/SG_AudioSettings.h"
 #include "Engine/LevelStreaming.h"
+#include "GreenOne/Widget/W_LoadingScreen.h"
 
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
@@ -16,6 +17,8 @@ UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 void UGI_GreenOne::Init()
 {
 	Super::Init();
+	// TODO Regarder ici. le truc lol
+	//FCoreUObjectDelegates::PreLoadMap.AddUObject(this, );
 	UE_LOG(LogTemp, Warning, TEXT("Le Init est call just in case."));
 	LoadSave();
 	LoadAudioSave();
@@ -42,7 +45,10 @@ void UGI_GreenOne::RemoveLoadingScreen()
 {
 	if (IsValid(CurrentLoadingScreen))
 	{
-		CurrentLoadingScreen->RemoveFromParent();
+		if (UW_LoadingScreen* CurrentLScreen = Cast<UW_LoadingScreen>(CurrentLoadingScreen))
+		{
+			CurrentLScreen->RemoveLoading();
+		}
 	}
 }
 

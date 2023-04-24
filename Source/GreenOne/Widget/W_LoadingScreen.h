@@ -19,6 +19,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TInfo;
 
+	UFUNCTION(BlueprintNativeEvent)
+	void RemoveLoading();
+
 	float GetLoadingPercent();
 
 	UFUNCTION(BlueprintCallable)
