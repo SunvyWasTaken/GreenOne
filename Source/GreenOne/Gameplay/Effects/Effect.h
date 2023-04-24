@@ -15,11 +15,17 @@ class GREENONE_API UEffect : public UObject, public IEffectInterface
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+
+	UPROPERTY(EditAnywhere, Category = "Effect", DisplayName = "Active le temps d'effect")
+	bool bTimeEffect = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect", meta = (EditCondition="bTimeEffect"))
 	float TimeEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 	class UNiagaraSystem* NSParticleEffect;
+	bool bAlreadySpawn = false;
+
+	void InstantiateParticleToActor(const AActor* Actor);
 
 public:
 	UEffect();

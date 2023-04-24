@@ -37,8 +37,11 @@ void UFertilizerSlowDown::ApplyEffect(AActor* Actor, AActor* Source)
 				Ennemy->UpdateMaxSpeed(NewSpeed);	
 			}
 			UE_LOG(LogTemp, Warning, TEXT("SlowDown, MaxSpeedActor = %f, ReduceSpeed = %f, CalculPercentSlowDown = %f"), ActorCurrentSpeed, ReduceSpeed, GetTotalPercent(ActorMaxSpeed,ActorCurrentSpeed));
-			
-			Ennemy->ResetEffect(GetTimeEffect());
+
+			if(bTimeEffect)
+			{
+				Ennemy->ResetEffect(GetTimeEffect());
+			}
 		}		
 	}
 
