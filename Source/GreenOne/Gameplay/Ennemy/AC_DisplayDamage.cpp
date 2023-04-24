@@ -14,7 +14,7 @@ UAC_DisplayDamage::UAC_DisplayDamage()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-	bAutoActivate = true;
+	bAutoActivate = false;
 	TextDamage = ATextRenderActor::StaticClass();
 }
 
@@ -23,7 +23,10 @@ UAC_DisplayDamage::UAC_DisplayDamage()
 void UAC_DisplayDamage::BeginPlay()
 {
 	Super::BeginPlay();
-
+	if (!IsActive())
+	{
+		return;
+	}
 	if (ABaseEnnemy* OwnerRef = Cast<ABaseEnnemy>(GetOwner()))
 	{
 		OwnerRef->OnTakeDamage.AddDynamic(this, &UAC_DisplayDamage::DisplayDamage);
@@ -32,6 +35,10 @@ void UAC_DisplayDamage::BeginPlay()
 
 void UAC_DisplayDamage::DisplayDamage(float NbrDamage)
 {
+	if (!IsActive())
+	{
+		return;
+	}
 	if (TextDamage == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("T'as oublié de mettre le TextRender Dans t'as variable"));

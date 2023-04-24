@@ -524,7 +524,7 @@ void AGreenOneCharacter::CanRegenerate()
 
 	if(Health >= MaxHealth)
 		return;
-		
+	HealComponent->Deactivate();
 	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
 		IsCombatMode = false;
