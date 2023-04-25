@@ -30,14 +30,14 @@ void UEffect::InstantiateParticleToActor(AActor* Actor)
 		NiagaraComponentTemp = UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
 			EName::None,Actor->GetActorLocation(),
 			Actor->GetActorRotation(),EAttachLocation::KeepWorldPosition,true);
-
+		
 		if(BaseEnnemy->bIsParticleExist(GetParticleEffect()))
 		{
 			NiagaraComponentTemp->DestroyComponent();
 			return;
 		}
 
-		BaseEnnemy->AddParticle(GetParticleEffect(), NiagaraComponentTemp);
+		//BaseEnnemy->AddParticle(GetParticleEffect(), NiagaraComponentTemp);
 
 		if(bTimeEffect)
 		{
