@@ -69,10 +69,10 @@ void ABaseEnnemy::ResetEffect(UEffect* Effect, const float DelayToReset)
 	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [=]()
 		{
 			UpdateMaxSpeed(MaxSpeed);
-			if(UNiagaraComponent* ParticleComponent = Effect->GetParticleComponent())
+			if(const UNiagaraSystem* ParticleEffect = Effect->GetParticleEffect())
 			{
-				EffectsOnActor.FindRef(Effect->GetParticleEffect())->DestroyComponent();
-				EffectsOnActor.Remove(Effect->GetParticleEffect());
+				EffectsOnActor.FindRef(ParticleEffect)->DestroyComponent();
+				EffectsOnActor.Remove(ParticleEffect);
 			}
 		}, DelayToReset, false);
 }
@@ -84,7 +84,7 @@ void ABaseEnnemy::AddParticle(UNiagaraSystem* Particle, UNiagaraComponent* Parti
 	EffectsOnActor.Add(Particle,ParticleComp);
 }
 
-bool ABaseEnnemy::bIsParticleExist(UNiagaraSystem* Particle)
+bool ABaseEnnemy::bIsParticleExist(UNiagaraSystem* Particle) const
 {
 	if(!Particle) return false;
 
