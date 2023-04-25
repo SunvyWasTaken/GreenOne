@@ -23,10 +23,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
-#endif
-
 #pragma region Property
 
 
@@ -87,7 +83,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void UpdateMaxSpeed(float Speed) override;
-	virtual void ResetEffect(const float DelayToReset) override;
 
 #pragma region AnimationRotation
 
@@ -142,10 +137,6 @@ private:
 private:
 
 #pragma region Tire
-
-	float ShootDmg;
-
-	float ExploDmg;
 
 	// Activate the cooldown of the shoot.
 	void ActiveCooldown();

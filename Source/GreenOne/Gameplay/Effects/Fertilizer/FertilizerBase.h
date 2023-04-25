@@ -16,5 +16,5 @@ class GREENONE_API UFertilizerBase : public UEffect
 
 public:
 	UFertilizerBase();
-	virtual void ApplyEffect(AActor* Actor) override;
+	virtual void ApplyEffect(AActor* Actor, AActor* Source = nullptr) override;
 };

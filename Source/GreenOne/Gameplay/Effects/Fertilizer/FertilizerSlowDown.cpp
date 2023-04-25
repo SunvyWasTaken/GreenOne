@@ -20,7 +20,7 @@ void UFertilizerSlowDown::PostEditChangeProperty(FPropertyChangedEvent& Property
 
 void UFertilizerSlowDown::ApplyEffect(AActor* Actor, AActor* Source)
 {
-	UE_LOG(LogTemp, Warning, TEXT("1 %d"), PercentSlowDown);
+	Super::ApplyEffect(Actor, Source);
 	if(!Actor) return;
 
 	if(ABaseEnnemy* Ennemy = Cast<ABaseEnnemy>(Actor))
@@ -36,8 +36,11 @@ void UFertilizerSlowDown::ApplyEffect(AActor* Actor, AActor* Source)
 				Ennemy->UpdateMaxSpeed(NewSpeed);	
 			}
 			UE_LOG(LogTemp, Warning, TEXT("SlowDown, MaxSpeedActor = %f, ReduceSpeed = %f, CalculPercentSlowDown = %f"), ActorCurrentSpeed, ReduceSpeed, GetTotalPercent(ActorMaxSpeed,ActorCurrentSpeed));
-			
-			Ennemy->ResetEffect(GetTimeEffect());
+
+			if(bTimeEffect)
+			{
+				Ennemy->ResetEffect(this,GetTimeEffect());
+			}
 		}		
 	}
 

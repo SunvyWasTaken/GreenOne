@@ -79,6 +79,10 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	// Add TargetMuzzle
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
 	TargetMuzzle->SetupAttachment(GetMesh(), FName("hand_rSocket"));
+
+	HealComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("HealComp"));
+	HealComponent->SetupAttachment(RootComponent);
+	HealComponent->Activate(false);
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -192,9 +196,8 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
-
 	Regenerate(DeltaSeconds);
-
+	
 	// Reset Dash Vector Direction
 	// FVector2D reset = FVector2D(0, 0);
 	// GetCustomCharacterMovement()->SetDashDirectionVector(reset);
@@ -354,8 +357,7 @@ void AGreenOneCharacter::ShootRafale()
 		}
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
-			// UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
-			IsCombatMode = true;
+			//IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
@@ -468,6 +470,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	MovementVector = Value.Get<FVector2D>();
+	
 	GetCustomCharacterMovement()->SetDashDirectionVector(MovementVector);
 	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
 
@@ -515,43 +518,24 @@ void AGreenOneCharacter::Dash()
 
 void AGreenOneCharacter::CanRegenerate()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
-
+	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
 	if(Health >= MaxHealth)
 		return;
-		
 	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
 		IsCombatMode = false;
-		// UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
+		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
 	},CoolDown, false);
-	/*while(IsCombatMode == false && Health < 100 && CoolDown <= 5)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("+1 time"));
-		CoolDown++;
-		IsRegenerate();
-	}
-	CanEarnHp = true;
-	IsRegenerate();*/
 }
-
-//void AGreenOneCharacter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-/*{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	CanRegenerate(DeltaTime);
-}*/
-
 
 void AGreenOneCharacter::Regenerate(float DeltaSeconds)
 {
 	if(IsCombatMode) return;
-	
 	if(Health < MaxHealth)
 	{
-		// UE_LOG(LogTemp, Warning, TEXT("+10 health"));
+		UE_LOG(LogTemp, Warning, TEXT("+10 health"));
 		Health += 10*DeltaSeconds;
-		// UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
+		UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
 		if(Health >= MaxHealth)
 		{
 			Health = MaxHealth;

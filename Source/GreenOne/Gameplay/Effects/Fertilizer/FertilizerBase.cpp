@@ -7,7 +7,7 @@ UFertilizerBase::UFertilizerBase()
 {
 }
 
-void UFertilizerBase::ApplyEffect(AActor* Actor)
+void UFertilizerBase::ApplyEffect(AActor* Actor, AActor* Source)
 {
-	Super::ApplyEffect(Actor);
+	Super::ApplyEffect(Actor, Source);
 }

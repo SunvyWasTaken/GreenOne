@@ -24,7 +24,9 @@ public:
 	virtual void Init();
 
 	UFUNCTION(BlueprintCallable)
-		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction);
+		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload = true);
+
+	FLatentActionInfo LatentInfo;
 
 #pragma region Loading Screen
 
@@ -137,6 +139,7 @@ protected:
 
 private:
 
+	UPROPERTY()
 	class UUserWidget* CurrenSaveScreen;
 
 	/// <summary>
@@ -144,10 +147,14 @@ private:
 	/// </summary>
 	void DisplaySaveScreen();
 
-	/// <summary>
+	/// <summary>	
 	/// This method deletes the save screen.
 	/// </summary>
 	void DeleteSaveScreen();
+
+	// Vrai function qui applique toutes les valeurs.
+	UFUNCTION()
+		void ApplyLocation();
 
 #pragma endregion
 

@@ -147,6 +147,8 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		Target = Direction;
 	}
 
+	TempRotationCharacter = GetRotationToDirection(Direction);
+	
 	//Check if the horizontal Jump is edit manually
 	if (bManualHorizontalVelocity)
 	{
@@ -196,38 +198,7 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 	return false;
 }
 
-/**
- * Return if Character can jump horizontally
- */
-bool UCustomCharacterMovementComponent::DoHorizontalJump() const
-{
-	return bHorizontalJump;
-}
-
-EJumpState UCustomCharacterMovementComponent::GetCurrentJumpState() const
-{
-	return InJumpState;
-}
-
-void UCustomCharacterMovementComponent::ExecHorizontalJump()
-{
-	if (!bHorizontalJump) return;
-
-	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
-
-	if (TargetDistance > DistanceHorizontalJump)
-	{
-		bHorizontalJump = false;
-		GravityScale = CustomGravityScale;
-		HorizontalJumpDirection = FVector2D::ZeroVector;
-		TargetDistance = 0;
-		InJumpState = JS_None;
-	}
-	CurrentLocation = GetActorLocation();
-}
-
-void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
-{
+void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime) {
 	if (!bVerticalJump) return;
 
 	JumpTime += DeltaTime;
@@ -259,6 +230,42 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime)
 	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X, GetOwnerCharacter()->GetActorLocation().Y, NewZLocation), true);
 }
 
+void UCustomCharacterMovementComponent::ExecHorizontalJump()
+{
+	if (!bHorizontalJump) return;
+
+	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
+
+	if (TargetDistance > DistanceHorizontalJump)
+	{
+		bHorizontalJump = false;
+		GravityScale = CustomGravityScale;
+		HorizontalJumpDirection = FVector2D::ZeroVector;
+		TargetDistance = 0;
+		InJumpState = JS_None;
+	}
+	CurrentLocation = GetActorLocation();
+	GetOwnerCharacter()->SetActorRotation(TempRotationCharacter);
+}
+
+FRotator UCustomCharacterMovementComponent::GetRotationToDirection(FVector Direction)
+{
+	return FRotator( 0.f, Direction.Rotation().Yaw, 0.f);
+}
+
+/**
+ * Return if Character can jump horizontally
+ */
+bool UCustomCharacterMovementComponent::DoHorizontalJump() const
+{
+	return bHorizontalJump;
+}
+
+EJumpState UCustomCharacterMovementComponent::GetCurrentJumpState() const
+{
+	return InJumpState;
+}
+
 void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& NewDirection)
 {
 	HorizontalJumpDirection = NewDirection;
@@ -272,7 +279,7 @@ void UCustomCharacterMovementComponent::Dash()
 {
 	if ( IsFalling() && GetCurrentJumpState() == JS_Vertical)
 	{
-		DoJump(false);
+		GetOwnerCharacter()->Jump();
 	}
 	
 	// Securite
@@ -289,7 +296,6 @@ void UCustomCharacterMovementComponent::Dash()
 	
 	// Récupération de la direction du joueur
 	FVector Direction = GC->GetActorForwardVector().GetSafeNormal2D();
-	TempRotationCharacter = FRotator(0.f, Direction.Rotation().Yaw, 0.f);
 	
 	if ( DashDirectionVector != FVector2D::ZeroVector )
 	{
@@ -299,8 +305,7 @@ void UCustomCharacterMovementComponent::Dash()
 		Direction.Normalize();
 	}
 
-	float Yaw = ( Direction.Rotation().Yaw );
-	TempRotationCharacter = FRotator( 0.f, Yaw, 0.f);
+	TempRotationCharacter = GetRotationToDirection(Direction);
 
 	Direction = FVector(Direction.X, Direction.Y, 0.f);
 

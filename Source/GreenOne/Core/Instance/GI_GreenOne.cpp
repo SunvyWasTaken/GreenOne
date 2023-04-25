@@ -7,6 +7,7 @@
 #include "GreenOne/Core/SaveGame/SG_GreenOne.h"
 #include "GreenOne/Core/Audio/SG_AudioSettings.h"
 #include "Engine/LevelStreaming.h"
+#include "GreenOne/Widget/W_LoadingScreen.h"
 
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
@@ -16,6 +17,9 @@ UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 void UGI_GreenOne::Init()
 {
 	Super::Init();
+	// TODO Regarder ici. le truc lol
+	//FCoreUObjectDelegates::PreLoadMap.AddUObject(this, );
+	UE_LOG(LogTemp, Warning, TEXT("Le Init est call just in case."));
 	LoadSave();
 	LoadAudioSave();
 	FTimerHandle AudioHandle;
@@ -41,33 +45,38 @@ void UGI_GreenOne::RemoveLoadingScreen()
 {
 	if (IsValid(CurrentLoadingScreen))
 	{
-		CurrentLoadingScreen->RemoveFromParent();
+		if (UW_LoadingScreen* CurrentLScreen = Cast<UW_LoadingScreen>(CurrentLoadingScreen))
+		{
+			CurrentLScreen->RemoveLoading();
+		}
 	}
 }
 
-void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction)
+void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload)
 {
-	DisplayLoadingScreen();
-	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = TargetRef;
 	LatentInfo.ExecutionFunction = CallFunction;
 	LatentInfo.Linkage = 0;
-	FName LevelToUnload;
-	for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
+	DisplayLoadingScreen();
+	if (ShouldUnload)
 	{
-		if (!CurrentLevel)
+		FName LevelToUnload;
+		for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
-			continue;
+			if (!CurrentLevel)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
+				continue;
+			}
+			if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+			{
+				LevelToUnload = CurrentLevel->GetWorldAssetPackageFName();
+				break;
+			}
 		}
-		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
-		{
-			LevelToUnload = CurrentLevel->GetWorldAssetPackageFName();
-			break;
-		}
+		FLatentActionInfo UnloadInfo;
+		UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
 	}
-	FLatentActionInfo UnloadInfo;
-	UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
 	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelToLoad, true, true, LatentInfo);
 }
 
@@ -141,7 +150,6 @@ void UGI_GreenOne::UpdateSaveData()
 			CurrentSave->MapName = CurrentLevel->GetWorldAssetPackageFName();
 			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *CurrentSave->MapName.ToString());
 		}
-		//CurrentSave->MapName = CurrentLevel;
 	}
 }
 
@@ -159,31 +167,15 @@ USG_GreenOne* UGI_GreenOne::CreateSave()
 
 void UGI_GreenOne::ApplySaveData()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Apply Save."));
 	if (!CurrentSave) { return; }
+
 	if (CurrentSave->bIsFirstTime)
 	{
-		DisplayLoadingScreen();
-		FLatentActionInfo LatentInfo;
-		LatentInfo.CallbackTarget = this;
-		LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
-		LatentInfo.Linkage = 0;
-		UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
+		LoadOneLevel(CurrentSave->MapName, this, FName("RemoveLoadingScreen"), false);
 		return;
 	}
-	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (!PlayerRef)
-	{
-		return;
-	}
-	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
-	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
-
-	DisplayLoadingScreen();
-	FLatentActionInfo LatentInfo;
-	LatentInfo.CallbackTarget = this;
-	LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
-	LatentInfo.Linkage = 0;
-	UGameplayStatics::LoadStreamLevel(GetWorld(), CurrentSave->MapName, true, false, LatentInfo);
+	LoadOneLevel(CurrentSave->MapName, this, FName("ApplyLocation"), false);
 }
 
 void UGI_GreenOne::DisplaySaveScreen()
@@ -193,7 +185,7 @@ void UGI_GreenOne::DisplaySaveScreen()
 		CurrenSaveScreen = CreateWidget<UUserWidget>(GetWorld(), SaveScreenClass);
 		CurrenSaveScreen->AddToViewport();
 	}
-	else if(IsValid(CurrenSaveScreen))
+	else if (IsValid(CurrenSaveScreen))
 	{
 		CurrenSaveScreen->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
@@ -205,6 +197,20 @@ void UGI_GreenOne::DeleteSaveScreen()
 {
 	CurrenSaveScreen->SetVisibility(ESlateVisibility::Collapsed);
 	return;
+}
+
+void UGI_GreenOne::ApplyLocation()
+{
+	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (!PlayerRef)
+	{
+		return;
+	}
+	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
+	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
+
+	FTimerHandle RemoveLoadingScreenHandle;
+	GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&](){ RemoveLoadingScreen();}, 2.f, false); 
 }
 
 #pragma endregion
@@ -255,11 +261,14 @@ void UGI_GreenOne::SetMasterVolume(float value)
 
 void UGI_GreenOne::SetMusicVolume(float value)
 {
-	if (!AudioSettingsRef)
+	if (AudioSettingsRef == nullptr)
 	{
 		CreateAudioSave();
 	}
-	AudioSettingsRef->MusicVolume = value;
+	else
+	{
+		AudioSettingsRef->MusicVolume = value;
+	}
 	if (!MusicSoundClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Il n'y a pas de MusicSoundClass assigner dans le game instance"))
@@ -290,7 +299,7 @@ void UGI_GreenOne::CreateAudioSave()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("La creation du Sound Save � Fail!!!"));
 	}
-	SavedAudioSettings();
+	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
 }
 
 void UGI_GreenOne::LoadAudioSave()
@@ -307,7 +316,6 @@ void UGI_GreenOne::LoadAudioSave()
 	{
 		CreateAudioSave();
 	}
-	ApplyAudioSettings();
 }
 
 void UGI_GreenOne::SavedAudioSettings()
@@ -320,7 +328,6 @@ void UGI_GreenOne::SavedAudioSettings()
 			return;
 		}
 	}
-	//CreateAudioSave();
 	//if (!)
 	//{
 	UE_LOG(LogTemp, Warning, TEXT("Attention save du sound la variable AudioSettingsRef nullptr"));
