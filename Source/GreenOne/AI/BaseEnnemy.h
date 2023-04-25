@@ -68,6 +68,7 @@ public:
 	virtual void ResetEffect(UEffect* Effect, const float DelayToReset);
 	void ResetParticleEffect(const UNiagaraSystem* Particle) const;
 	void ResetMaterialEffect() const;
+	void ResetAllParticle() const;
 #pragma endregion 
 	
 	UFUNCTION(BlueprintCallable)

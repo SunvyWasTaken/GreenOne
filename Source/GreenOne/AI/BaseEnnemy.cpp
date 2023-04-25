@@ -98,7 +98,16 @@ void ABaseEnnemy::ResetMaterialEffect() const
 	}
 }
 
-
+void ABaseEnnemy::ResetAllParticle() const
+{
+	TArray<UActorComponent*> UActorComponents;
+	GetComponents(UNiagaraComponent::StaticClass(),UActorComponents);
+	for (UActorComponent* ActorComponent : UActorComponents)
+	{
+		ActorComponent->SetActive(false);
+	}
+}
+	
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
 {
 	if (AAIController* AIController = Cast<AAIController>(Controller))
@@ -178,6 +187,7 @@ void ABaseEnnemy::DeadEntity()
 		SpawnerRef->RemoveEntityFromList(this);
 		FTimerHandle TimerHandle;
 		DrawLifeBar = false;
+		ResetAllParticle();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);
