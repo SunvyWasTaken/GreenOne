@@ -43,7 +43,7 @@ void UW_LoadingScreen::CheckLoadingProcess()
 		//	UE_LOG(LogTemp, Warning, TEXT("Currently loading level: %s"), *LevelName);
 		//}
 
-//This code is setting up a loading screen for a game. The first line creates a FLoadingScreenAttributes object, which is used to store the attributes of the loading
+// This code is setting up a loading screen for a game. The first line creates a FLoadingScreenAttributes object, which is used to store the attributes of the loading
 // screen. The next line creates a SNullWidget, which is a widget that does nothing. The following lines create a UUserWidget object, which is a widget that can be
 // used to create a custom loading screen. The code then sets the attributes of the loading screen, such as the minimum display time, whether or not the movies are
 // skippable, and the widget to be used for the loading screen. Finally, the code calls the GetMoviePlayer() function to set up the loading screen with the attributes
