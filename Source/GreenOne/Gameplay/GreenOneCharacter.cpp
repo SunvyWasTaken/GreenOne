@@ -14,35 +14,26 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/AI/BaseEnnemy.h"
 #include "Components/SceneComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
+#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
+#include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
+#include "Weapon/Fertilizer/FertilizerTankComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
 
-TSubclassOf<UFertilizerBase> AGreenOneCharacter::GetCurrentEffect(FertilizerType Type)
+AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-	if (!Effects.Contains(Type))
-	{
-		return TSubclassOf<UFertilizerBase>();
-	}
-	return *Effects.Find(Type);
-}
-
-bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
-{
-	if(!Effects.Find(Type)) return false;
-	return true;
-}
-
-AGreenOneCharacter::AGreenOneCharacter()
-{
+	InitializeCustomCharacterMovementComponent();
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -55,17 +46,17 @@ AGreenOneCharacter::AGreenOneCharacter()
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
+	
+	GetCustomCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	GetCustomCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = JumpVelocity;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-	GetCharacterMovement()->bRequestedMoveUseAcceleration = false;
+	GetCustomCharacterMovement()->AirControl = 0.35f;
+	GetCustomCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCustomCharacterMovement()->MinAnalogWalkSpeed = 20.f;
+	GetCustomCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCustomCharacterMovement()->bRequestedMoveUseAcceleration = false;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -84,23 +75,32 @@ AGreenOneCharacter::AGreenOneCharacter()
 	{
 		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
 	}
-
+	
+	// Add TargetMuzzle
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
-	TargetMuzzle->SetupAttachment(GetMesh());
+	TargetMuzzle->SetupAttachment(GetMesh(), FName("hand_rSocket"));
+
+	HealComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("HealComp"));
+	HealComponent->SetupAttachment(RootComponent);
+	HealComponent->Activate(false);
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	ShootCooldown = 1.f / 3.f;
+	ShootCooldown = 3.f;
 	ShootBloom = 0.f;
 	CanShoot = true;
 
-	DashDistance = 100.f;
-	DashTime = 0.5f;
-	DashCooldown = 3.f;
-	bDashOnCooldown = false;
-	bIsDashing = false;
+	JumpMaxCount = 2;
+
+	MaxHealth = Health;
+	ShootCooldownRemaining = 1.f / ShootCooldown;
 	
+}
+
+void AGreenOneCharacter::InitializeCustomCharacterMovementComponent()
+{
+	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
 }
 
 #if WITH_EDITOR
@@ -110,9 +110,13 @@ void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	{
 		MaxHealth = Health;
 	}
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, SocketMuzzle))
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, ShootCooldown))
 	{
-		//TargetMuzzle->SetAttachSocketName(SocketMuzzle);
+		ShootCooldownRemaining = 1.f / ShootCooldown;
+	}
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, Health))
+	{
+		MaxHealth = Health;
 	}
 }
 #endif
@@ -169,23 +173,45 @@ void AGreenOneCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	MaxHealth = Health;
-	ShootCooldownRemaining = ShootCooldown;
+
+	FertilizerTankComponent = FindComponentByClass<UFertilizerTankComponent>();
+	if(!FertilizerTankComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No FertilizerTankComponent Found"));
+	}
+}
+
+void AGreenOneCharacter::FellOutOfWorld(const UDamageType& dmgType)
+{
+	Respawn();
+}
+
+void AGreenOneCharacter::SetLastTouchLocation(FVector Location)
+{
+	LastTouchLocation = Location;
+	return;
 }
 
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
-	DashTick(DeltaSeconds);
-	CooldownDash(DeltaSeconds);
 	Regenerate(DeltaSeconds);
+	
+	// Reset Dash Vector Direction
+	// FVector2D reset = FVector2D(0, 0);
+	// GetCustomCharacterMovement()->SetDashDirectionVector(reset);
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 {
-	bool bIsJumping = Value.Get<bool>();
-	if (bIsJumping)
+
+	if(GetCustomCharacterMovement()->bIsDashing)
+	{
+		GetCustomCharacterMovement()->CancelDash();
+	}
+	
+	if (Value.Get<bool>())
 	{
 		Jump();
 	}
@@ -197,23 +223,26 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 
 void AGreenOneCharacter::EnableFertilizer()
 {
+	if(!FertilizerTankComponent) return;
 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer Enable"));
 	
-	if(EFertilizerType == FertilizerType::None)
-		EFertilizerType = FertilizerType::SlowDown;
-	else if(EFertilizerType != FertilizerType::None)
-		EFertilizerType = FertilizerType::None;
+	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::None)
+		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
+	else if(FertilizerTankComponent->GetCurrentFertilizerType() != FertilizerType::None)
+		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::None);
 }
 
 void AGreenOneCharacter::ChangeFertilizerType()
 {
-	if(EFertilizerType == FertilizerType::AttackBonus)
+	if(!FertilizerTankComponent) return;
+	
+	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::AttackBonus)
 	{
-		EFertilizerType = FertilizerType::SlowDown;
+		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
 		UE_LOG(LogTemp, Warning, TEXT("Fertilizer SlowDown"));
-	}else if(EFertilizerType == FertilizerType::SlowDown)
+	}else if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::SlowDown)
 	{
-		EFertilizerType = FertilizerType::AttackBonus;
+		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::AttackBonus);
 		UE_LOG(LogTemp, Warning, TEXT("Fertilizer AttackBonus"));
 	}
 	
@@ -222,6 +251,16 @@ void AGreenOneCharacter::ChangeFertilizerType()
 void AGreenOneCharacter::Interact()
 {
 	// TODO
+}
+
+void AGreenOneCharacter::Respawn()
+{
+	SetActorLocation(LastTouchLocation);
+	if (this->Implements<UEntityGame>())
+	{
+		IEntityGame::Execute_EntityTakeDamage(this, MaxHealth*0.1f, FName("None"), this);
+	}
+	GetCharacterMovement()->StopMovementImmediately();
 }
 
 void AGreenOneCharacter::TurnAtRate(float Rate)
@@ -270,7 +309,7 @@ void AGreenOneCharacter::Shoot()
 	if (!CanShoot) { return; }
 
 	CanShoot = false;
-	GetWorld()->GetTimerManager().SetTimer(ShootHandler, this, &AGreenOneCharacter::ShootRafale, ShootCooldown, true);
+	GetWorld()->GetTimerManager().SetTimer(ShootHandler, this, &AGreenOneCharacter::ShootRafale, 1/ShootCooldown, true);
 	ShootRafale();
 }
 
@@ -278,7 +317,6 @@ void AGreenOneCharacter::StopShoot()
 {
 	if (ShootHandler.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("stop"));
 		CanRegenerate();
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
 	}
@@ -286,6 +324,12 @@ void AGreenOneCharacter::StopShoot()
 
 void AGreenOneCharacter::ShootRafale()
 {
+	//OnShootDelegate.Broadcast(EFertilizerType);
+	if(FertilizerTankComponent)
+	{
+		FertilizerTankComponent->OnShoot();
+	}
+	
 	FHitResult OutHit;
 	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
 
@@ -313,18 +357,19 @@ void AGreenOneCharacter::ShootRafale()
 		}
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
 			//IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
-				if(IsCurrentEffectExist(EFertilizerType))
+				
+				if(FertilizerTankComponent && !FertilizerTankComponent->IsTankEmpty(FertilizerTankComponent->GetCurrentFertilizerType()))
 				{
-					if(UFertilizerBase* Fertilizer = FertilizerFactory::Factory(EFertilizerType, GetCurrentEffect(EFertilizerType)))
+					if(UFertilizerBase* Fertilizer = FertilizerTankComponent->GetEffect())
 					{
-						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer, this);	
+						IEntityGame::Execute_EntityTakeEffect(CurrentTargetHit, Fertilizer, this);
 					}	
 				}
+				
 				OnHitEnnemy.Broadcast(CurrentTargetHit);
 			}
 		}
@@ -345,7 +390,7 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 		ShootCooldownRemaining -= deltatime;
 		if (ShootCooldownRemaining <= 0.f)
 		{
-			ShootCooldownRemaining = ShootCooldown;
+			ShootCooldownRemaining = 1/ShootCooldown;
 			CanShoot = true;
 		}
 	}
@@ -369,45 +414,6 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 				LocationToAim = (OutHit.Location - TargetMuzzle->GetComponentLocation()) * ShootDistance;
 			}
 		}
-	}
-}
-
-void AGreenOneCharacter::Dash()
-{
-	if (GetCharacterMovement()->IsFalling()) { return; }
-	if (bDashOnCooldown || bIsDashing) { return; }
-	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
-	StartDashLocation = GetActorLocation();
-	TargetDashLocation = StartDashLocation + GetActorForwardVector() * DashDistance;
-	CurrentDashAlpha = 0.f;
-	bIsDashing = true;
-}
-
-void AGreenOneCharacter::DashTick(float deltatime)
-{
-	if (!bIsDashing || bDashOnCooldown) { return; }
-
-	CurrentDashAlpha += (1 / DashTime) * deltatime;
-	if (CurrentDashAlpha >= 1)
-	{
-		CurrentDashAlpha = 1;
-		CurrentDashCooldown = DashCooldown;
-		bIsDashing = false;
-		bDashOnCooldown = true;
-		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	}
-	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
-	SetActorLocation(TargetLocation);
-	return;
-}
-
-void AGreenOneCharacter::CooldownDash(float deltatime)
-{
-	if (!bDashOnCooldown) { return; }
-	CurrentDashCooldown -= deltatime;
-	if (CurrentDashCooldown <= 0.f)
-	{
-		bDashOnCooldown = false;
 	}
 }
 
@@ -463,19 +469,24 @@ void AGreenOneCharacter::TurnCamera()
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	MovementVector = Value.Get<FVector2D>();
+	
+	GetCustomCharacterMovement()->SetDashDirectionVector(MovementVector);
+	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
 
+	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
+	
 	if (Controller != nullptr)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FRotator YawRotation = FRotator(0, Rotation.Yaw, 0);
 
 		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
 
@@ -496,6 +507,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVectorY);
 		AddMovementInput(RightDirection, MovementVectorX);
+
 	}
 }
 

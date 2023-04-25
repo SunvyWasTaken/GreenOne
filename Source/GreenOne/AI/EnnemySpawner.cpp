@@ -1,53 +1,68 @@
 ﻿#include "EnnemySpawner.h"
-#include "Components/SphereComponent.h"
 #include "BaseEnnemy.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
+#include "Components/SceneComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Définit les valeurs par défaut
 AEnnemySpawner::AEnnemySpawner()
 {
 	// Définissez ce actor pour appeler Tick() à chaque frame. Vous pouvez désactiver cette option pour améliorer les performances si vous n’en avez pas besoin.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
-	NbrSpawnEnnemy = 10;
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("RootComp"));
+	RootComponent = Root;
 
-	RangeDetection = 1000.f;
-	RangeDetectionDisable = 1100.f;
+	TriggerArena = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger Box Arena"));
+	TriggerArena->SetupAttachment(Root);
 
-	SphereCollisionActivation = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Collision"));
-	RootComponent = SphereCollisionActivation;
-	//SphereCollisionDesactivation = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionDesactivation"));
-	//SphereCollisionDesactivation->SetupAttachment(RootComponent);
-
-	SphereCollisionActivation->SetSphereRadius(RangeDetection);
-	//SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
-}
-
-#if WITH_EDITOR
-void AEnnemySpawner::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	// Call parent implementation of this function first
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	// Check if the property that changed is RangeDetection
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AEnnemySpawner, RangeDetection))
+	/************************************************************************/
+	/* WALL - E																*/
+	/************************************************************************/
+	WallsComponents = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Walls Comp"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMeshClass(TEXT("/Engine/BasicShapes/Cube"));
+	if (CubeMeshClass.Object != nullptr)
 	{
-		// Update the sphere radius
-		SphereCollisionActivation->SetSphereRadius(RangeDetection);
+		WallsComponents->SetStaticMesh(CubeMeshClass.Object);
 	}
-	/*if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AEnnemySpawner, RangeDetectionDisable))
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterialObject(TEXT("/Game/GreenOne/Materials/Instance/MI_FieldForce"));
+	if (WallMaterialObject.Object != nullptr)
 	{
-		SphereCollisionDesactivation->SetSphereRadius(RangeDetectionDisable);
-	}*/
+		WallsComponents->SetMaterial(0, WallMaterialObject.Object);
+	}
+	WallsComponents->SetupAttachment(Root);
+	WallsComponents->SetHiddenInGame(true, true);
+	WallsComponents->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	/************************************************************************/
+	/* Spawn Points															*/
+	/************************************************************************/
+
+	SpawnPoints = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("SpawnPoints"));
+	SpawnPoints->SetupAttachment(Root);
+	SpawnPoints->SetHiddenInGame(true, true);
+	SpawnPoints->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SpawnPointMesh(TEXT("/Engine/BasicShapes/Plane"));
+	if (SpawnPointMesh.Object != nullptr)
+	{
+		SpawnPoints->SetStaticMesh(SpawnPointMesh.Object);
+	}
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> SpawnPointMat(TEXT("/Game/GreenOne/VFX/Material/Instances/MI_Truc"));
+	if (SpawnPointMat.Object != nullptr)
+	{
+		SpawnPoints->SetMaterial(0, SpawnPointMat.Object);
+	}
+
 }
-#endif
 
 // Appelé au début du jeu ou au moment de l'apparition de l'animal.
 void AEnnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	SphereCollisionActivation->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentActivate);
-	//SphereCollisionDesactivation->OnComponentEndOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentDeactivate);
+	TriggerArena->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentActivate);
+	//PlayerRef = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 // Appelé chaque frame
@@ -63,27 +78,32 @@ void AEnnemySpawner::OnComponentActivate(UPrimitiveComponent* OverlappedComponen
 	if (Cast<AGreenOneCharacter>(OtherActor))
 	{
 		PlayerRef = OtherActor;
-		FTimerHandle PlayerRefHandle;
 		TriggerSpawnEntity();
-		SetPlayerRefToEntitys(PlayerRef);
+		WallsComponents->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		WallsComponents->SetHiddenInGame(false, true);
+		if (!bShouldKillAllEnnemys)
+		{
+			GetWorld()->GetTimerManager().SetTimer(SpawnHandler, this, &AEnnemySpawner::TriggerSpawnEntity, DelayEachWave, true);
+		}
+		TriggerArena->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//SetPlayerRefToEntitys(PlayerRef);
 	}
-	
 }
-
-/*void AEnnemySpawner::OnComponentDeactivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (!Cast<AGreenOneCharacter>(OtherActor))
-	{
-		return;
-	}
-	PlayerRef = nullptr;
-	SetPlayerRefToEntitys(PlayerRef);
-	GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
-}*/
 
 void AEnnemySpawner::RemoveEntityFromList(ABaseEnnemy* entity)
 {
 	EntityList.Remove(entity);
+	if (bShouldKillAllEnnemys)
+	{
+		if (EntityList.Num() == 0)
+		{
+			GetWorld()->GetTimerManager().SetTimer(SpawnHandler, this, &AEnnemySpawner::TriggerSpawnEntity, DelayEachWave, false);
+		}
+	}
+	if (NbrWave <= 0 && EntityList.Num() == 0)
+	{
+		Victory();
+	}
 }
 
 /// <summary>
@@ -91,39 +111,50 @@ void AEnnemySpawner::RemoveEntityFromList(ABaseEnnemy* entity)
 /// </summary>
 void AEnnemySpawner::TriggerSpawnEntity()
 {
-	if (bCanSpawnEnnemy)
+	--NbrWave;
+	for (int i = 0; i < NbrEnnemyPerWave; ++i )
 	{
-		bCanSpawnEnnemy = false;
-		CurrentTimerRemaing = DelayEachSpawn;
-		GetWorld()->GetTimerManager().SetTimer(SpawnHandler, this, &AEnnemySpawner::SpawnEntity, DelayEachSpawn, true);
 		SpawnEntity();
+	}
+	if (!bShouldKillAllEnnemys && NbrWave <= 0)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
 	}
 }
 
 void AEnnemySpawner::SpawnEntity()
 {
-	if(EntityList.Num() >= NbrEnnemySameTime)
-		{ return; }
 	// Rewritten
-	if (EnnemyToSpawnClass != nullptr)
+	if (EnnemyToSpawnClass.IsEmpty())
 	{
-		// Set spawn parameters
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		UE_LOG(LogTemp, Warning, TEXT("La liste d'ennemie à spawn est vide xD"));
+		return;
+	}
+	// Set spawn parameters
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		// Spawn the actor
-		ABaseEnnemy* CurrentSpawnEnnemy = GetWorld()->SpawnActor<ABaseEnnemy>(EnnemyToSpawnClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+	int Index = UKismetMathLibrary::RandomBoolWithWeight(EnnemyRatio/100.f);
 
-		// Add the spawned actor to the list
-		if (CurrentSpawnEnnemy != nullptr)
+	TSubclassOf<ABaseEnnemy> SelectEnnemyToSpawn = EnnemyToSpawnClass[Index];
+
+	if (SelectEnnemyToSpawn == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("L'array est vide mec je sais pas comment t'as fait mais bref."))
+		return;
+	}
+
+	// Spawn the actor
+	ABaseEnnemy* CurrentSpawnEnnemy = GetWorld()->SpawnActor<ABaseEnnemy>(SelectEnnemyToSpawn, GetSpawnLocation(), GetActorRotation(), SpawnParams);
+
+	// Add the spawned actor to the list
+	if (CurrentSpawnEnnemy != nullptr)
+	{
+		EntityList.Add(CurrentSpawnEnnemy);
+		if (PlayerRef != nullptr)
 		{
-			EntityList.Add(CurrentSpawnEnnemy);
-			if (PlayerRef)
-			{
-				FTimerHandle SetPlayerTimer;
-				CurrentSpawnEnnemy->SetPlayerRef(PlayerRef);
-				CurrentSpawnEnnemy->SpawnerRef = this;
-			}
+			CurrentSpawnEnnemy->SetPlayerRef(PlayerRef);
+			CurrentSpawnEnnemy->SpawnerRef = this;
 		}
 	}
 }
@@ -142,6 +173,27 @@ void AEnnemySpawner::SpawnTick(float deltaseconds)
 			//Set the flag to true, allowing an enemy to be spawned.
 			bCanSpawnEnnemy = true;
 		}
+	}
+}
+
+FVector AEnnemySpawner::GetSpawnLocation()
+{
+	FTransform TargetLocation;
+	SpawnPoints->GetInstanceTransform(CurrentSpawnInt, TargetLocation, true);
+	if(SpawnPoints->GetInstanceCount() - 1 <= CurrentSpawnInt)
+		{ CurrentSpawnInt = 0; }
+	else
+		{ ++CurrentSpawnInt; }
+	return TargetLocation.GetLocation();
+}
+
+void AEnnemySpawner::Victory()
+{
+	if (NbrWave <= 0)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
+		WallsComponents->SetHiddenInGame(true, true);
+		WallsComponents->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 

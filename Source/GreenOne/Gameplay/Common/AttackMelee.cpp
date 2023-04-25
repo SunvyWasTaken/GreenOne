@@ -39,16 +39,16 @@ void UAttackMelee::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	SetCoolDown(DeltaTime);
 	SetDelayToResetCoolDown(DeltaTime);
 
-#if WITH_EDITOR
+#if WITH_EDITOR && (DEBUG_MESSAGE_ATTACK == AVAILABLE)
 
-	GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("CoolDown %f"), CoolDownTimer), true, FVector2d(1.5, 1.5));
+	/*GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Blue, FString::Printf(TEXT("CoolDown %f"), CoolDownTimer), true, FVector2d(1.5, 1.5));
 	GEngine->AddOnScreenDebugMessage(2, 1.0f, FColor::Red, FString::Printf(TEXT("CoolDownValue %f"), CoolDown), true, FVector2d(1.5, 1.5));
 
 	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Green, FString::Printf(TEXT("DelayToResetCoolDown %f"), DelayToResetCoolDownTimer), true, FVector2d(1.5, 1.5));
 	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Yellow, FString::Printf(TEXT("DelayToResetCoolDownValue %f"), DelayToResetCoolDown), true, FVector2d(1.5, 1.5));
 
 	GEngine->AddOnScreenDebugMessage(5, 1.0f, FColor::Magenta, FString::Printf(TEXT("ImpulseForce %f"), ImpulseForceTemp), true, FVector2d(1.5, 1.5));
-
+*/
 #endif
 }
 
@@ -78,6 +78,7 @@ bool UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
 	const FRotator ActorRotation = GetOwner()->GetActorRotation();
 	TArray<AActor*> ActorToIgnore;
 	ActorToIgnore.Add(GetOwner());
+	return false;
 	for (int i = 1; i <= Iteration; ++i)
 	{
 		float CurrentAlpha = UKismetMathLibrary::NormalizeToRange((TraceSize * i), 0, TraceDistance);

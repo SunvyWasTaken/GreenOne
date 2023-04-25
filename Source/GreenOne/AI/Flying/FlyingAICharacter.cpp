@@ -8,6 +8,7 @@
 #include "Engine/CollisionProfile.h"
 #include "AIProjectil.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -18,9 +19,6 @@ AFlyingAICharacter::AFlyingAICharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ExploRadius = 100.f;
-
-	ExploDmg = 20.f;
-
 }
 
 // Called when the game starts or when spawned
@@ -31,6 +29,10 @@ void AFlyingAICharacter::BeginPlay()
 	{
 		GetCharacterMovement()->MaxFlySpeed = MaxSpeed;
 	}
+	this->OnTakeDamage.AddDynamic(this, &AFlyingAICharacter::OnShinderu);
+
+	UMaterialInstanceDynamic* InstanceMat = GetMesh()->CreateDynamicMaterialInstance(0, GetMesh()->GetMaterial(0));
+	InstanceMat->SetScalarParameterValue(FName("EmissiveIntensity"), 2000);
 }
 
 // Called every frame
@@ -41,19 +43,13 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 	TickRotation(DeltaTime);
 }
 
-// Called to bind functionality to input
-void AFlyingAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
 void AFlyingAICharacter::Shoot()
 {
 	//GetWorld()->GetTimerManager().SetTimer(ShootTimer, this, &AFlyingAICharacter::TimerShoot, ShootRate, true);
 	if (!IsInCooldown)
 	{
-		TimerShoot();
+		bIsShooting = true;
+		//TimerShoot();
 	}
 }
 
@@ -73,10 +69,10 @@ void AFlyingAICharacter::SetRotationAxis(FVector2D TargetAxis)
 
 void AFlyingAICharacter::ResetEffect(float DelayToReset)
 {
-	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect,[&]()
-	{
-		UpdateMaxSpeed(MaxSpeed);
-	},DelayToReset,false);
+	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [&]()
+		{
+			UpdateMaxSpeed(MaxSpeed);
+		}, DelayToReset, false);
 }
 
 //This function is used to perform self-destruction of the AI character.
@@ -104,20 +100,43 @@ void AFlyingAICharacter::SelfDestruction()
 			{
 				UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 				//Call the EntityTakeDamage function on the GreenOneCharacter
-				IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, ExploDmg, Outhit.BoneName, this);
+				IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage * RatioExploDmg, Outhit.BoneName, this);
 				//Break out of the loop
 				break;
 			}
 		}
 	}
+#if WITH_EDITOR
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExploRadius, 12, FColor::Red, true, 5.f);
+#endif
 	//Check if the ExplosionParticule is not null
 	if (ExplosionParticule != nullptr)
 	{
 		//Spawn the ExplosionParticule at the actor's location
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
+		UNiagaraComponent* CurrentExploParticule = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
+		CurrentExploParticule->SetVariableFloat("ExplosionRadius", ExploRadius);
 	}
 	//Call the DeadEntity function
 	DeadEntity();
+}
+
+void AFlyingAICharacter::OnShinderu(float NbrDamage)
+{
+	if (GetPercentHealth() <= ExploTreshold)
+	{
+		SpawnWarning();
+	}
+}
+
+void AFlyingAICharacter::SpawnWarning()
+{
+	UMaterialInstanceDynamic* InstanceMat = GetMesh()->CreateDynamicMaterialInstance(0, GetMesh()->GetMaterial(0));
+	InstanceMat->SetScalarParameterValue(FName("EmissiveIntensity"), 200000);
+	if (WarningExplosion != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Warning!!"));
+		UNiagaraFunctionLibrary::SpawnSystemAttached(WarningExplosion, GetMesh(), FName("SocketShinderu"), FVector::ZeroVector, GetActorRotation(), FVector::OneVector, EAttachLocation::SnapToTarget, true, ENCPoolMethod::AutoRelease);
+	}
 }
 
 //This function sets the IsInCooldown boolean to true and sets the TimeRemainingForShoot to 1 divided by the ShootRate. 
@@ -141,6 +160,7 @@ void AFlyingAICharacter::TickCooldown(float DeltaSeconds)
 
 void AFlyingAICharacter::TimerShoot()
 {
+	bIsShooting = false;
 	if (bUseTrace)
 	{
 		FHitResult Outhit;
@@ -165,7 +185,7 @@ void AFlyingAICharacter::TimerShoot()
 				{
 					//If so, activate the cooldown and execute the EntityTakeDamage function
 					ActiveCooldown();
-					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
+					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage * RatioDmgShoot, Outhit.BoneName, this);
 				}
 				//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
 			}
@@ -184,7 +204,8 @@ void AFlyingAICharacter::TimerShoot()
 		AAIProjectil* CurrentBullet = GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
 		if (CurrentBullet)
 		{
-			CurrentBullet->ProjectilDamage = Damage;
+			UE_LOG(LogTemp, Warning, TEXT("Nbr Damage : %f"), Damage * RatioDmgShoot);
+			CurrentBullet->ProjectilDamage = Damage * RatioDmgShoot;
 		}
 	}
 }
@@ -192,5 +213,6 @@ void AFlyingAICharacter::TimerShoot()
 void AFlyingAICharacter::TickRotation(float DeltaSeconds)
 {
 	CurrentRotationInput = UKismetMathLibrary::Vector2DInterpTo_Constant(CurrentRotationInput, TargetRotationInput, DeltaSeconds, RotationSpeed);
+	//UE_LOG(LogTemp, Warning, TEXT("X: %f, Y: %f2"), CurrentRotationInput.X, CurrentRotationInput.Y);
 }
 
