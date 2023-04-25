@@ -32,8 +32,8 @@ private:
 };
 
 //TODO: preparer les delegates pour les UI
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateFertilizerTankGauge, float, GaugeValueUpdate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSwitchFertilizerType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateFertilizerTankGaugeSignature, float, GaugeValueUpdate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSwitchFertilizerTypeSignature);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GREENONE_API UFertilizerTankComponent : public UActorComponent
