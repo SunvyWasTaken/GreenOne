@@ -66,10 +66,7 @@ public:
 	void EntityTakeEffect(UEffect* Effect, AActor* Source = nullptr);
 	UFUNCTION(BlueprintCallable)
 	virtual void ResetEffect(UEffect* Effect, const float DelayToReset);
-	UFUNCTION(BlueprintCallable)
-	virtual void AddParticle(UNiagaraSystem* Particle, UNiagaraComponent* ParticleComp);
-	bool bIsParticleExist(UNiagaraSystem* Particle) const;
-	TMap<UNiagaraSystem*,UNiagaraComponent*> EffectsOnActor;
+	void ResetParticleEffect(const UNiagaraSystem* Particle) const;
 #pragma endregion 
 	
 	UFUNCTION(BlueprintCallable)

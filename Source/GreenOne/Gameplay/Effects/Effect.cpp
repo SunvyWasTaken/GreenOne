@@ -27,17 +27,17 @@ void UEffect::InstantiateParticleToActor(AActor* Actor)
 {
 	if(ABaseEnnemy* BaseEnnemy = Cast<ABaseEnnemy>(Actor))
 	{
-		NiagaraComponentTemp = UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
-			EName::None,Actor->GetActorLocation(),
-			Actor->GetActorRotation(),EAttachLocation::KeepWorldPosition,true);
 		
-		if(BaseEnnemy->bIsParticleExist(GetParticleEffect()))
+		if(IsAlreadyExist(Actor))
 		{
-			NiagaraComponentTemp->DestroyComponent();
+			if(NiagaraComponentTemp)
+				NiagaraComponentTemp->DestroyComponent();
 			return;
 		}
 
-		//BaseEnnemy->AddParticle(GetParticleEffect(), NiagaraComponentTemp);
+		NiagaraComponentTemp = UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
+		EName::None,Actor->GetActorLocation(),
+		Actor->GetActorRotation(),EAttachLocation::KeepWorldPosition,true);
 
 		if(bTimeEffect)
 		{
@@ -46,7 +46,7 @@ void UEffect::InstantiateParticleToActor(AActor* Actor)
 	}
 }
 
-const float UEffect::GetTimeEffect()
+float UEffect::GetTimeEffect() const
 {
 	return TimeEffect;
 }
@@ -58,18 +58,32 @@ UNiagaraSystem* UEffect::GetParticleEffect() const
 	return NSParticleEffect;
 }
 
+bool UEffect::IsAlreadyExist(const AActor* Actor)
+{
+	if(!Actor) return true;
+
+	bool bExist = false;
+	
+	TArray<UActorComponent*> UActorComponents;
+	Actor->GetComponents(UNiagaraComponent::StaticClass(),UActorComponents);
+	for (UActorComponent* ActorComponent : UActorComponents)
+	{
+		if(UNiagaraComponent* NiagaraComponent = Cast<UNiagaraComponent>(ActorComponent))
+		{
+			if(NiagaraComponent->GetAsset() == GetParticleEffect())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Exist"));
+				bExist = true;
+				break;
+			}
+		}
+	}
+	return bExist;
+}
+
 UNiagaraComponent* UEffect::GetParticleComponent() const
 {
 	if(!NiagaraComponentTemp) return nullptr;
 	
 	return NiagaraComponentTemp;
 }
-
-void UEffect::DestroyParticleComponent()
-{
-	if(!NiagaraComponentTemp) return;
-
-	NiagaraComponentTemp->DestroyComponent();
-}
-
-

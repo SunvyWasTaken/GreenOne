@@ -69,46 +69,26 @@ void ABaseEnnemy::ResetEffect(UEffect* Effect, const float DelayToReset)
 	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [=]()
 		{
 			UpdateMaxSpeed(MaxSpeed);
-			TArray<UActorComponent*> UActorComponent = GetComponentsByClass(UNiagaraComponent::StaticClass());
-			for (auto ActorComponent : UActorComponent)
-			{
-				if(UNiagaraComponent* NiagaraComponent = Cast<UNiagaraComponent>(ActorComponent))
-				{
-					if(NiagaraComponent->GetAsset() == Effect->GetParticleEffect())
-					{
-						NiagaraComponent->DestroyComponent();
-					}
-				}
-			}
-
-			/*if(const UNiagaraSystem* ParticleEffect = Effect->GetParticleEffect())
-			{
-				EffectsOnActor.FindRef(ParticleEffect)->DestroyComponent();
-				EffectsOnActor.Remove(ParticleEffect);
-			}*/
+			ResetParticleEffect(Effect->GetParticleEffect());
 		}, DelayToReset, false);
 }
 
-void ABaseEnnemy::AddParticle(UNiagaraSystem* Particle, UNiagaraComponent* ParticleComp)
+void ABaseEnnemy::ResetParticleEffect(const UNiagaraSystem* Particle) const
 {
-	if(!Particle) return;
-
-	EffectsOnActor.Add(Particle,ParticleComp);
+	TArray<UActorComponent*> UActorComponents;
+	GetComponents(UNiagaraComponent::StaticClass(),UActorComponents);
+	for (UActorComponent* ActorComponent : UActorComponents)
+	{
+		if(UNiagaraComponent* NiagaraComponent = Cast<UNiagaraComponent>(ActorComponent))
+		{
+			if(NiagaraComponent->GetAsset() == Particle)
+			{
+				NiagaraComponent->DestroyComponent();
+			}
+		}
+	}
 }
 
-bool ABaseEnnemy::bIsParticleExist(UNiagaraSystem* Particle) const
-{
-	if(!Particle) return false;
-
-	UNiagaraComponent* CompNiagara = FindComponentByClass<UNiagaraComponent>();
-	if(!CompNiagara) return false;
-
-	if(CompNiagara->GetAsset() == Particle) return true;
-
-	return false;
-	
-	//return EffectsOnActor.Contains(Particle);
-}
 
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
 {

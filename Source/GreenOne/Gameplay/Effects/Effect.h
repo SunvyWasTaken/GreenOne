@@ -34,11 +34,10 @@ public:
 	virtual void ApplyEffect(AActor* Actor, AActor* Source) override;
 
 	UFUNCTION(BlueprintGetter)
-	const float GetTimeEffect();
+	float GetTimeEffect() const;
 	UFUNCTION(BlueprintGetter)
 	UNiagaraSystem* GetParticleEffect() const;
-
-	class UNiagaraComponent* GetParticleComponent() const;
+	bool IsAlreadyExist(const AActor* Actor);
 	
-	void DestroyParticleComponent();
+	class UNiagaraComponent* GetParticleComponent() const;
 };
