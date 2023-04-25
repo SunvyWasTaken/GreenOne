@@ -511,6 +511,11 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
+void AGreenOneCharacter::Dash()
+{
+	GetCustomCharacterMovement()->Dash();
+}
+
 void AGreenOneCharacter::CanRegenerate()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
