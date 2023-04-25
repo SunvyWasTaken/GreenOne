@@ -29,4 +29,7 @@ public:
 
 private:
 
+	UFUNCTION()
+		void BeginLoadingScreen(const FString Name);
+
 };
