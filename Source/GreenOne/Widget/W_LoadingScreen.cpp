@@ -27,7 +27,7 @@ void UW_LoadingScreen::CheckLoadingProcess()
 		//const ULevelStreaming* StreamingLevel = UGameplayStatics::GetStreamingLevel(GetWorld(), FName("L_Level1"));
 		//StreamingLevel->GetLoadedLevelPackageName()
 		TSet<int32> UIDS;
-		GetWorld()->GetLatentActionManager().GetActiveUUIDs(GetWorld(), UIDS);
+		// GetWorld()->GetLatentActionManager().GetActiveUUIDs(GetWorld(), UIDS);
 		UE_LOG(LogTemp, Warning, TEXT("Je charge."));
 		for (int32 UID : UIDS)
 		{
