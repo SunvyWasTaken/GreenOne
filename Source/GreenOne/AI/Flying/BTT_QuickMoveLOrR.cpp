@@ -96,6 +96,8 @@ void UBTT_QuickMoveLOrR::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8
 	{
 		PlayerRef->CanLDash = false;
 		PlayerRef->CanRDash = false;
+		PlayerRef->Can_Fighting = false;
+		PlayerRef->CanM_Fighting = false;
 	}
 
 }
@@ -119,20 +121,39 @@ void UBTT_QuickMoveLOrR::SetDash(UBehaviorTreeComponent& OwnerComp)
 		}
 		
 	}
-
-	/*if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
-	{
-		
-	}*/
-	
-		
-		//if(CanDash)
-		//{
-			//EStates EState = EStates::LeftDas;
-			//enum States { LeftDas };
-			//PlayerRef->PlayAnimMontage(LeftDash, 1, NAME_None);
-		//}
-	
-	
-
 }
+void UBTT_QuickMoveLOrR::SetFight(UBehaviorTreeComponent& OwnerComp)
+{
+	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	{
+		if(DirectionValue == -1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Combo_gauche"));
+			PlayerRef->CanLDash = true;
+			PlayerRef->CanRDash = false; 
+		}
+		else if(DirectionValue == 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Combo_droite"));
+			PlayerRef->CanRDash = true;
+			PlayerRef->CanLDash = false; 
+			//PlayerRef->CanLDash = true; 
+		}
+	}
+}	
+/*if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+{
+	
+}*/
+
+	
+	//if(CanDash)
+	//{
+		//EStates EState = EStates::LeftDas;
+		//enum States { LeftDas };
+		//PlayerRef->PlayAnimMontage(LeftDash, 1, NAME_None);
+	//}
+
+
+
+
