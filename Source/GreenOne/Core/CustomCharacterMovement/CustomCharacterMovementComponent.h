@@ -114,6 +114,8 @@ private:
 	void ExecVerticalJump(const float DeltaTime);
 	void ExecHorizontalJump();
 
+	FRotator GetRotationToDirection(FVector Direction);
+
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual bool DoJump(bool bReplayingMoves) override;

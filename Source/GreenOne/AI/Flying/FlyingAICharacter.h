@@ -83,7 +83,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void UpdateMaxSpeed(float Speed) override;
-	virtual void ResetEffect(const float DelayToReset) override;
 
 #pragma region AnimationRotation
 

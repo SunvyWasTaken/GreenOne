@@ -24,18 +24,18 @@ public:
 	FertilizerFactory();
 	~FertilizerFactory();
 
-	static UFertilizerBase* Factory(FertilizerType Type, TSubclassOf<UFertilizerBase> FertilizerBase);
+	static UFertilizerBase* Factory(UObject* Context, FertilizerType Type, TSubclassOf<UFertilizerBase> FertilizerBase);
 
 private:
 	template <typename T>
-	static UFertilizerBase* InitFertilizer(TSubclassOf<UFertilizerBase> FertilizerBase);
+	static UFertilizerBase* InitFertilizer(UObject* Context, TSubclassOf<UFertilizerBase> FertilizerBase);
 };
 
 
 template <typename T>
-UFertilizerBase* FertilizerFactory::InitFertilizer(TSubclassOf<UFertilizerBase> FertilizerBase)
+UFertilizerBase* FertilizerFactory::InitFertilizer(UObject* Context, TSubclassOf<UFertilizerBase> FertilizerBase)
 {
-	UFertilizerBase* Fertilizer = NewObject<T>(FertilizerBase, NAME_None, RF_NoFlags,
+	UFertilizerBase* Fertilizer = NewObject<T>(Context,FertilizerBase, NAME_None, RF_NoFlags,
 	                                           FertilizerBase->GetDefaultObject());
 	return Fertilizer;
 }
