@@ -70,6 +70,7 @@ void ABaseEnnemy::ResetEffect(UEffect* Effect, const float DelayToReset)
 		{
 			UpdateMaxSpeed(MaxSpeed);
 			ResetParticleEffect(Effect->GetParticleEffect());
+			ResetMaterialEffect();
 		}, DelayToReset, false);
 }
 
@@ -86,6 +87,14 @@ void ABaseEnnemy::ResetParticleEffect(const UNiagaraSystem* Particle) const
 				NiagaraComponent->DestroyComponent();
 			}
 		}
+	}
+}
+
+void ABaseEnnemy::ResetMaterialEffect() const
+{
+	if(UMeshComponent* MeshComponent = FindComponentByClass<UMeshComponent>())
+	{
+		MeshComponent->SetOverlayMaterial(nullptr);
 	}
 }
 
