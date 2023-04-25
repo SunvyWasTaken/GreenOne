@@ -5,6 +5,8 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/LevelStreaming.h"
+#include "Engine/World.h"
+#include "Engine/LatentActionManager.h"
 #include "GreenOne/Core/Instance/GI_GreenOne.h"
 
 
@@ -25,7 +27,7 @@ void UW_LoadingScreen::CheckLoadingProcess()
 		//const ULevelStreaming* StreamingLevel = UGameplayStatics::GetStreamingLevel(GetWorld(), FName("L_Level1"));
 		//StreamingLevel->GetLoadedLevelPackageName()
 		TSet<int32> UIDS;
-		GetWorld()->GetLatentActionManager().GetActiveUUIDs(GetWorld(), UIDS);
+		// GetWorld()->GetLatentActionManager().GetActiveUUIDs(GetWorld(), UIDS); // NE PACKAGE PAS
 		UE_LOG(LogTemp, Warning, TEXT("Je charge."));
 		for (int32 UID : UIDS)
 		{
