@@ -68,7 +68,7 @@ public:
 	virtual void ResetEffect(UEffect* Effect, const float DelayToReset);
 	UFUNCTION(BlueprintCallable)
 	virtual void AddParticle(UNiagaraSystem* Particle, UNiagaraComponent* ParticleComp);
-	bool bIsParticleExist(UNiagaraSystem* Particle);
+	bool bIsParticleExist(UNiagaraSystem* Particle) const;
 	TMap<UNiagaraSystem*,UNiagaraComponent*> EffectsOnActor;
 #pragma endregion 
 	
