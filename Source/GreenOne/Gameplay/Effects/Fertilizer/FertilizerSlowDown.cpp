@@ -29,8 +29,9 @@ void UFertilizerSlowDown::ApplyEffect(AActor* Actor, AActor* Source)
 		{
 			const float ActorMaxSpeed = Ennemy->MaxSpeed;
 			const float ActorCurrentSpeed = Ennemy->GetCharacterMovement()->GetMaxSpeed();
-			const float ReduceSpeed = (ActorCurrentSpeed*PercentSlowDown)/100;
+			const float ReduceSpeed = (ActorMaxSpeed*PercentSlowDown)/100;
 			const float NewSpeed = ActorCurrentSpeed-ReduceSpeed;
+			UE_LOG(LogTemp, Warning, TEXT("new speed %f"), NewSpeed);
 			if(GetTotalPercent(ActorMaxSpeed, ActorCurrentSpeed) < MaxPercentSlownDown)
 			{
 				Ennemy->UpdateMaxSpeed(NewSpeed);	
