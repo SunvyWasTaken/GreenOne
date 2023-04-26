@@ -6,10 +6,11 @@
 #include "NiagaraComponent.h"
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
+#include "GreenOne/Gameplay/Effects/ActorEffectInterface.h"
 #include "BaseEnnemy.generated.h"
 
 UCLASS()
-class GREENONE_API ABaseEnnemy : public ACharacter, public IEntityGame
+class GREENONE_API ABaseEnnemy : public ACharacter, public IEntityGame, public IActorEffectInterface
 {
 	GENERATED_BODY()
 	

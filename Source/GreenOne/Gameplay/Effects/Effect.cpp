@@ -2,6 +2,7 @@
 
 #include "Effect.h"
 
+#include "ActorEffectInterface.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "GreenOne/AI/BaseEnnemy.h"
@@ -32,38 +33,39 @@ void UEffect::ApplyEffect(AActor* Actor)
 
 void UEffect::ApplyEffect(AActor* Actor, AActor* Source)
 {
-	if(NSParticleEffect)
+	if(IActorEffectInterface* ActorEffect = Cast<IActorEffectInterface>(Actor))
 	{
-		InstantiateParticleToActor(Actor);
-	}
+		if(NSParticleEffect)
+		{
+			InstantiateParticleToActor(Actor);
+		}
 
-	if(MaterialEffect && DynamicMaterialEffect)
-	{
-		ApplyMaterialEffect(Actor);
+		if(MaterialEffect && DynamicMaterialEffect)
+		{
+			ApplyMaterialEffect(Actor);
+		}
+		
+		if(bTimeEffect)
+		{
+			ActorEffect->ResetEffect(this,GetTimeEffect());
+		}
 	}
 }
 
-void UEffect::InstantiateParticleToActor(AActor* Actor)
+void UEffect::InstantiateParticleToActor(const AActor* Actor)
 {
-	if(ABaseEnnemy* BaseEnnemy = Cast<ABaseEnnemy>(Actor))
+	if(!Actor) return;
+
+	if(IsAlreadyExist(Actor))
 	{
-		
-		if(IsAlreadyExist(Actor))
-		{
-			if(NiagaraComponentTemp)
-				NiagaraComponentTemp->DestroyComponent();
-			return;
-		}
-
-		NiagaraComponentTemp = UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
-		EName::None,Actor->GetActorLocation(),
-		Actor->GetActorRotation(),EAttachLocation::KeepWorldPosition,true);
-
-		if(bTimeEffect)
-		{
-			BaseEnnemy->ResetEffect(this,GetTimeEffect());
-		}
+		if(NiagaraComponentTemp)
+			NiagaraComponentTemp->DestroyComponent();
+		return;
 	}
+
+	NiagaraComponentTemp = UNiagaraFunctionLibrary::SpawnSystemAttached(NSParticleEffect,Actor->GetRootComponent(),
+	EName::None,Actor->GetActorLocation(),
+	Actor->GetActorRotation(),EAttachLocation::KeepWorldPosition,true);
 }
 
 void UEffect::ApplyMaterialEffect(const AActor* Actor)
@@ -79,6 +81,16 @@ void UEffect::ApplyMaterialEffect(const AActor* Actor)
 		MeshComponent->SetOverlayMaterial(DynamicMaterialEffect);
 	}
 
+}
+
+bool UEffect::IsActorEffectInterface(const AActor* Actor)
+{
+	if(const IActorEffectInterface* ActorEffectInterface = Cast<IActorEffectInterface>(Actor))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 float UEffect::GetTimeEffect() const

@@ -35,9 +35,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect|VFX|Material", meta = (EditCondition="bOverrideColor"), DisplayName = "Couleur de la texture")
 	FLinearColor ColorMaterialEffect;
 
-	void InstantiateParticleToActor(AActor* Actor);
+	void InstantiateParticleToActor(const AActor* Actor);
 	void ApplyMaterialEffect(const AActor* Actor);
-
+	bool IsActorEffectInterface(const AActor* Actor);
+	
 public:
 	UEffect();
 	void Init();
