@@ -101,6 +101,11 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 void UBTT_FlyingTo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
 {
+
+	if (AFlyingAICharacter* AIRef = Cast<AFlyingAICharacter>(ControllerRef->GetPawn()))
+	{
+		AIRef->SetRotationAxis(FVector2D::ZeroVector);
+	}
 	if (!bOverrideSpeed)
 	{
 		return;
@@ -122,7 +127,7 @@ void UBTT_FlyingTo::TickAddInputToPawn(float Deltatime, AFlyingAICharacter* Bird
 	FVector2D TargetInputRotation;
 	TargetInputRotation.X = UKismetMathLibrary::Dot_VectorVector(Direction, BirdRef->GetActorRightVector());
 	TargetInputRotation.Y = UKismetMathLibrary::Dot_VectorVector(Direction, BirdRef->GetActorForwardVector());
-	TargetInputRotation *= UKismetMathLibrary::NormalizeToRange(BirdRef->GetMovementComponent()->Velocity.Length(), 0, InitialSpeed);
+	TargetInputRotation *= UKismetMathLibrary::NormalizeToRange(BirdRef->GetMovementComponent()->Velocity.Length(), 0, PawnMovementRef->MaxFlySpeed);
 	BirdRef->SetRotationAxis(TargetInputRotation);
 
 	if (bUseOld)

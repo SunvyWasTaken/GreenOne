@@ -81,7 +81,7 @@ private:
 
 	FVector TargetLocation;
 
-	float InitialSpeed;
+	float InitialSpeed = 600.f;
 
 	float InitialAcceleration;
 

@@ -142,6 +142,10 @@ private:
 	UFUNCTION()
 	void OnShinderu(float NbrDamage);
 
+	class USoundBase* SoundClass;
+
+	class UAudioComponent* AudioWarning;
+
 #pragma endregion 
 
 private:
