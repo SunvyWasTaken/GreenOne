@@ -97,6 +97,10 @@ private:
 	FVector TargetJumpLocation;
 
 	float JumpTime = 0;
+	
+	FTimerHandle BlockCheckHandle;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|BlockingCheck")
+	float DelayToBlockCheck = .3f;
 
 public:
 	/** Commun a tous les jumps **/
@@ -113,7 +117,7 @@ private:
 	bool HorizontalJump();
 	void ExecVerticalJump(const float DeltaTime);
 	void ExecHorizontalJump();
-
+	
 	FRotator GetRotationToDirection(FVector Direction);
 
 public:

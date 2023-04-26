@@ -69,7 +69,7 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Goes Down"));
+		//UE_LOG(LogTemp, Warning, TEXT("Goes Down"));
 		GetMovementComponent()->AddInputVector(FVector::UpVector * -1);
 	}
 }

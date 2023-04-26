@@ -28,7 +28,6 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
     
     DashTick(DeltaTime);
     CooldownTick(DeltaTime);
-	
 	// Reset the DashDirectionVector
 	DashDirectionVector = FVector2D::ZeroVector;
 }
@@ -236,6 +235,20 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 
 	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
 
+	
+	if (TargetDistance == 0.0f && !BlockCheckHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().SetTimer(BlockCheckHandle, [&]()
+		{
+			GetOwnerCharacter()->LaunchCharacter(FVector::BackwardVector*10.f, false, false);
+		},DelayToBlockCheck,false);
+	}
+	else if(TargetDistance > 0.0f)
+	{
+		BlockCheckHandle.Invalidate();
+	}
+	
+	
 	if (TargetDistance > DistanceHorizontalJump)
 	{
 		bHorizontalJump = false;
