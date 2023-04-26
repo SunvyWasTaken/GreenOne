@@ -117,8 +117,6 @@ private:
 	bool HorizontalJump();
 	void ExecVerticalJump(const float DeltaTime);
 	void ExecHorizontalJump();
-
-	bool IsJumpBlocked() const;
 	
 	FRotator GetRotationToDirection(FVector Direction);
 
