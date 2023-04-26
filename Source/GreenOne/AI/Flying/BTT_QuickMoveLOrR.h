@@ -95,7 +95,7 @@ public:
 private:
 	
 		void SetDash(UBehaviorTreeComponent& OwnerComp);
-		void SetFight(UBehaviorTreeComponent& OwnerComp);
+		//void SetFight(UBehaviorTreeComponent& OwnerComp);
 
 #pragma endregion	
 	

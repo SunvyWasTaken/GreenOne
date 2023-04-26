@@ -13,5 +13,46 @@ UCLASS()
 class GREENONE_API UBTT_AICombo : public UBTTaskNode
 {
 	GENERATED_BODY()
+
+
+public:
+
+	UBTT_AICombo();
+
+#pragma region Task
+	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
+
+	//void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
+
+	void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult);
+#pragma endregion	
+
+
+
+
+
+
+private:
+
+#pragma region Fight
+	int FightStatus;
+	void SetFight(UBehaviorTreeComponent& OwnerComp);
+	void SetMoveFight(UBehaviorTreeComponent& OwnerComp);
+#pragma endregion	
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 };
+
+

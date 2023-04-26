@@ -96,8 +96,8 @@ void UBTT_QuickMoveLOrR::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8
 	{
 		PlayerRef->CanLDash = false;
 		PlayerRef->CanRDash = false;
-		PlayerRef->Can_Fighting = false;
-		PlayerRef->CanM_Fighting = false;
+		//PlayerRef->Can_Fighting = false;
+		//PlayerRef->CanM_Fighting = false;
 	}
 
 }
@@ -122,7 +122,7 @@ void UBTT_QuickMoveLOrR::SetDash(UBehaviorTreeComponent& OwnerComp)
 		
 	}
 }
-void UBTT_QuickMoveLOrR::SetFight(UBehaviorTreeComponent& OwnerComp)
+/*void UBTT_QuickMoveLOrR::SetFight(UBehaviorTreeComponent& OwnerComp)
 {
 	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
@@ -140,7 +140,7 @@ void UBTT_QuickMoveLOrR::SetFight(UBehaviorTreeComponent& OwnerComp)
 			//PlayerRef->CanLDash = true; 
 		}
 	}
-}	
+}*/	
 /*if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 {
 	

@@ -92,9 +92,13 @@ public:
 	bool CanLDash = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanRDash = false;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanM_Fighting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanML_Fighting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanMR_Fighting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool Can_Fighting = false;
 	//bool IsInCooldown = false;
