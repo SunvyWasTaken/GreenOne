@@ -107,7 +107,6 @@ bool UEffect::IsAlreadyExist(const AActor* Actor)
 		{
 			if(NiagaraComponent->GetAsset() == GetParticleEffect())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Exist"));
 				bExist = true;
 				break;
 			}
