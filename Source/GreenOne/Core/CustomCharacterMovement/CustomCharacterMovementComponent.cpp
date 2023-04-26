@@ -28,7 +28,6 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
     
     DashTick(DeltaTime);
     CooldownTick(DeltaTime);
-	
 	// Reset the DashDirectionVector
 	DashDirectionVector = FVector2D::ZeroVector;
 }
@@ -236,6 +235,20 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 
 	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
 
+	
+	if (TargetDistance == 0.0f && !BlockCheckHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().SetTimer(BlockCheckHandle, [&]()
+		{
+			GetOwnerCharacter()->LaunchCharacter(FVector::BackwardVector*10.f, false, false);
+		},DelayToBlockCheck,false);
+	}
+	else if(TargetDistance > 0.0f)
+	{
+		BlockCheckHandle.Invalidate();
+	}
+	
+	
 	if (TargetDistance > DistanceHorizontalJump)
 	{
 		bHorizontalJump = false;
@@ -246,6 +259,38 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 	}
 	CurrentLocation = GetActorLocation();
 	GetOwnerCharacter()->SetActorRotation(TempRotationCharacter);
+}
+
+bool UCustomCharacterMovementComponent::IsJumpBlocked() const
+{
+
+	bool bIsBlocked = false;
+
+	FHitResult TopLine, MiddleLine, BottomLine;
+
+	float HeightCapsule = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()/2;
+
+	FVector DebugDirection = GetOwnerCharacter()->GetForwardDirection() * 50;
+	
+	FVector Start = GetOwnerCharacter()->GetActorLocation();
+	FVector StartTop = Start + FVector::UpVector * HeightCapsule;
+	FVector StartBottom = Start - FVector::UpVector * HeightCapsule;
+	
+	GetWorld()->LineTraceSingleByChannel(TopLine,Start,StartTop + DebugDirection, ECC_Visibility);
+	DrawDebugLine(GetWorld(),StartTop, StartTop + DebugDirection,FColor::Blue,false, 1.f);
+
+	GetWorld()->LineTraceSingleByChannel(MiddleLine,Start,Start + DebugDirection, ECC_Visibility);
+	DrawDebugLine(GetWorld(),Start, Start + DebugDirection,FColor::Red,false, 1.f);
+
+	GetWorld()->LineTraceSingleByChannel(BottomLine,Start,StartBottom + DebugDirection, ECC_Visibility);
+	DrawDebugLine(GetWorld(),StartBottom, StartBottom + DebugDirection ,FColor::Green,false, 1.f);
+
+	if(TopLine.bBlockingHit || MiddleLine.bBlockingHit || BottomLine.bBlockingHit)
+	{
+		return true;
+	}
+	
+	return false;
 }
 
 FRotator UCustomCharacterMovementComponent::GetRotationToDirection(FVector Direction)
