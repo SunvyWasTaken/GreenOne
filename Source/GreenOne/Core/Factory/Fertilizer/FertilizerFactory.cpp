@@ -33,6 +33,9 @@ UFertilizerBase* FertilizerFactory::Factory(UObject* Context, FertilizerType Typ
 		default:
 			break;
 	}
+
+	if(Fertilizer)
+		Fertilizer->Init();
 	
 	return Fertilizer;
 }

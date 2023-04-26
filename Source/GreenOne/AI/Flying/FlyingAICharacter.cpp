@@ -2,7 +2,6 @@
 
 
 #include "FlyingAICharacter.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"	
 #include "Engine/CollisionProfile.h"
@@ -10,6 +9,11 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/TextRenderComponent.h"
+#include "Components/AudioComponent.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
@@ -17,6 +21,14 @@ AFlyingAICharacter::AFlyingAICharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	CurrentHeight = CreateDefaultSubobject<UTextRenderComponent>(TEXT("CurrentHeight"));
+	CurrentHeight->SetupAttachment(RootComponent);
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundObject(TEXT("/Game/GreenOne/Sounds/S_SoundCisailleur"));
+	if (SoundObject.Object != NULL)
+	{
+		SoundClass = SoundObject.Object;
+	}
 
 	ExploRadius = 100.f;
 }
@@ -41,6 +53,25 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	TickCooldown(DeltaTime);
 	TickRotation(DeltaTime);
+
+	FHitResult OuthitGround;
+	FVector StartLocation = GetActorLocation() + (FVector::UpVector * -70.f);
+	FVector EndLocation = StartLocation + ((FVector::UpVector * -1) * (MaxFlyHeight + 1.f));
+	bool bIsHitSomething = GetWorld()->LineTraceSingleByChannel(OuthitGround, StartLocation, EndLocation, ECC_Visibility);
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, DeltaTime);
+	if (bIsHitSomething)
+	{
+		CurrentHHH = OuthitGround.Distance;
+		if (OuthitGround.Distance < MinFlyHeight)
+		{
+			GetMovementComponent()->AddInputVector(FVector::UpVector);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Goes Down"));
+		GetMovementComponent()->AddInputVector(FVector::UpVector * -1);
+	}
 }
 
 void AFlyingAICharacter::Shoot()
@@ -108,6 +139,7 @@ void AFlyingAICharacter::SelfDestruction()
 		UNiagaraComponent* CurrentExploParticule = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
 		CurrentExploParticule->SetVariableFloat("ExplosionRadius", ExploRadius);
 	}
+	AudioWarning->FadeOut(1.f, 0.f, EAudioFaderCurve::Linear);
 	//Call the DeadEntity function
 	DeadEntity();
 }
@@ -116,6 +148,7 @@ void AFlyingAICharacter::OnShinderu(float NbrDamage)
 {
 	if (GetPercentHealth() <= ExploTreshold)
 	{
+		AudioWarning = UGameplayStatics::SpawnSoundAttached(SoundClass, RootComponent, FName(""), FVector::ZeroVector, EAttachLocation::SnapToTarget);
 		SpawnWarning();
 	}
 }
