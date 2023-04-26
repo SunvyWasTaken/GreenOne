@@ -95,8 +95,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanM_Fighting = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
-	bool CanML_Fighting = false;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	//bool CanML_Fighting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanMR_Fighting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)

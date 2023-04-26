@@ -17,7 +17,11 @@ EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 {
 	FightStatus = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	SetMoveFight(OwnerComp);
-	//SetFight(OwnerComp);
+	FTimerHandle Timer;
+	GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
+	{
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	},2.0f, false);
 	return EBTNodeResult::InProgress;
 }
 
@@ -47,8 +51,6 @@ void UBTT_AICombo::SetMoveFight(UBehaviorTreeComponent& OwnerComp)
 			UE_LOG(LogTemp, Warning, TEXT("mouv droite"));
 			PlayerRef->CanMR_Fighting = true;
 			//PlayerRef->CanML_Fighting = false; 
-			
 		}
 	}
-	
 }
