@@ -11,12 +11,15 @@
 #include "NiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/TextRenderComponent.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	CurrentHeight = CreateDefaultSubobject<UTextRenderComponent>(TEXT("CurrentHeight"));
+	CurrentHeight->SetupAttachment(RootComponent);
 
 	ExploRadius = 100.f;
 }
@@ -41,6 +44,25 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	TickCooldown(DeltaTime);
 	TickRotation(DeltaTime);
+
+	FHitResult OuthitGround;
+	FVector StartLocation = GetActorLocation() + (FVector::UpVector * -70.f);
+	FVector EndLocation = StartLocation + ((FVector::UpVector * -1) * (MaxFlyHeight + 1.f));
+	bool bIsHitSomething = GetWorld()->LineTraceSingleByChannel(OuthitGround, StartLocation, EndLocation, ECC_Visibility);
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, DeltaTime);
+	if (bIsHitSomething)
+	{
+		CurrentHHH = OuthitGround.Distance;
+		if (OuthitGround.Distance < MinFlyHeight)
+		{
+			GetMovementComponent()->AddInputVector(FVector::UpVector);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Goes Down"));
+		GetMovementComponent()->AddInputVector(FVector::UpVector * -1);
+	}
 }
 
 void AFlyingAICharacter::Shoot()

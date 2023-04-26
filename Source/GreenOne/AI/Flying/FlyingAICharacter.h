@@ -15,6 +15,12 @@ public:
 	// Sets default values for this character's properties
 	AFlyingAICharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UTextRenderComponent* CurrentHeight;
+
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentHHH;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,7 +31,11 @@ public:
 
 #pragma region Property
 
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
+		float MinFlyHeight = 180.f;
 
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
+		float MaxFlyHeight = 700.f;
 
 #pragma endregion
 

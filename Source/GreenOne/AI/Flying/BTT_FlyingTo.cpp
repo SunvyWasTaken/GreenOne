@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "FlyingAICharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/TextRenderComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 // TODO Regarder le Dot product parcequ'il est tjr pencher très legerement.
@@ -76,13 +77,11 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 		TickCheckCollision(DeltaSeconds, AIRef, OwnerComp);
 
 		FVector LocTo = TargetLocation - AIRef->GetActorLocation();
-
 		if (Zlock)
 		{
 			LocTo.Z = 0.f;
 			TargetLocation.Z = AIRef->GetActorLocation().Z;
 		}
-
 
 		TickAddInputToPawn(DeltaSeconds, AIRef, LocTo);
 
@@ -132,8 +131,9 @@ void UBTT_FlyingTo::TickAddInputToPawn(float Deltatime, AFlyingAICharacter* Bird
 	}
 	else
 	{
+		TargetLoc.Normalize();
 		// Rotate the player. and move forward
-		const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(BirdRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(TargetLoc.GetSafeNormal2D()), Deltatime, RotationSpeed);
+		const FRotator CurrentTargetRotation = UKismetMathLibrary::RInterpTo(BirdRef->GetActorRotation(), UKismetMathLibrary::MakeRotFromX(TargetLoc), Deltatime, RotationSpeed);
 		BirdRef->SetActorRotation(CurrentTargetRotation);
 		BirdRef->GetMovementComponent()->AddInputVector(BirdRef->GetActorForwardVector());
 	}

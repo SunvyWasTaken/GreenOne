@@ -239,6 +239,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
 	void StopShoot();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Animation")
+	const FVector GetLocationToAim() { return LocationToAim; };
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
 	float DamagePlayer = 10.f;
 
