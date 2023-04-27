@@ -47,18 +47,29 @@ void AFlyingAICharacter::BeginPlay()
 	InstanceMat->SetScalarParameterValue(FName("EmissiveIntensity"), 2000);
 }
 
+void AFlyingAICharacter::DeadEntity()
+{
+	Super::DeadEntity();
+	AudioWarning->FadeOut(1.f, 0.f, EAudioFaderCurve::Linear);
+}
+
 // Called every frame
 void AFlyingAICharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	TickCooldown(DeltaTime);
 	TickRotation(DeltaTime);
+	CheckHeight(DeltaTime);
+	CancelShoot();
+}
 
+void AFlyingAICharacter::CheckHeight(float Deltatime)
+{
 	FHitResult OuthitGround;
 	FVector StartLocation = GetActorLocation() + (FVector::UpVector * -70.f);
 	FVector EndLocation = StartLocation + ((FVector::UpVector * -1) * (MaxFlyHeight + 1.f));
 	bool bIsHitSomething = GetWorld()->LineTraceSingleByChannel(OuthitGround, StartLocation, EndLocation, ECC_Visibility);
-	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, DeltaTime);
+	//DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, Deltatime);
 	if (bIsHitSomething)
 	{
 		CurrentHHH = OuthitGround.Distance;
@@ -81,6 +92,25 @@ void AFlyingAICharacter::Shoot()
 	{
 		bIsShooting = true;
 		//TimerShoot();
+	}
+}
+
+void AFlyingAICharacter::CancelShoot()
+{
+	if (!bIsShooting || !bCanCancelShoot)
+	{
+		return;
+	}
+	AActor* PlayerRef = GetWorld()->GetFirstPlayerController()->GetCharacter();
+	if (PlayerRef != nullptr)
+	{
+		FVector PLayerLocation = PlayerRef->GetActorLocation();
+		double DistanceBet = FVector::Dist(PLayerLocation, GetActorLocation());
+		if (DistanceBet <= MinShootDistance || DistanceBet >= MaxShootDistance)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Cancel l'attaque!!!"));
+			bIsShooting = false;
+		}
 	}
 }
 
@@ -139,7 +169,6 @@ void AFlyingAICharacter::SelfDestruction()
 		UNiagaraComponent* CurrentExploParticule = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
 		CurrentExploParticule->SetVariableFloat("ExplosionRadius", ExploRadius);
 	}
-	AudioWarning->FadeOut(1.f, 0.f, EAudioFaderCurve::Linear);
 	//Call the DeadEntity function
 	DeadEntity();
 }

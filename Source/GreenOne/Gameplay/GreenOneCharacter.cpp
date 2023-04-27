@@ -333,11 +333,6 @@ void AGreenOneCharacter::ShootRafale()
 	FHitResult OutHit;
 	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
 
-	if (!IsTouchSomething)
-	{
-		LocationToAim = FollowCamera->GetComponentLocation() + (FollowCamera->GetForwardVector() * ShootDistance);
-	}
-
 	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, LocationToAim, ECC_Camera))
 	{
 		if(ShootParticule)
@@ -407,12 +402,16 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 		{
 			if (OutHit.GetActor() == this)
 			{
-				LocationToAim = TargetMuzzle->GetComponentLocation() + (GetActorForwardVector() * ShootDistance);
+				LocationToAim = TargetMuzzle->GetComponentLocation() + (GetActorForwardVector() * (ShootDistance + CameraBoom->TargetArmLength));
 			}
 			else
 			{
 				LocationToAim = (OutHit.Location - TargetMuzzle->GetComponentLocation()) * ShootDistance;
 			}
+		}
+		else
+		{
+			LocationToAim = FollowCamera->GetComponentLocation() + (FollowCamera->GetForwardVector() * (ShootDistance + CameraBoom->TargetArmLength));
 		}
 	}
 }

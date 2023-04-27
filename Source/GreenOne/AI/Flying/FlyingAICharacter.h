@@ -25,6 +25,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void DeadEntity() override;	
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -36,6 +38,10 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 		float MaxFlyHeight = 700.f;
+
+private:
+
+	void CheckHeight(float Deltatime);
 
 #pragma endregion
 
@@ -49,6 +55,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Custom|Tire")
 	void Shoot();
+
+	UFUNCTION(BlueprintCallable, Category = "Custom|Tire")
+	void CancelShoot();
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Distance min de tir", ClampMin = 0), Category = "Custom|Tire")
+	float MinShootDistance = 290.f;
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Distance max de tir", ClampMin = 0), Category = "Custom|Tire")
+	float MaxShootDistance = 500.f;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanShoot() { return !IsInCooldown; };
@@ -82,6 +97,9 @@ public:
 	 */
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = bUseTrace), Category = "Custom|Tire|UseTrace")
 	float ShootRange = 5000.f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Custom|Tire")
+	bool bCanCancelShoot = true;
 
 private:
 
