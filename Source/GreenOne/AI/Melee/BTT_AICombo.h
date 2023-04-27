@@ -37,6 +37,7 @@ private:
 #pragma region Fight
 	int FightStatus;
 	//void SetFight(UBehaviorTreeComponent& OwnerComp);
+	void Check(UBehaviorTreeComponent& OwnerComp);
 	void SetMoveFight(UBehaviorTreeComponent& OwnerComp);
 #pragma endregion	
 

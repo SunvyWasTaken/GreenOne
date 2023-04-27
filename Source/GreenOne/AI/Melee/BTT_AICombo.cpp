@@ -8,9 +8,9 @@
 
 UBTT_AICombo::UBTT_AICombo()
 {
-	bNotifyTick = true;
+	//bNotifyTick = true;
 	bCreateNodeInstance = true;
-	bNotifyTaskFinished = true;
+	//bNotifyTaskFinished = true;
 }
 
 EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -20,11 +20,10 @@ EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	FTimerHandle Timer;
 	GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
 	{
-		OnTaskFinished(OwnerComp, NodeMemory, EBTNodeResult::Succeeded);
-		//FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		//OnTaskFinished(OwnerComp, NodeMemory, EBTNodeResult::Succeeded);
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		UE_LOG(LogTemp, Warning, TEXT("timer"));
-		
-	},2.0f, false);
+	},3.0f, false);
 	return EBTNodeResult::InProgress;
 }
 
@@ -47,7 +46,7 @@ void UBTT_AICombo::SetMoveFight(UBehaviorTreeComponent& OwnerComp)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("mouv gauche"));
 			//PlayerRef->CanML_Fighting = true;
-			PlayerRef->CanMR_Fighting = false; 
+			//PlayerRef->CanMR_Fighting = false; 
 		}
 		else if(FightStatus == 1)
 		{
@@ -55,5 +54,24 @@ void UBTT_AICombo::SetMoveFight(UBehaviorTreeComponent& OwnerComp)
 			PlayerRef->CanMR_Fighting = true;
 			//PlayerRef->CanML_Fighting = false; 
 		}
+		Check(OwnerComp);
 	}
 }
+																				
+
+void UBTT_AICombo::Check(UBehaviorTreeComponent& OwnerComp)
+{
+	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	{
+		if(	PlayerRef->CanM_Fighting == false)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("mouv faux"));
+		}
+		if(	PlayerRef->CanMR_Fighting == false)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("mouvR faux"));
+		}
+	}
+	
+}
+
