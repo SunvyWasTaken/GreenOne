@@ -5,6 +5,7 @@
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -12,6 +13,13 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObje
 	GravityScale = CustomGravityScale;
 	JumpZVelocity = JumpVelocity;
 	MaxDistanceHorizontalJump = JumpZVelocity / 2;
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> DashSoundObject(TEXT("/Game/GreenOne/SFX/MainCharater/S_Dash"));
+	if (DashSoundObject.Object != nullptr)
+	{
+		DashSound = DashSoundObject.Object;
+	}
+
 }
 
 void UCustomCharacterMovementComponent::InitializeComponent()
@@ -191,6 +199,7 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		                 FColor::Purple, false, 3);
 
 		bHorizontalJump = true;
+		UGameplayStatics::PlaySound2D(GetWorld(), DashSound);
 		return true;
 	}
 
@@ -359,6 +368,7 @@ void UCustomCharacterMovementComponent::Dash()
 	
 	CurrentDashAlpha = 0.f;
 	bIsDashing = true;
+	UGameplayStatics::PlaySound2D(GetWorld(), DashSound);
 }
 
 void UCustomCharacterMovementComponent::CancelDash()

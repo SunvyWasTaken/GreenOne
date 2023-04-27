@@ -24,7 +24,7 @@ AFlyingAICharacter::AFlyingAICharacter()
 	CurrentHeight = CreateDefaultSubobject<UTextRenderComponent>(TEXT("CurrentHeight"));
 	CurrentHeight->SetupAttachment(RootComponent);
 
-	static ConstructorHelpers::FObjectFinder<USoundBase> SoundObject(TEXT("/Game/GreenOne/Sounds/S_SoundCisailleur"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundObject(TEXT("/Game/GreenOne/SFX/S_AvancerKamikazeCisailleur"));
 	if (SoundObject.Object != NULL)
 	{
 		SoundClass = SoundObject.Object;
@@ -49,8 +49,8 @@ void AFlyingAICharacter::BeginPlay()
 
 void AFlyingAICharacter::DeadEntity()
 {
+	AudioWarning->FadeOut(0.1f, 0.f, EAudioFaderCurve::Linear);
 	Super::DeadEntity();
-	AudioWarning->FadeOut(1.f, 0.f, EAudioFaderCurve::Linear);
 }
 
 // Called every frame
@@ -178,6 +178,8 @@ void AFlyingAICharacter::OnShinderu(float NbrDamage)
 	if (GetPercentHealth() <= ExploTreshold)
 	{
 		AudioWarning = UGameplayStatics::SpawnSoundAttached(SoundClass, RootComponent, FName(""), FVector::ZeroVector, EAttachLocation::SnapToTarget);
+		AudioWarning->FadeIn(1.f, 1.f, 0.f, EAudioFaderCurve::Linear);
+
 		SpawnWarning();
 	}
 }

@@ -95,6 +95,12 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 
 	MaxHealth = Health;
 	ShootCooldownRemaining = 1.f / ShootCooldown;
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundObject(TEXT("/Game/GreenOne/SFX/MainCharater/Tire/SC_Tire"));
+	if (SoundObject.Object != nullptr)
+	{
+		ShootSound = SoundObject.Object;
+	}
 	
 }
 
@@ -376,6 +382,7 @@ void AGreenOneCharacter::ShootRafale()
 		if(CurrentShootPart)
 		CurrentShootPart->SetFloatParameter("ShootDistance", ShootDistance);
 	}
+	UGameplayStatics::PlaySound2D(GetWorld(), ShootSound);
 }
 
 void AGreenOneCharacter::ShootTick(float deltatime)

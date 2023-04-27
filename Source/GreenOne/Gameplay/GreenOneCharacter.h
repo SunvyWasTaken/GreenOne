@@ -273,6 +273,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Combat")
 	float ShootCooldownRemaining;
 
+	class USoundBase* ShootSound;
+
 private:
 
 	FVector LocationToAim;

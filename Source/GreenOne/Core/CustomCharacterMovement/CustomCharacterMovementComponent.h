@@ -195,6 +195,8 @@ private:
 
 	float DashTime = 0.f;
 
+	class USoundBase* DashSound;
+
 #pragma endregion Dash
 
 };
