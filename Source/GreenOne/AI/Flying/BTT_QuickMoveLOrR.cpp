@@ -15,7 +15,7 @@ UBTT_QuickMoveLOrR::UBTT_QuickMoveLOrR()
 	bNotifyTick = true;
 	MoveTime = 1.f;
 	bCreateNodeInstance = true;
-	//bNotifyTaskFinished = true;
+	bNotifyTaskFinished = true;
 }
 
 EBTNodeResult::Type UBTT_QuickMoveLOrR::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -119,7 +119,6 @@ void UBTT_QuickMoveLOrR::SetDash(UBehaviorTreeComponent& OwnerComp)
 			PlayerRef->CanLDash = false; 
 			//PlayerRef->CanLDash = true; 
 		}
-		
 	}
 }
 /*void UBTT_QuickMoveLOrR::SetFight(UBehaviorTreeComponent& OwnerComp)

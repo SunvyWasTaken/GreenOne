@@ -8,9 +8,9 @@
 
 UBTT_AICombo::UBTT_AICombo()
 {
-	//bNotifyTick = true;
+	bNotifyTick = true;
 	bCreateNodeInstance = true;
-	//bNotifyTaskFinished = true;
+	bNotifyTaskFinished = true;
 }
 
 EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
