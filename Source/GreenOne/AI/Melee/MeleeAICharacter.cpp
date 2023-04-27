@@ -111,6 +111,7 @@ void AMeleeAICharacter::Collision()
 		if (!ActorsHit.GetActor()) {}
 		if (AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(ActorsHit.GetActor()))
 		{
+			CanCombo = true;
 			UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 			IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage, ActorsHit.BoneName, this);
 			break;

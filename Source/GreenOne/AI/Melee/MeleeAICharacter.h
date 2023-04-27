@@ -95,16 +95,20 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanM_Fighting = false;
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
-	//bool CanML_Fighting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanMR_Fighting = false;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool Can_Fighting = false;
-	//bool IsInCooldown = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanR_Fighting = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanCombo = false;
+
 private:
 	
-	//void SetDash(UBehaviorTreeComponent& OwnerComp);
+
 
 #pragma endregion	
 	

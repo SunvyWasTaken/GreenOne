@@ -23,7 +23,7 @@ EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 		//OnTaskFinished(OwnerComp, NodeMemory, EBTNodeResult::Succeeded);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		UE_LOG(LogTemp, Warning, TEXT("timer"));
-	},2.0f, false);
+	},1.5f, false);
 	return EBTNodeResult::InProgress;
 }
 
@@ -45,19 +45,43 @@ void UBTT_AICombo::SetMoveFight(UBehaviorTreeComponent& OwnerComp)
 		if(FightStatus == -1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("mouv gauche"));
-			//PlayerRef->CanML_Fighting = true;
-			//PlayerRef->CanMR_Fighting = false; 
 		}
 		else if(FightStatus == 1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("mouv droite"));
 			PlayerRef->CanMR_Fighting = true;
-			//PlayerRef->CanML_Fighting = false; 
 		}
 		Check(OwnerComp);
+		HitCheck(OwnerComp);
 	}
 }
-																				
+
+
+void UBTT_AICombo::SetFight(UBehaviorTreeComponent& OwnerComp)
+{
+	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	{
+		if(	PlayerRef->CanM_Fighting == true)
+		{
+			PlayerRef->Can_Fighting = true;
+			UE_LOG(LogTemp, Warning, TEXT("id_fightL"));
+		}
+		if(	PlayerRef->CanMR_Fighting == true)
+		{
+			PlayerRef->CanR_Fighting = true;
+			UE_LOG(LogTemp, Warning, TEXT("id_fightR"));
+		}
+		FTimerHandle Timer;
+		GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
+		{
+			PlayerRef->Can_Fighting = false;
+			PlayerRef->CanR_Fighting = false;
+			UE_LOG(LogTemp, Warning, TEXT("reset combo value"));
+		},2.3, false);
+	}
+	
+}
+
 
 void UBTT_AICombo::Check(UBehaviorTreeComponent& OwnerComp)
 {
@@ -65,7 +89,7 @@ void UBTT_AICombo::Check(UBehaviorTreeComponent& OwnerComp)
 	{
 		if(	PlayerRef->CanM_Fighting == false)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("mouv faux"));
+			UE_LOG(LogTemp, Warning, TEXT("mouvL faux"));
 		}
 		if(	PlayerRef->CanMR_Fighting == false)
 		{
@@ -75,3 +99,19 @@ void UBTT_AICombo::Check(UBehaviorTreeComponent& OwnerComp)
 	
 }
 
+void UBTT_AICombo::HitCheck(UBehaviorTreeComponent& OwnerComp)
+{
+	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	{
+		if(	PlayerRef->CanCombo == true)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Can Combo"));
+			FTimerHandle Timer;
+			GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
+			{
+				SetFight(OwnerComp);
+			},1.3f, false);
+		}
+		
+	}
+}
