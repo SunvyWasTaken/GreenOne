@@ -20,7 +20,10 @@ EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	FTimerHandle Timer;
 	GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
 	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		OnTaskFinished(OwnerComp, NodeMemory, EBTNodeResult::Succeeded);
+		//FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		UE_LOG(LogTemp, Warning, TEXT("timer"));
+		
 	},2.0f, false);
 	return EBTNodeResult::InProgress;
 }
