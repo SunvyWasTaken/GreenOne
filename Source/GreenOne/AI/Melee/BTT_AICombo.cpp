@@ -23,7 +23,7 @@ EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 		//OnTaskFinished(OwnerComp, NodeMemory, EBTNodeResult::Succeeded);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		UE_LOG(LogTemp, Warning, TEXT("timer"));
-	},3.0f, false);
+	},2.0f, false);
 	return EBTNodeResult::InProgress;
 }
 
