@@ -14,6 +14,12 @@ void FertilizerTankStruct::UpdateGauge()
 	ClampGaugeValue();
 }
 
+void FertilizerTankStruct::AddFertilizer(float NewGaugeValue)
+{
+	GaugeValue += NewGaugeValue;
+	ClampGaugeValue();
+}
+
 void FertilizerTankStruct::ClampGaugeValue()
 {
 	if(GaugeValue >= MaxGaugeValue)
@@ -146,6 +152,13 @@ FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive()
 	return FertilizerTanks.Find(EFertilizerType);
 }
 
+FertilizerTankStruct* UFertilizerTankComponent::GetFertilizerTankByType(FertilizerType Type)
+{
+	if(!IsTypeExist(Type)) return nullptr;
+
+	return FertilizerTanks.Find(Type);
+}
+
 FString UFertilizerTankComponent::GetFertilizerTypeName() const
 {
 	switch (EFertilizerType)
@@ -162,5 +175,9 @@ FString UFertilizerTankComponent::GetFertilizerTypeName() const
 	}
 
 	return FString(TEXT("Aucun"));
+}
+
+void UFertilizerTankComponent::SetFertilizerValue(float Value)
+{
 }
 

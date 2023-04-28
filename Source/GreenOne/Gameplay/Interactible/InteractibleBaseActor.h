@@ -36,5 +36,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	virtual void Action(IInteractorInterface* Interactor) override;
+	virtual void Action(AActor* Actor) override;
 };

@@ -23,5 +23,5 @@ class GREENONE_API IInteractorInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void SetInteractibleActor(class IInteractibleActorInterface* InteractibleActor) {};
-	virtual IInteractibleActorInterface* GetInteractibleActor() const {return nullptr; };
+	virtual IInteractibleActorInterface* GetInteractibleActor() const { return nullptr; };
 };

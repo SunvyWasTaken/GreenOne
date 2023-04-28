@@ -25,6 +25,7 @@ struct FertilizerTankStruct
 	TSubclassOf<UFertilizerBase> Effect;
 	
 	void UpdateGauge();
+	void AddFertilizer(float NewGaugeValue);
 	
 private:
 	void ClampGaugeValue();
@@ -82,9 +83,12 @@ public:
 	class UFertilizerBase* GetEffect();
 	
 	FertilizerTankStruct* GetCurrentFertilizerTankActive();
-	//TODO: L'effet de l'engrais est propres a son réservoir, si le reservoir est vide alors on ne creer plus d'effet = ok
+	FertilizerTankStruct* GetFertilizerTankByType(FertilizerType Type);
 
 	/**Only Debug -> To Delete*/
 	FString GetFertilizerTypeName() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetFertilizerValue(float Value);
 	
 };

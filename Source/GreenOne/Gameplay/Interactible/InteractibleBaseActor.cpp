@@ -12,17 +12,19 @@ AInteractibleBaseActor::AInteractibleBaseActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	DetectionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Interactible Detection"));
-	if(DetectionBox)
-	{
-		RootComponent = DetectionBox;
-	}
-	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Interactible Mesh"));
 	if(Mesh)
 	{
-		Mesh->SetupAttachment(DetectionBox);
+		RootComponent = Mesh;
 	}
+	
+	DetectionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Interactible Detection"));
+	if(DetectionBox)
+	{
+		DetectionBox->SetupAttachment(Mesh);
+	}
+	
+	
 
 }
 
@@ -79,9 +81,11 @@ void AInteractibleBaseActor::OnIneractibleActorEndOverlap(UPrimitiveComponent* O
 	}
 }
 
-void AInteractibleBaseActor::Action(IInteractorInterface* Interactor)
+void AInteractibleBaseActor::Action(AActor* Actor)
 {
-	IInteractibleActorInterface::Action(Interactor);
+	if(!Actor || !Cast<IInteractorInterface>(Actor)) return;
+	
+	IInteractibleActorInterface::Action(Actor);
 	UE_LOG(LogTemp, Warning, TEXT("Interaction done"));
 }
 
