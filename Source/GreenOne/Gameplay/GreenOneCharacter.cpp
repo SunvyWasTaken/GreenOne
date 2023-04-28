@@ -24,6 +24,7 @@
 #include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
+#include "Interactible/InteractibleActorInterface.h"
 #include "Weapon/Fertilizer/FertilizerTankComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -250,7 +251,11 @@ void AGreenOneCharacter::ChangeFertilizerType()
 
 void AGreenOneCharacter::Interact()
 {
-	// TODO
+	UE_LOG(LogTemp, Warning, TEXT("Interact"));
+	
+	if(!InteractibleActorInterface) return;
+
+	InteractibleActorInterface->Action(this);
 }
 
 void AGreenOneCharacter::Respawn()
@@ -261,6 +266,22 @@ void AGreenOneCharacter::Respawn()
 		IEntityGame::Execute_EntityTakeDamage(this, MaxHealth*0.1f, FName("None"), this);
 	}
 	GetCharacterMovement()->StopMovementImmediately();
+}
+
+void AGreenOneCharacter::SetInteractibleActor(IInteractibleActorInterface* InteractibleActor)
+{
+	if(InteractibleActor)
+	{
+		InteractibleActorInterface = InteractibleActor;		
+	}else
+	{
+		InteractibleActorInterface = nullptr;
+	}
+}
+
+IInteractibleActorInterface* AGreenOneCharacter::GetInteractibleActor() const
+{
+	return InteractibleActorInterface;
 }
 
 void AGreenOneCharacter::TurnAtRate(float Rate)
