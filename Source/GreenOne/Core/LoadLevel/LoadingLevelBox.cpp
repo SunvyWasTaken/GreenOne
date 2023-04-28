@@ -25,7 +25,10 @@ ALoadingLevelBox::ALoadingLevelBox()
 void ALoadingLevelBox::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ALoadingLevelBox::OnComponentOverlap);
+	if(CollisionBox)
+	{
+		CollisionBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &ALoadingLevelBox::OnComponentOverlap);
+	}
 }
 
 #if WITH_EDITOR
@@ -72,7 +75,7 @@ void ALoadingLevelBox::TpPlayer()
 			{
 				FTimerHandle TimerTP;
 				GetWorld()->GetTimerManager().SetTimer(TimerTP, [=](){PlayerRef->SetActorLocation(TargetLocation->GetActorLocation()); }, 0.01f, false);
-				UE_LOG(LogTemp, Warning, TEXT("HHAHAHAHAHA ça n'a pas marcher."));
+				UE_LOG(LogTemp, Warning, TEXT("HHAHAHAHAHA ï¿½a n'a pas marcher."));
 			}
 		}
 		FTimerHandle LoadHandle;

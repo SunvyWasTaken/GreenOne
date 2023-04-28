@@ -61,7 +61,10 @@ AEnnemySpawner::AEnnemySpawner()
 void AEnnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	TriggerArena->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentActivate);
+	if(TriggerArena)
+	{
+		TriggerArena->OnComponentBeginOverlap.AddUniqueDynamic(this, &AEnnemySpawner::OnComponentActivate);
+	}
 	//PlayerRef = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
