@@ -61,10 +61,7 @@ AEnnemySpawner::AEnnemySpawner()
 void AEnnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	if(TriggerArena)
-	{
-		TriggerArena->OnComponentBeginOverlap.AddUniqueDynamic(this, &AEnnemySpawner::OnComponentActivate);
-	}
+	// TriggerArena->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentActivate);
 	//PlayerRef = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
@@ -76,8 +73,26 @@ void AEnnemySpawner::Tick(float DeltaTime)
 	SpawnTick(DeltaTime);
 }
 
-void AEnnemySpawner::OnComponentActivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+// void AEnnemySpawner::OnComponentActivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+// {
+// 	if (Cast<AGreenOneCharacter>(OtherActor))
+// 	{
+// 		PlayerRef = OtherActor;
+// 		TriggerSpawnEntity();
+// 		WallsComponents->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+// 		WallsComponents->SetHiddenInGame(false, true);
+// 		if (!bShouldKillAllEnnemys)
+// 		{
+// 			GetWorld()->GetTimerManager().SetTimer(SpawnHandler, this, &AEnnemySpawner::TriggerSpawnEntity, DelayEachWave, true);
+// 		}
+// 		TriggerArena->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+// 		//SetPlayerRefToEntitys(PlayerRef);
+// 	}
+// }
+
+void AEnnemySpawner::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorBeginOverlap(OtherActor);
 	if (Cast<AGreenOneCharacter>(OtherActor))
 	{
 		PlayerRef = OtherActor;
