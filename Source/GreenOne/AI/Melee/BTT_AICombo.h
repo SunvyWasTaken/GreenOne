@@ -35,11 +35,13 @@ public:
 private:
 
 #pragma region Fight
-	int FightStatus;
+	int FightMStatus;
+	int FightStatus = 0;
 	void SetFight(UBehaviorTreeComponent& OwnerComp);
-	void Check(UBehaviorTreeComponent& OwnerComp);
 	void SetMoveFight(UBehaviorTreeComponent& OwnerComp);
+	void Check(UBehaviorTreeComponent& OwnerComp);
 	void HitCheck(UBehaviorTreeComponent& OwnerComp);
+	void Reset(UBehaviorTreeComponent& OwnerComp);
 #pragma endregion	
 
 
