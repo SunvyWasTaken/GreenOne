@@ -36,6 +36,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Loading Screen")
 		TSubclassOf<class UUserWidget> LoadingScreenClass;
 
+	UPROPERTY(EditAnywhere, Category = "Reference")
+		TSoftObjectPtr<class UWorld> MapMenuRef;
+
 
 	/**
 	* Display the loading screen for the selected map when it begins to load.

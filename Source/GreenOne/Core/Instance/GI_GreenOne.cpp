@@ -25,7 +25,7 @@ void UGI_GreenOne::Init()
 	LoadAudioSave();
 	FTimerHandle AudioHandle;
 	GetWorld()->GetTimerManager().SetTimer(AudioHandle, this, &UGI_GreenOne::ApplyAudioSettings, 0.1f, false);
-	//FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGI_GreenOne::BeginLoadingScreen);
+	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGI_GreenOne::BeginLoadingScreen);
 }
 
 void UGI_GreenOne::DisplayLoadingScreen()
@@ -81,7 +81,11 @@ void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, con
 
 void UGI_GreenOne::BeginLoadingScreen(const FString& MapName)
 {
-	if (MapName == "L_Menu")
+	if (MapMenuRef == nullptr)
+	{
+		return;
+	}
+	if (MapName == MapMenuRef->GetFName().ToString())
 	{
 		return;
 	}
