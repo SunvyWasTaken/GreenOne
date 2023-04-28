@@ -8,6 +8,7 @@
 #include "GreenOne/Core/Audio/SG_AudioSettings.h"
 #include "Engine/LevelStreaming.h"
 #include "GreenOne/Widget/W_LoadingScreen.h"
+#include "MoviePlayer.h"
 
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
@@ -24,6 +25,7 @@ void UGI_GreenOne::Init()
 	LoadAudioSave();
 	FTimerHandle AudioHandle;
 	GetWorld()->GetTimerManager().SetTimer(AudioHandle, this, &UGI_GreenOne::ApplyAudioSettings, 0.1f, false);
+	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGI_GreenOne::BeginLoadingScreen);
 }
 
 void UGI_GreenOne::DisplayLoadingScreen()
@@ -32,17 +34,14 @@ void UGI_GreenOne::DisplayLoadingScreen()
 	{
 		return;
 	}
-
-	CurrentLoadingScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
-	if (CurrentLoadingScreen)
-	{
-		CurrentLoadingScreen->AddToViewport();
-	}
-
 }
 
 void UGI_GreenOne::RemoveLoadingScreen()
 {
+	if (CurrentLoadingScreen != nullptr)
+	{
+		return;
+	}
 	if (IsValid(CurrentLoadingScreen))
 	{
 		if (UW_LoadingScreen* CurrentLScreen = Cast<UW_LoadingScreen>(CurrentLoadingScreen))
@@ -79,6 +78,27 @@ void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, con
 	}
 	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelToLoad, true, true, LatentInfo);
 }
+
+void UGI_GreenOne::BeginLoadingScreen(const FString& MapName)
+{
+	CurrentLoadingScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
+	if (CurrentLoadingScreen)
+	{
+		FLoadingScreenAttributes LoadingScreen;
+
+		TSharedRef<SWidget> LoadingScreenWidget = SNullWidget::NullWidget;
+
+		LoadingScreenWidget = CurrentLoadingScreen->TakeWidget();
+		LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
+		LoadingScreen.MinimumLoadingScreenDisplayTime = 1.5f;
+		LoadingScreen.bMoviesAreSkippable = false;
+
+		LoadingScreen.WidgetLoadingScreen = LoadingScreenWidget;
+		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
+		GetMoviePlayer()->PlayMovie();
+	}
+}
+
 
 #pragma region Save
 
@@ -149,6 +169,7 @@ void UGI_GreenOne::UpdateSaveData()
 		{
 			CurrentSave->MapName = CurrentLevel->GetWorldAssetPackageFName();
 			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *CurrentSave->MapName.ToString());
+			break;
 		}
 	}
 }
@@ -209,8 +230,10 @@ void UGI_GreenOne::ApplyLocation()
 	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
 	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
 
-	FTimerHandle RemoveLoadingScreenHandle;
-	GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&](){ RemoveLoadingScreen();}, 2.f, false); 
+	//RemoveLoadingScreen();
+
+	//FTimerHandle RemoveLoadingScreenHandle;
+	//GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&](){ RemoveLoadingScreen();}, 2.f, false); 
 }
 
 #pragma endregion
