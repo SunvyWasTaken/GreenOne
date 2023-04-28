@@ -1,0 +1,29 @@
+# YML : Jobs Builds on GreenOne Project
+name: Build
+
+on:
+  push:
+    branches:
+      - 'feature-*'
+      - 'features-*'
+  pull_request:
+    branches:
+      - 'release'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name : Debug Git
+        run: git log
+
+      - name: Run build CI
+        shell: powershell
+        run: |
+            cd "C:\Users\SERV-ADMIN\Desktop\GreenOneProject\"
+            .\build_ue5.ps1
