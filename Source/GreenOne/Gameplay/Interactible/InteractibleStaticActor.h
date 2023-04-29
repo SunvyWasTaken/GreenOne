@@ -14,6 +14,7 @@ class GREENONE_API AInteractibleStaticActor : public AInteractibleBaseActor
 {
 	GENERATED_BODY()
 
+protected:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* MeshComponent;
 	

@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "InteractibleBaseActor.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteractActorSignature, bool, Display);
+
 UCLASS()
 class GREENONE_API AInteractibleBaseActor : public AActor, public IInteractibleActorInterface
 {
@@ -15,6 +17,9 @@ class GREENONE_API AInteractibleBaseActor : public AActor, public IInteractibleA
 public:	
 	// Sets default values for this actor's properties
 	AInteractibleBaseActor();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnInteractActorSignature OnInteractActorDelegate;
 
 protected:
 
