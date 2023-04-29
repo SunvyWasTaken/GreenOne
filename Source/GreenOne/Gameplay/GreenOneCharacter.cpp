@@ -210,13 +210,7 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
-{
-
-	if(GetCustomCharacterMovement()->bIsDashing)
-	{
-		GetCustomCharacterMovement()->CancelDash();
-	}
-	
+{	
 	if (Value.Get<bool>())
 	{
 		Jump();
@@ -519,7 +513,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 void AGreenOneCharacter::Dash()
 {
-	GetCustomCharacterMovement()->Dash();
+	GetCustomCharacterMovement()->CustomDash();
 }
 
 void AGreenOneCharacter::CanRegenerate()
