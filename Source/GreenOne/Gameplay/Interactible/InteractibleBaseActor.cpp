@@ -12,20 +12,7 @@ AInteractibleBaseActor::AInteractibleBaseActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Interactible Mesh"));
-	if(Mesh)
-	{
-		RootComponent = Mesh;
-	}
-	
-	DetectionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Interactible Detection"));
-	if(DetectionBox)
-	{
-		DetectionBox->SetupAttachment(Mesh);
-	}
-	
-	
-
+	DetectionBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Detection Component"));
 }
 
 // Called when the game starts or when spawned
@@ -33,10 +20,10 @@ void AInteractibleBaseActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(DetectionBox)
+	if(DetectionBoxComponent)
 	{
-		DetectionBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &AInteractibleBaseActor::OnInteractibleActorBeginOverlap);
-		DetectionBox->OnComponentEndOverlap.AddUniqueDynamic(this, &AInteractibleBaseActor::OnIneractibleActorEndOverlap);
+		DetectionBoxComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &AInteractibleBaseActor::OnInteractibleActorBeginOverlap);
+		DetectionBoxComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &AInteractibleBaseActor::OnIneractibleActorEndOverlap);
 	}
 }
 
@@ -44,10 +31,10 @@ void AInteractibleBaseActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	if(DetectionBox)
+	if(DetectionBoxComponent)
 	{
-		DetectionBox->OnComponentBeginOverlap.RemoveDynamic(this, &AInteractibleBaseActor::OnInteractibleActorBeginOverlap);
-		DetectionBox->OnComponentEndOverlap.RemoveDynamic(this, &AInteractibleBaseActor::OnIneractibleActorEndOverlap);
+		DetectionBoxComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AInteractibleBaseActor::OnInteractibleActorBeginOverlap);
+		DetectionBoxComponent->OnComponentEndOverlap.RemoveDynamic(this, &AInteractibleBaseActor::OnIneractibleActorEndOverlap);
 	}
 }
 
@@ -86,7 +73,6 @@ void AInteractibleBaseActor::Action(AActor* Actor)
 	if(!Actor || !Cast<IInteractorInterface>(Actor)) return;
 	
 	IInteractibleActorInterface::Action(Actor);
-	UE_LOG(LogTemp, Warning, TEXT("Interaction done"));
 }
 
 

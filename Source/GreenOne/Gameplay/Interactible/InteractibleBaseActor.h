@@ -11,22 +11,19 @@ UCLASS()
 class GREENONE_API AInteractibleBaseActor : public AActor, public IInteractibleActorInterface
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, Category = "Custom|Interactible|Mesh")
-	UStaticMeshComponent* Mesh;
-
-	UPROPERTY(EditAnywhere, Category = "Custom|Interactible|Detection")
-	class UBoxComponent* DetectionBox;
 	
 public:	
 	// Sets default values for this actor's properties
 	AInteractibleBaseActor();
 
 protected:
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* DetectionBoxComponent;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	
 	UFUNCTION()
 	virtual void OnInteractibleActorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
