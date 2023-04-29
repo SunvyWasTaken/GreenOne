@@ -68,11 +68,11 @@ void AInteractibleBaseActor::OnIneractibleActorEndOverlap(UPrimitiveComponent* O
 	}
 }
 
-void AInteractibleBaseActor::Action(AActor* Actor)
+void AInteractibleBaseActor::Action(AActor* Interactor)
 {
-	if(!Actor || !Cast<IInteractorInterface>(Actor)) return;
+	if(!Interactor || !Cast<IInteractorInterface>(Interactor)) return;
 	
-	IInteractibleActorInterface::Action(Actor);
+	IInteractibleActorInterface::Action(Interactor);
 }
 
 

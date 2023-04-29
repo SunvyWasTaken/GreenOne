@@ -15,8 +15,8 @@ AInteractibleStaticActor::AInteractibleStaticActor()
 	}
 }
 
-void AInteractibleStaticActor::Action(AActor* Actor)
+void AInteractibleStaticActor::Action(AActor* Interactor)
 {
-	Super::Action(Actor);
+	Super::Action(Interactor);
 	UE_LOG(LogTemp, Warning, TEXT("Interaction Static done"));
 }
