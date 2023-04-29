@@ -164,6 +164,8 @@ private:
 
 	class UAudioComponent* AudioWarning;
 
+	bool IsAlreadyDead = false;
+
 #pragma endregion 
 
 private:
