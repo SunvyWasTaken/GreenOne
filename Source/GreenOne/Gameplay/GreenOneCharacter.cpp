@@ -395,9 +395,9 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 		APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 		FHitResult OutHit;
 
-		float DegreeRotation = UKismetMathLibrary::Lerp(0.f, 360.f, ShootBloom);
+		//float DegreeRotation = UKismetMathLibrary::Lerp(0.f, 360.f, ShootBloom);
 		FVector StartLocation = CameraRef->GetCameraLocation();
-		FVector EndLocation = StartLocation + UKismetMathLibrary::RandomUnitVectorInConeInDegrees(CameraRef->GetActorForwardVector(), DegreeRotation) * ShootDistance;
+		FVector EndLocation = StartLocation + (CameraRef->GetActorForwardVector() * ShootDistance); //UKismetMathLibrary::RandomUnitVectorInConeInDegrees(CameraRef->GetActorForwardVector(), DegreeRotation) * ShootDistance;
 		IsTouchSomething = GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera);
 		if (IsTouchSomething)
 		{
@@ -407,7 +407,7 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 			}
 			else
 			{
-				LocationToAim = (OutHit.Location - TargetMuzzle->GetComponentLocation()) * ShootDistance;
+				LocationToAim = OutHit.Location;
 			}
 		}
 		else
