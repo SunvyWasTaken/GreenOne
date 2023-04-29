@@ -78,7 +78,8 @@ bool UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
 	const FRotator ActorRotation = GetOwner()->GetActorRotation();
 	TArray<AActor*> ActorToIgnore;
 	ActorToIgnore.Add(GetOwner());
-	return false;
+
+
 	for (int i = 1; i <= Iteration; ++i)
 	{
 		float CurrentAlpha = UKismetMathLibrary::NormalizeToRange((TraceSize * i), 0, TraceDistance);
@@ -89,30 +90,7 @@ bool UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)
 		if (UKismetSystemLibrary::BoxTraceMulti(GetWorld(), CurrentPos, CurrentPos, Box, ActorRotation, UCollisionProfile::Get()->ConvertToTraceType(ECC_GameTraceChannel1), false, ActorToIgnore, EDrawDebugTrace::Persistent, CurrentHits, true))
 		{
 			bConeHit = true;
-			if (TargetHits.IsEmpty())
-			{
-				for (const FHitResult& hit : CurrentHits)
-				{
-					TargetHits.Add(hit);
-				}
-			}
-			else
-			{
-				for (FHitResult& hit : CurrentHits)
-				{
-					for (int j = 0; j < TargetHits.Num(); ++j)
-					{
-						if (CurrentHits[j].GetActor() == hit.GetActor())
-						{
-							continue;
-						}
-						else if (j == CurrentHits.Num() - 1)
-						{
-							TargetHits.Add(hit);
-						}
-					}
-				}
-			}
+			TargetHits.Append(CurrentHits);
 		}
 	}
 	return bConeHit;
@@ -161,7 +139,7 @@ void UAttackMelee::ApplyImpulseForce(TArray<FHitResult>& ActorsHit)
 			if (UCharacterMovementComponent* Comp = Character->GetCharacterMovement())
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Impulse %s"), *Actor.GetActor()->GetName());
-				Comp->AddImpulse(GetOwner()->GetActorForwardVector() * ImpulseForceTemp, true);
+				Comp->AddImpulse((GetOwner()->GetActorForwardVector() + FVector::UpVector) * ImpulseForceTemp, true);
 			}
 		}
 	}
