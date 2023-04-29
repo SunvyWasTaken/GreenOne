@@ -9,6 +9,7 @@
 #include "Engine/LevelStreaming.h"
 #include "GreenOne/Widget/W_LoadingScreen.h"
 #include "MoviePlayer.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
@@ -34,16 +35,24 @@ void UGI_GreenOne::DisplayLoadingScreen()
 	{
 		return;
 	}
+	CurrentLoadingScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
+	if (IsValid(CurrentLoadingScreen))
+	{
+		CurrentLoadingScreen->AddToViewport();
+		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetWorld()->GetFirstPlayerController(), CurrentLoadingScreen);
+	}
 }
 
 void UGI_GreenOne::RemoveLoadingScreen()
 {
-	if (CurrentLoadingScreen != nullptr)
+	if (CurrentLoadingScreen == nullptr)
 	{
 		return;
 	}
 	if (IsValid(CurrentLoadingScreen))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Retour à la normale"));
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetWorld()->GetFirstPlayerController());
 		if (UW_LoadingScreen* CurrentLScreen = Cast<UW_LoadingScreen>(CurrentLoadingScreen))
 		{
 			CurrentLScreen->RemoveLoading();
@@ -89,14 +98,14 @@ void UGI_GreenOne::BeginLoadingScreen(const FString& MapName)
 	{
 		return;
 	}
-	CurrentLoadingScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
-	if (CurrentLoadingScreen)
+	UUserWidget* LoadingWidget = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
+	if (LoadingWidget)
 	{
 		FLoadingScreenAttributes LoadingScreen;
 
 		TSharedRef<SWidget> LoadingScreenWidget = SNullWidget::NullWidget;
 
-		LoadingScreenWidget = CurrentLoadingScreen->TakeWidget();
+		LoadingScreenWidget = LoadingWidget->TakeWidget();
 		LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
 		LoadingScreen.MinimumLoadingScreenDisplayTime = 1.5f;
 		LoadingScreen.bMoviesAreSkippable = false;
@@ -229,18 +238,18 @@ void UGI_GreenOne::DeleteSaveScreen()
 
 void UGI_GreenOne::ApplyLocation()
 {
-	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (!PlayerRef)
-	{
-		return;
-	}
-	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
-	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
-
-	//RemoveLoadingScreen();
-
-	//FTimerHandle RemoveLoadingScreenHandle;
-	//GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&](){ RemoveLoadingScreen();}, 2.f, false); 
+	FTimerHandle RemoveLoadingScreenHandle;
+	GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&]()
+	{ 
+		APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		if (!PlayerRef)
+		{
+			return;
+		}
+		PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
+		PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
+		RemoveLoadingScreen();
+	}, 2.f, false);
 }
 
 #pragma endregion
