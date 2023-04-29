@@ -43,7 +43,6 @@ UFertilizerTankComponent::UFertilizerTankComponent()
 
 }
 
-
 // Called when the game starts
 void UFertilizerTankComponent::BeginPlay()
 {
