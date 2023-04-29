@@ -175,8 +175,13 @@ void AFlyingAICharacter::SelfDestruction()
 
 void AFlyingAICharacter::OnShinderu(float NbrDamage)
 {
-	if (GetPercentHealth() <= ExploTreshold)
+	if (IsAlreadyDead)
 	{
+		return;
+	}
+	else if (GetPercentHealth() <= ExploTreshold)
+	{
+		IsAlreadyDead = true;
 		AudioWarning = UGameplayStatics::SpawnSoundAttached(SoundClass, RootComponent, FName(""), FVector::ZeroVector, EAttachLocation::SnapToTarget);
 		AudioWarning->FadeIn(1.f, 1.f, 0.f, EAudioFaderCurve::Linear);
 
