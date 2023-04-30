@@ -34,9 +34,12 @@ protected:
 	UFUNCTION()
 	virtual void OnIneractibleActorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	void SetupInteractibleToInteractor(bool Setup, AActor* Interactor);
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual void Action(AActor* Interactor) override;
+
 };

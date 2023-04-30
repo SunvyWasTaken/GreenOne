@@ -51,11 +51,7 @@ void AInteractibleBaseActor::OnInteractibleActorBeginOverlap(UPrimitiveComponent
 {
 	if(!OtherActor) return;
 	
-	if(IInteractorInterface* Interactor = Cast<IInteractorInterface>(OtherActor))
-	{
-		OnInteractActorDelegate.Broadcast(true);
-		Interactor->SetInteractibleActor(this);
-	}
+	SetupInteractibleToInteractor(true, OtherActor);
 }
 
 void AInteractibleBaseActor::OnIneractibleActorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -63,10 +59,21 @@ void AInteractibleBaseActor::OnIneractibleActorEndOverlap(UPrimitiveComponent* O
 {
 	if(!OtherActor) return;
 
-	if(IInteractorInterface* Interactor = Cast<IInteractorInterface>(OtherActor))
+	SetupInteractibleToInteractor(false, OtherActor);
+}
+
+void AInteractibleBaseActor::SetupInteractibleToInteractor(bool Setup, AActor* Actor)
+{
+	if(IInteractorInterface* Interactor = Cast<IInteractorInterface>(Actor))
 	{
-		OnInteractActorDelegate.Broadcast(false);
-		Interactor->SetInteractibleActor(nullptr);
+		if(Setup)
+		{
+			Interactor->SetInteractibleActor(this);
+		}else
+		{
+			Interactor->SetInteractibleActor(nullptr);
+		}
+		OnInteractActorDelegate.Broadcast(Setup);
 	}
 }
 
@@ -76,5 +83,3 @@ void AInteractibleBaseActor::Action(AActor* Interactor)
 	
 	IInteractibleActorInterface::Action(Interactor);
 }
-
-
