@@ -2,29 +2,31 @@
 
 
 #include "CollectibleActorBase.h"
-
-#include "CollectorInterface.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
 ACollectibleActorBase::ACollectibleActorBase()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	RootComponent = MeshComponent;
 }
 
-void ACollectibleActorBase::OnConstruction(const FTransform& Transform)
+void ACollectibleActorBase::PostCDOCompiled()
 {
-	Super::OnConstruction(Transform);
-	if(UShapeComponent* ShapeDetection = FindComponentByClass<UShapeComponent>())
+	Super::PostCDOCompiled();
+	if(TypeShapeComponent)
 	{
-		ShapeComponent = ShapeDetection;
-	}else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Detecion Shape not found to %s !!"), *GetName());
+		if (UShapeComponent* ShapeExist = FindComponentByClass<UShapeComponent>())
+		{
+			RemoveInstanceComponent(ShapeExist);
+			InitDynamicCollisionShape();
+		}else
+		{
+			InitDynamicCollisionShape();
+		}
 	}
 }
 
@@ -32,28 +34,22 @@ void ACollectibleActorBase::OnConstruction(const FTransform& Transform)
 void ACollectibleActorBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if(ShapeComponent)
-	{
-		ShapeComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &ACollectibleActorBase::OnCollectibleActorBeginOverlap);
-	}
 }
 
 void ACollectibleActorBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if(ShapeComponent)
-	{
-		ShapeComponent->OnComponentBeginOverlap.RemoveDynamic(this, &ACollectibleActorBase::OnCollectibleActorBeginOverlap);
-	}
 }
 
 void ACollectibleActorBase::OnCollectibleActorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
                                                            bool bFromSweep, const FHitResult& SweepResult)
 {
-	if(!OtherActor || !Cast<ICollectorInterface>(OtherActor)) return;
-	Action(OtherActor);	
+}
+
+void ACollectibleActorBase::OnCollectibleActorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                                         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
 }
 
 // Called every frame
@@ -62,7 +58,11 @@ void ACollectibleActorBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACollectibleActorBase::Action(AActor* Collector)
+void ACollectibleActorBase::InitDynamicCollisionShape()
 {
-	ICollectibleInterface::Action(Collector);
+	ShapeComponent = NewObject<UShapeComponent>(this, TypeShapeComponent);
+	ShapeComponent->SetupAttachment(RootComponent);
+	ShapeComponent->bAutoRegister = true;
+	AddInstanceComponent(ShapeComponent);
+	TypeShapeComponent = nullptr;
 }
