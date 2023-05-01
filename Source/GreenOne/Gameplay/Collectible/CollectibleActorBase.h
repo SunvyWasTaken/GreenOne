@@ -24,16 +24,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UShapeComponent* ShapeComponent;
 
-	/**
-	 * Permet de modifier la forme de la collision,
-	 * La forme de collision se reset apres compilation.
-	 */
-	UPROPERTY(EditDefaultsOnly, DisplayName = "Type de forme de collision")
-	TSubclassOf<UShapeComponent> TypeShapeComponent;
-
-#if WITH_EDITOR
-	virtual void PostCDOCompiled() override;
-#endif
+	virtual void OnConstruction(const FTransform& Transform) override;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -42,9 +33,6 @@ protected:
 	UFUNCTION()
 	virtual void OnCollectibleActorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
-private:
-	void InitDynamicCollisionShape();
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
