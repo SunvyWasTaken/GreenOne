@@ -1,11 +1,11 @@
-#include "FInteractibleFertilizerTankStruct.h"
+#include "FFertilizerTankStruct.h"
 
-FInteractibleFertilizerTankStruct::FInteractibleFertilizerTankStruct()
+FFertilizerTankStruct::FFertilizerTankStruct()
 {
 	
 }
 
-float FInteractibleFertilizerTankStruct::GetFertilizerValue(float CurrentReceverGaugeValue)
+float FFertilizerTankStruct::GetFertilizerValue(float CurrentReceverGaugeValue)
 {
 	float ValueToReturn = FertilizerValueToGive;
 	if(bIsConsume)
@@ -35,7 +35,7 @@ float FInteractibleFertilizerTankStruct::GetFertilizerValue(float CurrentRecever
 	return ValueToReturn;
 }
 
-void FInteractibleFertilizerTankStruct::ClampGauge()
+void FFertilizerTankStruct::ClampGauge()
 {
 	if(bIsConsume)
 	{

@@ -59,10 +59,8 @@ void ACollectibleActorBase::OnCollectibleActorBeginOverlap(UPrimitiveComponent* 
                                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
                                                            bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("B Collectible"));
 	if(!OtherActor || !Cast<ICollectorInterface>(OtherActor)) return;
-	
-	UE_LOG(LogTemp, Warning, TEXT("Take Collectible"));
+	Action(OtherActor);	
 }
 
 // Called every frame
@@ -71,9 +69,9 @@ void ACollectibleActorBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACollectibleActorBase::Action(AActor* Actor)
+void ACollectibleActorBase::Action(AActor* Collector)
 {
-	ICollectibleInterface::Action(Actor);
+	ICollectibleInterface::Action(Collector);
 }
 
 void ACollectibleActorBase::InitDynamicCollisionShape()
