@@ -2,7 +2,6 @@
 
 
 #include "InteractibleStaticFertilizerTank.h"
-
 #include "GreenOne/Gameplay/Weapon/Fertilizer/FertilizerTankComponent.h"
 
 AInteractibleStaticFertilizerTank::AInteractibleStaticFertilizerTank()

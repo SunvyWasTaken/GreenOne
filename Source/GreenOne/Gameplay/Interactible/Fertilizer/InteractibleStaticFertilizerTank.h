@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FInteractibleFertilizerTankStruct.h"
+#include "GreenOne/Core/Struct/Fertilizer/FFertilizerTankStruct.h"
 #include "GreenOne/Gameplay/Interactible/InteractibleStaticActor.h"
 #include "InteractibleStaticFertilizerTank.generated.h"
 
@@ -16,7 +16,7 @@ class GREENONE_API AInteractibleStaticFertilizerTank : public AInteractibleStati
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer")
-	FInteractibleFertilizerTankStruct InteractibleFertilizerTankStruct;
+	FFertilizerTankStruct InteractibleFertilizerTankStruct;
 
 public:
 	AInteractibleStaticFertilizerTank();
