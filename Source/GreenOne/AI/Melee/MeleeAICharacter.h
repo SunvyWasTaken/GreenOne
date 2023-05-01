@@ -5,7 +5,6 @@
 #include "Navigation/CrowdFollowingComponent.h"
 #include "CoreMinimal.h"
 #include "GreenOne/AI/BaseEnnemy.h"
-#include "GameFramework/Character.h"
 #include "MeleeAICharacter.generated.h"
 
 UCLASS()
@@ -79,6 +78,8 @@ private:
 
 #pragma region AnimationValue
 public:
+
+	void StopMov();	
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanDash() { return !IsDashing; };

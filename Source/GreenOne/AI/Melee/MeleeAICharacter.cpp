@@ -2,6 +2,8 @@
 
 
 #include "MeleeAICharacter.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"	
 #include "NiagaraFunctionLibrary.h"
@@ -111,14 +113,50 @@ void AMeleeAICharacter::Collision()
 		if (!ActorsHit.GetActor()) {}
 		if (AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(ActorsHit.GetActor()))
 		{
+			
 			CanCombo = true;
 			UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 			IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage, ActorsHit.BoneName, this);
+			if (AAIController* AIController = Cast<AAIController>(Controller))
+			{
+				UBlackboardComponent* BlackboardComp  = AIController->GetBlackboardComponent();
+				if (BlackboardComp)
+				{
+					BlackboardComp->SetValueAsBool("StopMov", false);
+					UE_LOG(LogTemp, Warning, TEXT("Stop Mouv"));
+				}
+			}
 			break;
 		}
 	}
 }	
 
+void AMeleeAICharacter::StopMov()
+{
+	if ( CanCombo == true)
+	{
+		if (AAIController* AIController = Cast<AAIController>(Controller))
+		{
+			UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+			if (BlackboardComp)
+			{
+				BlackboardComp->SetValueAsBool("StopMouv", true);
+			}
+		}
+	}
+	else
+	{
+		if (AAIController* AIController = Cast<AAIController>(Controller))
+		{
+			UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+			if (BlackboardComp)
+			{
+				BlackboardComp->SetValueAsBool("StopMouv", false);
+			}
+		}
+	}
+
+}
 
 
 /*void AMeleeAICharacter::OnDamage(float value)
