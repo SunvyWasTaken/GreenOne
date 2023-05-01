@@ -14,32 +14,25 @@ ACollectibleActorBase::ACollectibleActorBase()
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	RootComponent = MeshComponent;
-
-	ShapeComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Detection Shape"));
-	ShapeComponent->SetGenerateOverlapEvents(true);
-	ShapeComponent->SetupAttachment(RootComponent);
 }
 
-void ACollectibleActorBase::PostCDOCompiled()
+void ACollectibleActorBase::OnConstruction(const FTransform& Transform)
 {
-	Super::PostCDOCompiled();
-	// if(TypeShapeComponent)
-	// {
-	// 	if (UShapeComponent* ShapeExist = FindComponentByClass<UShapeComponent>())
-	// 	{
-	// 		RemoveInstanceComponent(ShapeExist);
-	// 		InitDynamicCollisionShape();
-	// 	}else
-	// 	{
-	// 		InitDynamicCollisionShape();
-	// 	}
-	// }
+	Super::OnConstruction(Transform);
+	if(UShapeComponent* ShapeDetection = FindComponentByClass<UShapeComponent>())
+	{
+		ShapeComponent = ShapeDetection;
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Detecion Shape not found to %s !!"), *GetName());
+	}
 }
 
 // Called when the game starts or when spawned
 void ACollectibleActorBase::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	if(ShapeComponent)
 	{
 		ShapeComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &ACollectibleActorBase::OnCollectibleActorBeginOverlap);
@@ -72,14 +65,4 @@ void ACollectibleActorBase::Tick(float DeltaTime)
 void ACollectibleActorBase::Action(AActor* Collector)
 {
 	ICollectibleInterface::Action(Collector);
-}
-
-void ACollectibleActorBase::InitDynamicCollisionShape()
-{
-	ShapeComponent = NewObject<UShapeComponent>(this, TypeShapeComponent);
-	ShapeComponent->SetupAttachment(MeshComponent);
-	ShapeComponent->SetGenerateOverlapEvents(true);
-	ShapeComponent->bAutoRegister = true;
-	AddInstanceComponent(ShapeComponent);
-	TypeShapeComponent = nullptr;
 }
