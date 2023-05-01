@@ -30,9 +30,6 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, DisplayName = "Type de forme de collision")
 	TSubclassOf<UShapeComponent> TypeShapeComponent;
-	
-	UPROPERTY(EditAnywhere)
-	UBlueprint* Bp;
 
 #if WITH_EDITOR
 	virtual void PostCDOCompiled() override;
@@ -44,14 +41,13 @@ protected:
 	
 	UFUNCTION()
 	virtual void OnCollectibleActorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	virtual void OnCollectibleActorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
+	
 private:
 	void InitDynamicCollisionShape();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void Action(AActor* Actor) override;
+	
 };
