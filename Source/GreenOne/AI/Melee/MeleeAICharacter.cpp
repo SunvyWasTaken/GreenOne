@@ -40,56 +40,6 @@ void AMeleeAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 }
 
-
-/*void AMeleeAICharacter::AttackMeleeOK()
-{
-	//Create an array to store the results of the trace
-	TArray<FHitResult> Outhits;
-
-	//Create an array to store the actors to ignore
-	TArray<AActor*> ActorToIgnore;
-
-	//Add the current actor to the array of actors to ignore
-	ActorToIgnore.Add(this);
-
-
-	//Perform a sphere trace to detect any actors within the explosion radius
-	if (UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), GetActorLocation(), ExploRadius, UCollisionProfile::Get()->ConvertToTraceType(ECC_Camera), false, ActorToIgnore, EDrawDebugTrace::None, Outhits, true))
-	{
-		//Loop through the results of the trace
-		for (FHitResult Outhit : Outhits)
-		{
-			//Check if nothing was hit by the explosion
-			if (!Outhit.GetActor())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("nothing hit by the explosion."));
-			}
-			//Check if the actor hit is a GreenOneCharacter
-			if (AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(Outhit.GetActor()))
-			{
-				UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
-				//Call the EntityTakeDamage function on the GreenOneCharacter
-				IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
-				//Break out of the loop
-				break;
-			}
-		}
-	}
-	//Check if the ExplosionParticule is not null
-	if (ExplosionParticule != nullptr)
-	{
-		//Spawn the ExplosionParticule at the actor's location
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
-	}
-
-	
-	/*UE_LOG(LogTemp, Warning, TEXT("yo"));
-	FHitResult Outhit;
-	//IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
-
-}*/
-
-
 void AMeleeAICharacter::Collision()
 {
 	//FHitResult Outhit;
@@ -117,7 +67,7 @@ void AMeleeAICharacter::Collision()
 			CanCombo = true;
 			UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 			IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage, ActorsHit.BoneName, this);
-			if (AAIController* AIController = Cast<AAIController>(Controller))
+			/*if (AAIController* AIController = Cast<AAIController>(Controller))
 			{
 				UBlackboardComponent* BlackboardComp  = AIController->GetBlackboardComponent();
 				if (BlackboardComp)
@@ -125,7 +75,7 @@ void AMeleeAICharacter::Collision()
 					BlackboardComp->SetValueAsBool("StopMov", false);
 					UE_LOG(LogTemp, Warning, TEXT("Stop Mouv"));
 				}
-			}
+			}*/
 			break;
 		}
 	}

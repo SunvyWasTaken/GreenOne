@@ -37,12 +37,13 @@ void UBTT_AICombo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* Node
 {
 	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		PlayerRef->StopMov();
 		FightStatus = 0;
+		PlayerRef->CanCombo = false;
 		PlayerRef->CanM_Fighting = false;
 		PlayerRef->CanMR_Fighting = false;
 		PlayerRef->Can_Fighting = false;
 		PlayerRef->CanR_Fighting = false;
+		PlayerRef->StopMov();
 	}
 }
 
