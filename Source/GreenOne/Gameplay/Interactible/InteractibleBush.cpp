@@ -3,6 +3,7 @@
 
 #include "InteractibleBush.h"
 
+#include "Components/BoxComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 
 AInteractibleBush::AInteractibleBush()
@@ -20,6 +21,7 @@ void AInteractibleBush::Action(AActor* Interactor)
 		{
 			MeshComponent->SetWorldLocation(Socket->GetSocketLocation(ActorSkeletalMesh));
 			MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			DetectionBoxComponent->SetGenerateOverlapEvents(false);
 			AttachToComponent(ActorSkeletalMesh, FAttachmentTransformRules::KeepWorldTransform,FName("socket_hat"));
 		}
 	}
