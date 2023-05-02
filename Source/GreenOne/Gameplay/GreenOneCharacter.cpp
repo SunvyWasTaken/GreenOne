@@ -352,9 +352,12 @@ void AGreenOneCharacter::ShootRafale()
 	}
 	
 	FHitResult OutHit;
-	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
+	const FVector StartLocation = TargetMuzzle->GetComponentLocation();
+	FVector EndLocation = LocationToAim - StartLocation;
+	EndLocation.Normalize();
+	EndLocation *= ShootDistance;
 
-	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, LocationToAim, ECC_Camera))
+	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera))
 	{
 		if(ShootParticule)
 		{
