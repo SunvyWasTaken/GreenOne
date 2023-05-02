@@ -55,7 +55,6 @@ void UFertilizerTankComponent::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Can't Cast GetOwner, GetOwner is maybe not find !"));
 	}
-	
 }
 
 
@@ -101,6 +100,7 @@ void UFertilizerTankComponent::OnShoot()
 	if(FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
 	{
 		CurrentFertilizerTankActive->UpdateGauge();
+		OnUpdateFertilizerTankGaugeDelegate.Broadcast(CurrentFertilizerTankActive->GaugeValue);
 		UE_LOG(LogTemp, Warning, TEXT("Current Fertilizer Tank gauge value : %f"),CurrentFertilizerTankActive->GaugeValue);	
 	}else
 	{
@@ -125,6 +125,29 @@ void UFertilizerTankComponent::UpdateFertilizerType(FertilizerType Type)
 	EFertilizerType = Type;
 }
 
+void UFertilizerTankComponent::Equip()
+{
+	FertilizerPrimary = GetFertilizerTankByType(FertilizerType::SlowDown);
+	FertilizerSecondary = GetFertilizerTankByType(FertilizerType::AttackBonus);
+	if(FertilizerPrimary)
+		OnEquipFertilizerDelegate.Broadcast(0,FertilizerPrimary->GaugeValue);
+
+	if(FertilizerSecondary)
+		OnEquipFertilizerDelegate.Broadcast(1,FertilizerSecondary->GaugeValue);
+}
+
+void UFertilizerTankComponent::SwitchFertilizerEquip()
+{
+	if(!FertilizerPrimary || !FertilizerSecondary) return;
+	
+	FertilizerTankStruct* Temp = FertilizerPrimary;
+	FertilizerPrimary = FertilizerSecondary;
+	FertilizerSecondary = Temp;
+	
+	OnSwitchFertilizerTypeDelegate.Broadcast(0, FertilizerPrimary->GaugeValue);
+	OnSwitchFertilizerTypeDelegate.Broadcast(1, FertilizerSecondary->GaugeValue);
+}
+
 FertilizerType UFertilizerTankComponent::GetCurrentFertilizerType() const
 {
 	return EFertilizerType;
@@ -134,11 +157,11 @@ UFertilizerBase* UFertilizerTankComponent::GetEffect()
 {
 	if(!IsTypeExist(EFertilizerType)) return nullptr;
 
-	if(const FertilizerTankStruct* FertilizerTankStruct = GetCurrentFertilizerTankActive())
+	if(FertilizerPrimary)
 	{
-		if(!FertilizerTankStruct->Effect) return  nullptr;
+		if(!FertilizerPrimary->Effect) return  nullptr;
 		
-		return FertilizerFactory::Factory(this, EFertilizerType, FertilizerTankStruct->Effect);
+		return FertilizerFactory::Factory(this, EFertilizerType, FertilizerPrimary->Effect);
 	}
 	
 	return nullptr;
@@ -146,9 +169,9 @@ UFertilizerBase* UFertilizerTankComponent::GetEffect()
 
 FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive()
 {
-	if(!IsTypeExist(EFertilizerType)) return nullptr;
+	if(!FertilizerPrimary) return nullptr;
 	
-	return FertilizerTanks.Find(EFertilizerType);
+	return FertilizerPrimary;
 }
 
 FertilizerTankStruct* UFertilizerTankComponent::GetFertilizerTankByType(FertilizerType Type)

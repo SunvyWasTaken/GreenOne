@@ -226,6 +226,8 @@ void AGreenOneCharacter::EnableFertilizer()
 {
 	if(!FertilizerTankComponent) return;
 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer Enable"));
+
+	FertilizerTankComponent->Equip();
 	
 	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::None)
 		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
@@ -236,16 +238,18 @@ void AGreenOneCharacter::EnableFertilizer()
 void AGreenOneCharacter::ChangeFertilizerType()
 {
 	if(!FertilizerTankComponent) return;
+
+	FertilizerTankComponent->SwitchFertilizerEquip();
 	
-	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::AttackBonus)
-	{
-		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
-		UE_LOG(LogTemp, Warning, TEXT("Fertilizer SlowDown"));
-	}else if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::SlowDown)
-	{
-		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::AttackBonus);
-		UE_LOG(LogTemp, Warning, TEXT("Fertilizer AttackBonus"));
-	}
+	// if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::AttackBonus)
+	// {
+	// 	FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
+	// 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer SlowDown"));
+	// }else if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::SlowDown)
+	// {
+	// 	FertilizerTankComponent->UpdateFertilizerType(FertilizerType::AttackBonus);
+	// 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer AttackBonus"));
+	// }
 	
 }
 

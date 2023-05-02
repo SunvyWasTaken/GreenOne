@@ -34,7 +34,8 @@ private:
 
 //TODO: preparer les delegates pour les UI
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateFertilizerTankGaugeSignature, float, GaugeValueUpdate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSwitchFertilizerTypeSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquipFertilizerSignature, int, index, float, GaugeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSwitchFertilizerTypeSignature, int, index, float, GaugeValue);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GREENONE_API UFertilizerTankComponent : public UActorComponent
@@ -56,6 +57,10 @@ public:
 private:
 	UPROPERTY(EditAnywhere)
 	TMap<FertilizerType,FertilizerTankStruct> FertilizerTanks;
+
+	FertilizerTankStruct* FertilizerPrimary;
+	FertilizerTankStruct* FertilizerSecondary;
+	
 	bool IsTypeExist(const FertilizerType Type) const;
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
@@ -69,6 +74,13 @@ private:
 	
 	
 public:
+	UPROPERTY(BlueprintAssignable)
+	FOnUpdateFertilizerTankGaugeSignature OnUpdateFertilizerTankGaugeDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnEquipFertilizerSignature OnEquipFertilizerDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnSwitchFertilizerTypeSignature OnSwitchFertilizerTypeDelegate;
+	
 	UFUNCTION(BlueprintCallable)
 	void OnShoot();
 
@@ -76,6 +88,8 @@ public:
 	bool IsTankEmpty(const FertilizerType Type);
 
 	void UpdateFertilizerType(FertilizerType Type);
+	void Equip();
+	void SwitchFertilizerEquip();
 
 	FertilizerType GetCurrentFertilizerType() const;
 	
