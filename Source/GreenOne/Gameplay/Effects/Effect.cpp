@@ -20,6 +20,6 @@ void UEffect::ApplyEffect(AActor* Actor, AActor* Source)
 
 const float UEffect::GetTimeEffect()
 {
-	UNiagaraFunctionLibrary::SpawnSystemAttached()
+	//UNiagaraFunctionLibrary::SpawnSystemAttached();
 	return TimeEffect;
 }
