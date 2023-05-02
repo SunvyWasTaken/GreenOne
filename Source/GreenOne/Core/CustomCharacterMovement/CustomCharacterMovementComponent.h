@@ -132,137 +132,50 @@ public:
 
 #pragma endregion 
 
-#pragma region Dash_Hugo
+#pragma region Dash
 
-//public:
-//
-//	// Dash dans la direction de l'input mouvement.
-//	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
-//	void Dash();
-//
-//	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
-//	void CancelDash();
-//
-//	// Distance du dash
-//	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ForceUnits = "cm", ClampMin = 0), Category = "Custom|Dash")
-//	float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
-//
-//	// Vitesse du Dash
-//	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ForceUnits = "cm/s", ClampMin = 0), Category = "Custom|Dash")
-//	float DashSpeed = 2000.f; // CM/s
-//
+public:
+	
 	// Temps que va prendre le dash a revenir apres utilisation.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash", ForceUnits = "secs", ClampMin = 0), Category = "Custom|Dash")
-	float DashCooldown = 3.0f; // S
-//
-//
+		float DashCooldown = 1.0f; // S
+
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
-	bool bDashOnCooldown = false;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash", meta = (AllowPrivateAccess = "true"))
-//	float MaxVerticalAngle = 40.f;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash", meta = (AllowPrivateAccess = "true"))
-//	float MaxHorizontalAngle = 60.f;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash", meta = (AllowPrivateAccess = "true"))
-//	bool DrawLines = true;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash", meta = (AllowPrivateAccess = "true"))
-//	float MaxClimbHeight = 30.f;
-//
-//	/**
-//	 * Return the remaining time of the dash cooldown.
-//	 */
-//	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
-//	float GetRemainingDashTime() { return CurrentDashCooldown; };
-//
-//
-//private:
-//
-//	// Utiliser pour placer le player pendant le Dash
-//	void DashTick(float DeltaTime);
-//
-	// Cooldown du Dash
-	void CooldownTick(float DeltaTime);
-//
-//	void CollisionTrace(FVector Begin, FVector End);
-//
-//	bool CanClimbUP(FHitResult &OldHitResult);
-//
-//	void AngleTrace(FHitResult &HitResult);
-//
-//	// Vector de Départ
-//	FVector StartDashLocation = FVector::ZeroVector;
-//
-//	// Vector de Fin
-//	FVector TargetDashLocation = FVector::ZeroVector;
-//
-//	// Rotation AVANT
-//	FRotator BeforeRotationCharacter = FRotator::ZeroRotator;
-//
-//	// Direction VECTOR 3D
-//	FVector DashDirectionVector3D = FVector::ZeroVector;
-//
-//
-//	// Vector Temporaire pour le Dash
-//	FVector TempTargetLocation = FVector::ZeroVector;
-//	
-//	float CurrentDashAlpha = 0.f;
-//
-	float CurrentDashCooldown = 0.f;
-//
-//	float DashTime = 0.f;
-//
-//	// Distance restante du dash
-//	float DashDistanceLeft = 0.f;
-//
-//	//Classes to ignore when tracing
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash", meta = (AllowPrivateAccess = "true"))
-//	TArray<TSubclassOf<AActor>> ClassToSkip;
-//
-//	//Array of actors to ignore when tracing (added in runtime)
-//	UPROPERTY()
-//	TArray<AActor*> ToIgnore;
-//	
-//	//Array of points to dash to
-//	TArray<FVector> DashPoints;
-//
-//	//Capsule component of the player
-//	UPROPERTY()
-//	UCapsuleComponent* Capsule;
-//	
-//	//Security to avoid infinite loop
-//	int MAXIT = 20;
-
-#pragma endregion
+		bool bDashOnCooldown = false;
 	
-#pragma region Keanu
-
-public:
-
 	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
 		bool bIsDashing = false;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Dash", meta = (ForceUnits = "cm"))
+		float CustomDashDistance = 800.f;
 
-	void SetDashDirectionVector(FVector2D& vector) { DashDirectionVector2D = vector; }
-
-	UPROPERTY(EditDefaultsOnly, Category = "Custom|KeanuDash", meta = (ForceUnits = "cm"))
-	float CustomDashDistance = 800.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Custom|KeanuDash", meta = (ForceUnits = "cm/s"))
-	float CustomDashSpeed = 2500.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Dash", meta = (ForceUnits = "cm/s"))
+		float CustomDashSpeed = 2500.f;
 
 	void CustomDash();
 
-private: 
+	void SetDashDirectionVector(FVector2D& vector) { DashDirectionVector2D = vector; }
 
+private:
+	
+	// Cooldown du Dash
+	void CooldownTick(float DeltaTime);
+
+	// Dash Tick
 	void CustomDashTick(float Deltatime);
+
+	bool InFrontOfWall(float *Distance);
+	
+	bool CheckTheoricPosition();
 	
 	FVector2D DashDirectionVector2D = FVector2D::ZeroVector;
 
 	float PreviousVel;
 
+	FVector StartLocation = FVector::ZeroVector;
+	FVector TheoricEndLocation = FVector::ZeroVector;
+	
 	FVector CustomForwardVector = FVector::ZeroVector;
 
 	FVector CustomEndLocation = FVector::ZeroVector;
@@ -271,6 +184,12 @@ private:
 
 	float CustomCurrentAlpha = 0;
 
+	float CurrentCustomDashDistance = 0.f;
+
 	TArray<FVector> CustomDashLocation;
+	
+	float CurrentDashCooldown = 0.f;
+
+#pragma endregion Dash
 
 };

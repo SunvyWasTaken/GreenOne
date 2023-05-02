@@ -28,10 +28,6 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 	ExecVerticalJump(DeltaTime);
 	CustomDashTick(DeltaTime);
     CooldownTick(DeltaTime);
-	
-    //DashTick(DeltaTime);
-	// Reset the DashDirectionVector
-	//DashDirectionVector2D = FVector2D::ZeroVector;
 }
 
 void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
@@ -300,7 +296,6 @@ void UCustomCharacterMovementComponent::CustomDash()
 	}
 	if (bDashOnCooldown || bIsDashing) { return; }
 
-
 	bIsDashing = true;
 	CurrentLocation = GetOwneChara()->GetActorLocation();
 	CustomForwardVector = GetOwneChara()->GetActorForwardVector();
@@ -312,14 +307,79 @@ void UCustomCharacterMovementComponent::CustomDash()
 	}
 	CustomEndLocation = CurrentLocation + (CustomForwardVector * CustomDashDistance);
 	CustomTraceParcourtDistance = 0.f;
+
+	StartLocation = CurrentLocation;
+	TheoricEndLocation = CurrentLocation + (CustomForwardVector * CustomDashDistance);
 	
 	PreviousVel = Velocity.Length();
+	CurrentCustomDashDistance = CustomDashDistance;
+}
+
+bool UCustomCharacterMovementComponent::CheckTheoricPosition()
+{
+	if ( TheoricEndLocation == FVector::ZeroVector ) { return false; }
+
+	if ( CurrentLocation == TheoricEndLocation )
+	{
+		return false;
+	}
+
+	if ( TheoricEndLocation.X > 0.f)
+	{
+		if ( TheoricEndLocation.Y > 0.f)
+		{
+			// FULL POSITIF
+			if ( CurrentLocation.X <= TheoricEndLocation.X )
+			{
+				if ( CurrentLocation.Y <= TheoricEndLocation.Y )
+				{
+					return false;
+				}
+			}
+		}
+		else
+		{
+			// X POSITIF
+			if ( CurrentLocation.X <= TheoricEndLocation.X )
+			{
+				if ( CurrentLocation.Y >= TheoricEndLocation.Y )
+				{
+					return false;
+				}
+			}
+		}
+	}
+	else
+	{
+		if ( TheoricEndLocation.Y > 0.f)
+		{
+			// Y POSITIF
+			if ( CurrentLocation.X >= TheoricEndLocation.X )
+			{
+				if ( CurrentLocation.Y <= TheoricEndLocation.Y )
+				{
+					return false;
+				}
+			}
+		}
+		else
+		{
+			// FULL NEGATIF
+			if ( CurrentLocation.X >= TheoricEndLocation.X )
+			{
+				if ( CurrentLocation.Y >= TheoricEndLocation.Y )
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 void UCustomCharacterMovementComponent::CustomDashTick(float Deltatime)
 {
-	if (!bIsDashing)
-		{ return; }
+	if (!bIsDashing) { return; }
 
 	TArray<AActor*> CustomActorToIgnore;
 	CustomActorToIgnore.Add(GetOwner());
@@ -331,32 +391,72 @@ void UCustomCharacterMovementComponent::CustomDashTick(float Deltatime)
 	Velocity = CustomDashDirection;
 	CustomEndLocation = CurrentLocation + CustomDashDirection;
 
-	if (CustomTraceParcourtDistance <= CustomDashDistance)
+	float temp_distance = 0.f;
+	if ( InFrontOfWall(&temp_distance) )
 	{
-		FHitResult CustomCurrentOuthit;
-		bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
-			UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, CustomActorToIgnore, EDrawDebugTrace::None, CustomCurrentOuthit, true);
+		CurrentCustomDashDistance = temp_distance;
+	}
 
-		if (bHasHit)
+	if (CheckTheoricPosition())
+	{
+		if (CustomTraceParcourtDistance <= CurrentCustomDashDistance)
 		{
-			CustomTraceParcourtDistance += CustomCurrentOuthit.Distance;
-			CurrentLocation = CustomCurrentOuthit.Location + CustomCurrentOuthit.ImpactNormal;
-			CustomForwardVector = FVector::VectorPlaneProject(CustomForwardVector, CustomCurrentOuthit.ImpactNormal);
-			CustomForwardVector.Normalize();
+			FHitResult CustomCurrentOuthit;
+			bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
+				UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, CustomActorToIgnore, EDrawDebugTrace::None, CustomCurrentOuthit, true);
+
+			if (bHasHit)
+			{
+				CustomTraceParcourtDistance += CustomCurrentOuthit.Distance;
+				CurrentLocation = CustomCurrentOuthit.Location + CustomCurrentOuthit.ImpactNormal;
+				CustomForwardVector = FVector::VectorPlaneProject(CustomForwardVector, CustomCurrentOuthit.ImpactNormal);
+				CustomForwardVector.Normalize();
+			}
+			else
+			{
+				CustomTraceParcourtDistance += CustomDashDirection.Length();
+				CurrentLocation = CustomCurrentOuthit.TraceEnd;
+			}
+			GetOwner()->AddActorWorldOffset(CustomDashDirection);
+			GetOwner()->SetActorRotation(GetRotationToDirection(CustomDashDirection));
 		}
 		else
 		{
-			CustomTraceParcourtDistance += CustomDashDirection.Length();
-			CurrentLocation = CustomCurrentOuthit.TraceEnd;
+			bIsDashing = false;
+			DashDirectionVector2D = FVector2D::ZeroVector;
+			bDashOnCooldown = true;
+			CurrentDashCooldown = DashCooldown;
 		}
-		GetOwner()->AddActorWorldOffset(CustomDashDirection);
-		GetOwner()->SetActorRotation(GetRotationToDirection(CustomDashDirection));
 	}
 	else
 	{
 		bIsDashing = false;
 		DashDirectionVector2D = FVector2D::ZeroVector;
+		bDashOnCooldown = true;
 		CurrentDashCooldown = DashCooldown;
+	}
+}
+
+bool UCustomCharacterMovementComponent::InFrontOfWall(float* Distance)
+{
+	const float CustomCapRadius = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const float CustomCapHeight = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 1.25;
+
+	TArray<AActor*> CustomActorToIgnore;
+	CustomActorToIgnore.Add(GetOwner());
+	
+	FHitResult WallHitResult;
+	bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
+		UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, CustomActorToIgnore, EDrawDebugTrace::None, WallHitResult, true);
+
+	if (bHasHit)
+	{
+		Distance = &WallHitResult.Distance;
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
