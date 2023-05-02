@@ -54,6 +54,8 @@ protected:
 public:
 	UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer);
 
+	void BackToPreviousPosition();
+	
 	UFUNCTION(BlueprintCallable)
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
 
@@ -97,8 +99,8 @@ private:
 	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
 	float TargetDistance = 0;
 
-	FVector CurrentLocation;
-	FVector TargetJumpLocation;
+	FVector CurrentLocation = FVector::ZeroVector;
+	FVector TargetJumpLocation = FVector::ZeroVector;
 
 	float JumpTime = 0;
 
@@ -155,6 +157,8 @@ public:
 
 	void CustomDash();
 
+	void StopDash();
+
 	void SetDashDirectionVector(FVector2D& vector) { DashDirectionVector2D = vector; }
 
 private:
@@ -166,8 +170,19 @@ private:
 	void CustomDashTick(float Deltatime);
 
 	bool InFrontOfWall(float *Distance);
+
+	bool IsToClose();
 	
 	bool CheckTheoricPosition();
+
+	/* TODO : PAS OUF A REFAIRE
+	// ** STATIC POSITION ** // .. // Personnage immobile
+	bool IsStaticPosition(float DeltaTime);
+	bool bIsStaticPosition = false;
+	float CurrentStaticPositionTime = 0.f;
+	float StaticPositionMaxTime = 0.5f;
+	// ********************* //
+	*/
 	
 	FVector2D DashDirectionVector2D = FVector2D::ZeroVector;
 
@@ -175,6 +190,7 @@ private:
 
 	FVector StartLocation = FVector::ZeroVector;
 	FVector TheoricEndLocation = FVector::ZeroVector;
+	FVector PreviousLocation = FVector::ZeroVector;
 	
 	FVector CustomForwardVector = FVector::ZeroVector;
 

@@ -15,6 +15,15 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObje
 	
 }
 
+void UCustomCharacterMovementComponent::BackToPreviousPosition()
+{
+	if ( PreviousLocation != FVector::ZeroVector )
+	{
+		GetOwneChara()->SetActorLocation(PreviousLocation);
+		PreviousLocation = FVector::ZeroVector;
+	}
+}
+
 void UCustomCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
@@ -28,6 +37,7 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 	ExecVerticalJump(DeltaTime);
 	CustomDashTick(DeltaTime);
     CooldownTick(DeltaTime);
+	// if ( IsStaticPosition(DeltaTime) ) { BackToPreviousPosition(); } // A AMELIORER // TODO : PAS OUF
 }
 
 void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
@@ -295,8 +305,8 @@ void UCustomCharacterMovementComponent::CustomDash()
 		return;
 	}
 	if (bDashOnCooldown || bIsDashing) { return; }
+	if (IsToClose()) { return; }
 
-	bIsDashing = true;
 	CurrentLocation = GetOwneChara()->GetActorLocation();
 	CustomForwardVector = GetOwneChara()->GetActorForwardVector();
 	if (DashDirectionVector2D != FVector2D::ZeroVector)
@@ -312,70 +322,54 @@ void UCustomCharacterMovementComponent::CustomDash()
 	TheoricEndLocation = CurrentLocation + (CustomForwardVector * CustomDashDistance);
 	
 	PreviousVel = Velocity.Length();
+	bIsDashing = true;
 	CurrentCustomDashDistance = CustomDashDistance;
+}
+
+void UCustomCharacterMovementComponent::StopDash()
+{
+	bIsDashing = false;
+	DashDirectionVector2D = FVector2D::ZeroVector;
+	bDashOnCooldown = true;
+	CurrentDashCooldown = DashCooldown;
 }
 
 bool UCustomCharacterMovementComponent::CheckTheoricPosition()
 {
 	if ( TheoricEndLocation == FVector::ZeroVector ) { return false; }
+	if ( CurrentLocation == TheoricEndLocation ) { return false;	}
 
-	if ( CurrentLocation == TheoricEndLocation )
+	float const_between = FVector::DistXY(StartLocation, TheoricEndLocation);
+	float d_between = FVector::DistXY(CurrentLocation, TheoricEndLocation);
+
+	if ( d_between <= const_between ) { return true; }
+	
+	return false;
+}
+
+/** TODO : PAS OUF 
+bool UCustomCharacterMovementComponent::IsStaticPosition(float DeltaTime)
+{
+	const FVector CustomCurrentLocation = GetOwneChara()->GetActorLocation();
+
+	if (PreviousLocation == FVector::Zero())
 	{
 		return false;
 	}
+	
+	if (PreviousLocation == CustomCurrentLocation)
+	{
+		CurrentStaticPositionTime += DeltaTime;
+		if ( CurrentStaticPositionTime >= StaticPositionMaxTime)
+		{
+			CurrentStaticPositionTime = 0.f;
+			return true;
+		}
+	}
 
-	if ( TheoricEndLocation.X > 0.f)
-	{
-		if ( TheoricEndLocation.Y > 0.f)
-		{
-			// FULL POSITIF
-			if ( CurrentLocation.X <= TheoricEndLocation.X )
-			{
-				if ( CurrentLocation.Y <= TheoricEndLocation.Y )
-				{
-					return false;
-				}
-			}
-		}
-		else
-		{
-			// X POSITIF
-			if ( CurrentLocation.X <= TheoricEndLocation.X )
-			{
-				if ( CurrentLocation.Y >= TheoricEndLocation.Y )
-				{
-					return false;
-				}
-			}
-		}
-	}
-	else
-	{
-		if ( TheoricEndLocation.Y > 0.f)
-		{
-			// Y POSITIF
-			if ( CurrentLocation.X >= TheoricEndLocation.X )
-			{
-				if ( CurrentLocation.Y <= TheoricEndLocation.Y )
-				{
-					return false;
-				}
-			}
-		}
-		else
-		{
-			// FULL NEGATIF
-			if ( CurrentLocation.X >= TheoricEndLocation.X )
-			{
-				if ( CurrentLocation.Y >= TheoricEndLocation.Y )
-				{
-					return false;
-				}
-			}
-		}
-	}
-	return true;
+	return false;
 }
+**/
 
 void UCustomCharacterMovementComponent::CustomDashTick(float Deltatime)
 {
@@ -392,14 +386,11 @@ void UCustomCharacterMovementComponent::CustomDashTick(float Deltatime)
 	CustomEndLocation = CurrentLocation + CustomDashDirection;
 
 	float temp_distance = 0.f;
-	if ( InFrontOfWall(&temp_distance) )
-	{
-		CurrentCustomDashDistance = temp_distance;
-	}
+	if ( InFrontOfWall(&temp_distance) ) { CurrentCustomDashDistance = temp_distance; }
 
 	if (CheckTheoricPosition())
 	{
-		if (CustomTraceParcourtDistance <= CurrentCustomDashDistance)
+		if (CustomTraceParcourtDistance <= CurrentCustomDashDistance - 25.f)
 		{
 			FHitResult CustomCurrentOuthit;
 			bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
@@ -422,25 +413,29 @@ void UCustomCharacterMovementComponent::CustomDashTick(float Deltatime)
 		}
 		else
 		{
-			bIsDashing = false;
-			DashDirectionVector2D = FVector2D::ZeroVector;
-			bDashOnCooldown = true;
-			CurrentDashCooldown = DashCooldown;
+			StopDash();
 		}
 	}
 	else
 	{
-		bIsDashing = false;
-		DashDirectionVector2D = FVector2D::ZeroVector;
-		bDashOnCooldown = true;
-		CurrentDashCooldown = DashCooldown;
+		StopDash();
 	}
+}
+
+bool UCustomCharacterMovementComponent::IsToClose()
+{
+	float _distance = 50.f;
+	if (InFrontOfWall(&_distance))
+	{
+		if (_distance <= 25.f) { return true; }
+	}
+	return false;
 }
 
 bool UCustomCharacterMovementComponent::InFrontOfWall(float* Distance)
 {
 	const float CustomCapRadius = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleRadius();
-	const float CustomCapHeight = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 1.25;
+	const float CustomCapHeight = ( GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2 );
 
 	TArray<AActor*> CustomActorToIgnore;
 	CustomActorToIgnore.Add(GetOwner());
@@ -455,9 +450,7 @@ bool UCustomCharacterMovementComponent::InFrontOfWall(float* Distance)
 		return true;
 	}
 	else
-	{
 		return false;
-	}
 }
 
 #pragma endregion
