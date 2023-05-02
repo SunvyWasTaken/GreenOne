@@ -33,7 +33,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Collision();
 
+	UFUNCTION(BlueprintCallable)
+	void EndCollision();
 
+
+	UFUNCTION(BlueprintCallable)
+	void SetCollision();
 
 
 
@@ -106,9 +111,18 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanCombo = false;
+	
 
+	
 private:
 	
+	UFUNCTION()
+	void OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* R_ArmCollider;
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* L_ArmCollider;
 
 
 #pragma endregion	
