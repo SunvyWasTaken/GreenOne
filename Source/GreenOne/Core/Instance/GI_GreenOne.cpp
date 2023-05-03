@@ -44,11 +44,18 @@ void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, con
 				UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
 				continue;
 			}
-			if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+		{
+			FName TargetMapName = CurrentLevel->GetWorldAssetPackageFName();
+			FString CurrentMapStringName;
+			TargetMapName.ToString(CurrentMapStringName);
+			if (CurrentMapStringName.Contains("Level"))
 			{
-				LevelToUnload = CurrentLevel->GetWorldAssetPackageFName();
+				LevelToUnload = TargetMapName;
 				break;
 			}
+			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *LevelToUnload.ToString());
+		}
 		}
 		LatInfo.ExecutionFunction = FName("UnloadMap");
 	}
@@ -162,7 +169,6 @@ void UGI_GreenOne::SaveGame()
 	UpdateSaveData();
 	if (UGameplayStatics::DoesSaveGameExist(SaveName, SaveIndex))
 	{
-		CurrentSave->bIsFirstTime = false;
 		UGameplayStatics::SaveGameToSlot(CurrentSave, SaveName, SaveIndex);
 	}
 	else
@@ -203,7 +209,11 @@ void UGI_GreenOne::DeleteSave()
 
 void UGI_GreenOne::UpdateSaveData()
 {
-	if (!CurrentSave) { return; }
+	if (!CurrentSave)
+	{
+		UE_LOG(LogTemp, Error, TEXT("La save c'est mal passer il y un pointeur vide ici"));
+		return;
+	}
 	CurrentSave->PlayerLocation = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation();
 	CurrentSave->PlayerRotation = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorRotation();
 
@@ -216,9 +226,15 @@ void UGI_GreenOne::UpdateSaveData()
 		}
 		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
 		{
-			CurrentSave->MapName = CurrentLevel->GetWorldAssetPackageFName();
+			FName TargetMapName = CurrentLevel->GetWorldAssetPackageFName();
+			FString CurrentMapStringName;
+			TargetMapName.ToString(CurrentMapStringName);
+			if (CurrentMapStringName.Contains("Level"))
+			{
+				CurrentSave->MapName = TargetMapName;
+				break;
+			}
 			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *CurrentSave->MapName.ToString());
-			break;
 		}
 	}
 }
@@ -240,11 +256,6 @@ void UGI_GreenOne::ApplySaveData()
 	UE_LOG(LogTemp, Warning, TEXT("Apply Save."));
 	if (!CurrentSave) { return; }
 
-	if (CurrentSave->bIsFirstTime)
-	{
-		LoadOneLevel(CurrentSave->MapName);
-		return;
-	}
 	LoadOneLevel(CurrentSave->MapName, this, FName("ApplyLocation"));
 }
 
@@ -271,7 +282,7 @@ void UGI_GreenOne::DeleteSaveScreen()
 
 void UGI_GreenOne::ApplyLocation()
 {
-	FTimerHandle SetLocatioHandle;
+	//FTimerHandle SetLocatioHandle;
 	//GetWorld()->GetTimerManager().SetTimer(SetLocatioHandle, [&]() {
 		APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 		if (!PlayerRef)
@@ -369,14 +380,14 @@ void UGI_GreenOne::CreateAudioSave()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("La creation du Sound Save � Fail!!!"));
 	}
-	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
+	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex + 1);
 }
 
 void UGI_GreenOne::LoadAudioSave()
 {
-	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex))
+	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex + 1))
 	{
-		AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::LoadGameFromSlot(AudioSaveName, SaveIndex));
+		AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::LoadGameFromSlot(AudioSaveName, SaveIndex + 1));
 		if (AudioSettingsRef == nullptr)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Le cast du get Sound Save � Fail!!!"));
@@ -390,11 +401,11 @@ void UGI_GreenOne::LoadAudioSave()
 
 void UGI_GreenOne::SavedAudioSettings()
 {
-	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex))
+	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex + 1))
 	{
 		if (AudioSettingsRef != nullptr)
 		{
-			UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
+			UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex + 1);
 			return;
 		}
 	}
