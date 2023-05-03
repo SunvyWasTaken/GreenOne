@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, Abstract)
 class GREENONE_API UEffect : public UObject, public IEffectInterface
 {
 	GENERATED_BODY()

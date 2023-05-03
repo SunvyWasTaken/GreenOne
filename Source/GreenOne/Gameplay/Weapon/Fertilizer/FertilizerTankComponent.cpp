@@ -130,10 +130,10 @@ void UFertilizerTankComponent::Equip()
 	FertilizerPrimary = GetFertilizerTankByType(FertilizerType::SlowDown);
 	FertilizerSecondary = GetFertilizerTankByType(FertilizerType::AttackBonus);
 	if(FertilizerPrimary)
-		OnEquipFertilizerDelegate.Broadcast(0,FertilizerPrimary->GaugeValue);
+		OnActionFertilizerDelegate.Broadcast(0,FertilizerPrimary->GaugeValue, FertilizerPrimary->ColorInfo);
 
 	if(FertilizerSecondary)
-		OnEquipFertilizerDelegate.Broadcast(1,FertilizerSecondary->GaugeValue);
+		OnActionFertilizerDelegate.Broadcast(1,FertilizerSecondary->GaugeValue, FertilizerSecondary->ColorInfo);
 }
 
 void UFertilizerTankComponent::SwitchFertilizerEquip()
@@ -144,8 +144,8 @@ void UFertilizerTankComponent::SwitchFertilizerEquip()
 	FertilizerPrimary = FertilizerSecondary;
 	FertilizerSecondary = Temp;
 	
-	OnSwitchFertilizerTypeDelegate.Broadcast(0, FertilizerPrimary->GaugeValue);
-	OnSwitchFertilizerTypeDelegate.Broadcast(1, FertilizerSecondary->GaugeValue);
+	OnActionFertilizerDelegate.Broadcast(0, FertilizerPrimary->GaugeValue, FertilizerPrimary->ColorInfo);
+	OnActionFertilizerDelegate.Broadcast(1, FertilizerSecondary->GaugeValue, FertilizerSecondary->ColorInfo);
 }
 
 FertilizerType UFertilizerTankComponent::GetCurrentFertilizerType() const
@@ -199,7 +199,11 @@ FString UFertilizerTankComponent::GetFertilizerTypeName() const
 	return FString(TEXT("Aucun"));
 }
 
-void UFertilizerTankComponent::SetFertilizerValue(float Value)
+void UFertilizerTankComponent::SetFertilizerValueByType(const FertilizerType Type, float Value)
 {
+	if(FertilizerTankStruct* FertilizerTank = GetFertilizerTankByType(Type))
+	{
+		FertilizerTank->AddFertilizer(Value);
+	}
 }
 

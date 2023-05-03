@@ -11,18 +11,18 @@ struct FInteractibleFertilizerTankStruct
 
 	FInteractibleFertilizerTankStruct();
 	
-	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank", DisplayName = "Capacite max du reservoir", meta = (ClampMin = 0, ClampMax = 100))
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties", DisplayName = "Capacite max du reservoir", meta = (ClampMin = 0, ClampMax = 100))
 	float MaxGaugeValue = 100.f;
-	UPROPERTY(VisibleAnywhere, Category = "Custom|Fertilizer|Tank")
+	UPROPERTY(VisibleAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
 	float GaugeValue = MaxGaugeValue;
 	
-	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank", meta = (ClampMin = 0, ClampMax = 100), DisplayName = "Pourcentage d'engrais")
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties", meta = (ClampMin = 0, ClampMax = 100), DisplayName = "Pourcentage d'engrais")
 	float FertilizerValueToGive = 100.f;
 
-	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank", DisplayName = "Type d'engrais")
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties", DisplayName = "Type d'engrais")
 	FertilizerType FertilizerType;
 	
-	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank", DisplayName = "Consome le reservoir")
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties", DisplayName = "Consome le reservoir")
 	bool bIsConsume = false;
 	
 	float GetFertilizerValue(float CurrentReceverGaugeValue);
