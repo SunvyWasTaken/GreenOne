@@ -28,6 +28,11 @@ ABaseEnnemy::ABaseEnnemy()
 	DamageComp = CreateDefaultSubobject<UAC_DisplayDamage>(TEXT("DamageComp"));
 }
 
+void ABaseEnnemy::FellOutOfWorld(const UDamageType& dmgType)
+{
+	DeadEntity();
+}
+
 // Called when the game starts or when spawned
 void ABaseEnnemy::BeginPlay()
 {

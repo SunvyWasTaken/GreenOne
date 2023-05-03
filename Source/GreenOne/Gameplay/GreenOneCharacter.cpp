@@ -324,6 +324,8 @@ float AGreenOneCharacter::GetHealthPercent()
 	return Health / MaxHealth;
 }
 
+#pragma region Shoot
+
 void AGreenOneCharacter::Shoot()
 {
 	TurnCamera();
@@ -353,8 +355,11 @@ void AGreenOneCharacter::ShootRafale()
 	
 	FHitResult OutHit;
 	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
+	FVector EndLocation = LocationToAim - StartLocation;
+	EndLocation.Normalize();
+	EndLocation = StartLocation + (EndLocation * ShootDistance);
 
-	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, LocationToAim, ECC_Camera))
+	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera))
 	{
 		if(ShootParticule)
 		{
@@ -437,6 +442,8 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 		}
 	}
 }
+
+#pragma endregion
 
 //This function is used to toggle the pause state of the game. It first checks if a pause widget class has been set, and if not, it logs a warning. It then casts the
 // controller to a player controller and checks if it is valid. If it is, it checks if the world is paused. If it is, it creates a pause widget and adds it to the view

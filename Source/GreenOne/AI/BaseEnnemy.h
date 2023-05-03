@@ -23,6 +23,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UAC_DisplayDamage* DamageComp;
 
+	virtual void FellOutOfWorld(const class UDamageType& dmgType) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

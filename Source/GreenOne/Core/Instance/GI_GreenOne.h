@@ -23,15 +23,33 @@ public:
 
 	virtual void Init();
 
+#pragma region LoadLevel
+
 	UFUNCTION(BlueprintCallable)
-		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload = true);
+		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef = nullptr, const FName CallFunction = "", const bool ShouldUnload = false);
 
 	UFUNCTION()
 		void BeginLoadingScreen(const FString& MapName);
 
-	FLatentActionInfo LatentInfo;
+private:
+
+	UFUNCTION()
+		void UnloadMap();
+
+	UFUNCTION()
+		void CallFunctionAndRemoveLoading();
+
+	bool bShouldUnload;
+
+	FName LevelToUnload;
+
+	FName CallFunctionRef;
+
+	UObject* ObjectTargetRef;
 
 #pragma region Loading Screen
+
+public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Loading Screen")
 		TSubclassOf<class UUserWidget> LoadingScreenClass;
