@@ -37,13 +37,14 @@ void UBTT_AICombo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* Node
 {
 	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("taskfinish"));
 		FightStatus = 0;
 		PlayerRef->CanCombo = false;
 		PlayerRef->CanM_Fighting = false;
 		PlayerRef->CanMR_Fighting = false;
 		PlayerRef->Can_Fighting = false;
 		PlayerRef->CanR_Fighting = false;
-		PlayerRef->StopMov();
+		PlayerRef->StopMouv();
 	}
 }
 
@@ -117,10 +118,11 @@ void UBTT_AICombo::HitCheck(UBehaviorTreeComponent& OwnerComp)
 	{
 		if(	PlayerRef->CanCombo == true)
 		{
-			PlayerRef->StopMov();
+			PlayerRef->StopMouv();
 			UE_LOG(LogTemp, Warning, TEXT("Can Combo"));
 			SetFight(OwnerComp);
 		}
+		else{UE_LOG(LogTemp, Warning, TEXT("cest la merde"))};
 	}
 }
 
@@ -132,7 +134,7 @@ void UBTT_AICombo::Reset(UBehaviorTreeComponent& OwnerComp)
 		UE_LOG(LogTemp, Warning, TEXT("Reset Value Mouv"));
 		PlayerRef->CanM_Fighting = false;
 		PlayerRef->CanMR_Fighting = false;
-		PlayerRef->StopMov();
+		PlayerRef->StopMouv();
 		HitCheck(OwnerComp);
 	}
 }

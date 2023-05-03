@@ -30,8 +30,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Distance de Detection devant l'ennemie ")
 	FVector Offset = FVector(0, 0, 0);
 	
-	UFUNCTION(BlueprintCallable)
-	void Collision();
+	//UFUNCTION(BlueprintCallable)
+	//void Collision();
 
 	UFUNCTION(BlueprintCallable)
 	void EndCollision();
@@ -84,7 +84,7 @@ private:
 #pragma region AnimationValue
 public:
 
-	void StopMov();	
+	void StopMouv();	
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanDash() { return !IsDashing; };
