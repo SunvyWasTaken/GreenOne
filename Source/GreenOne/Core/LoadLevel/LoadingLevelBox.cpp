@@ -77,7 +77,7 @@ void ALoadingLevelBox::NotifyActorBeginOverlap(AActor* OtherActor)
 			{
 				const FName LevelName = FName(*FPackageName::ObjectPathToPackageName(LevelToLoad.ToString()));
 				UE_LOG(LogTemp, Warning, TEXT("Map to load %s"), *LevelName.ToString());
-				GameInstanceRef->LoadOneLevel(LevelName, this, FName("TpPlayer"));
+				GameInstanceRef->LoadOneLevel(LevelName, this, FName("TpPlayer"), true);
 			}
 			else
 			{
@@ -95,13 +95,9 @@ void ALoadingLevelBox::TpPlayer()
 		{
 			if (AActor* TargetLocation = Cast<AActor>(PlayerStartRef.LoadSynchronous()))
 			{
-				FTimerHandle TimerTP;
-				GetWorld()->GetTimerManager().SetTimer(TimerTP, [=](){PlayerRef->SetActorLocation(TargetLocation->GetActorLocation()); }, 0.01f, false);
-				UE_LOG(LogTemp, Warning, TEXT("HHAHAHAHAHA �a n'a pas marcher."));
+				PlayerRef->SetActorLocation(TargetLocation->GetActorLocation());
 			}
 		}
-		FTimerHandle LoadHandle;
-		GetWorld()->GetTimerManager().SetTimer(LoadHandle, [=](){ GameInstanceRef->RemoveLoadingScreen(); }, 2.f, false);
 	}
 }
 

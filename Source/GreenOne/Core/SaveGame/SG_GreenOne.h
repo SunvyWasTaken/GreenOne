@@ -20,7 +20,7 @@ public:
 	 * Position du player sur la carte.
 	 */
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
-	FVector PlayerLocation = FVector();
+	FVector PlayerLocation = FVector(-8976.f, -21785.f, 252.f);
 
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
 	FRotator PlayerRotation = FRotator();

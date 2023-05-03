@@ -19,56 +19,24 @@ UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 void UGI_GreenOne::Init()
 {
 	Super::Init();
-	// TODO Regarder ici. le truc lol
-	//FCoreUObjectDelegates::PreLoadMap.AddUObject(this, );
-	UE_LOG(LogTemp, Warning, TEXT("Le Init est call just in case."));
 	LoadSave();
 	LoadAudioSave();
 	FTimerHandle AudioHandle;
 	GetWorld()->GetTimerManager().SetTimer(AudioHandle, this, &UGI_GreenOne::ApplyAudioSettings, 0.1f, false);
-	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGI_GreenOne::BeginLoadingScreen);
-}
-
-void UGI_GreenOne::DisplayLoadingScreen()
-{
-	if (!LoadingScreenClass)
-	{
-		return;
-	}
-	CurrentLoadingScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
-	if (IsValid(CurrentLoadingScreen))
-	{
-		CurrentLoadingScreen->AddToViewport();
-		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetWorld()->GetFirstPlayerController(), CurrentLoadingScreen);
-	}
-}
-
-void UGI_GreenOne::RemoveLoadingScreen()
-{
-	if (CurrentLoadingScreen == nullptr)
-	{
-		return;
-	}
-	if (IsValid(CurrentLoadingScreen))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Retour à la normale"));
-		UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetWorld()->GetFirstPlayerController());
-		if (UW_LoadingScreen* CurrentLScreen = Cast<UW_LoadingScreen>(CurrentLoadingScreen))
-		{
-			CurrentLScreen->RemoveLoading();
-		}
-	}
+	//FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGI_GreenOne::BeginLoadingScreen);
 }
 
 void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload)
 {
-	LatentInfo.CallbackTarget = TargetRef;
-	LatentInfo.ExecutionFunction = CallFunction;
-	LatentInfo.Linkage = 0;
 	DisplayLoadingScreen();
+	ObjectTargetRef = TargetRef;
+	CallFunctionRef = CallFunction;
+	bShouldUnload = ShouldUnload;
+
+	FLatentActionInfo LatInfo;
+	LatInfo.CallbackTarget = this;
 	if (ShouldUnload)
 	{
-		FName LevelToUnload;
 		for (ULevelStreaming* CurrentLevel : GetWorld()->GetStreamingLevels())
 		{
 			if (!CurrentLevel)
@@ -76,16 +44,27 @@ void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, con
 				UE_LOG(LogTemp, Warning, TEXT("Wesh Vide, just in case le level que t'as voulu check est vide bref."));
 				continue;
 			}
-			if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
+		{
+			FName TargetMapName = CurrentLevel->GetWorldAssetPackageFName();
+			FString CurrentMapStringName;
+			TargetMapName.ToString(CurrentMapStringName);
+			if (CurrentMapStringName.Contains("Level"))
 			{
-				LevelToUnload = CurrentLevel->GetWorldAssetPackageFName();
+				LevelToUnload = TargetMapName;
 				break;
 			}
+			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *LevelToUnload.ToString());
 		}
-		FLatentActionInfo UnloadInfo;
-		UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, UnloadInfo, true);
+		}
+		LatInfo.ExecutionFunction = FName("UnloadMap");
 	}
-	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelToLoad, true, true, LatentInfo);
+	else
+	{
+		LatInfo.ExecutionFunction = FName("CallFunctionAndRemoveLoading");
+	}
+	LatInfo.Linkage = 0;
+	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelToLoad, true, false, LatInfo);
 }
 
 void UGI_GreenOne::BeginLoadingScreen(const FString& MapName)
@@ -115,6 +94,67 @@ void UGI_GreenOne::BeginLoadingScreen(const FString& MapName)
 	}
 }
 
+void UGI_GreenOne::UnloadMap()
+{
+	if (ObjectTargetRef != nullptr)
+	{
+		UFunction* Function = ObjectTargetRef->FindFunction(CallFunctionRef);
+		ObjectTargetRef->ProcessEvent(Function, nullptr);
+	}
+	if (bShouldUnload)
+	{
+		FLatentActionInfo LatentInfo;
+		LatentInfo.CallbackTarget = this;
+		LatentInfo.ExecutionFunction = FName("RemoveLoadingScreen");
+		LatentInfo.Linkage = 0;
+		UGameplayStatics::UnloadStreamLevel(GetWorld(), LevelToUnload, LatentInfo, false);
+	}
+}
+
+void UGI_GreenOne::CallFunctionAndRemoveLoading()
+{
+	FTimerHandle RemoveLoadHandle;
+	GetWorld()->GetTimerManager().SetTimer(RemoveLoadHandle, [&](){ RemoveLoadingScreen(); }, 1.5f, false);
+	if (ObjectTargetRef != nullptr)
+	{
+		UFunction* Function = ObjectTargetRef->FindFunction(CallFunctionRef);
+		ObjectTargetRef->ProcessEvent(Function, nullptr);
+	}
+}
+
+#pragma region LoadingScreen
+
+void UGI_GreenOne::DisplayLoadingScreen()
+{
+	if (!LoadingScreenClass)
+	{
+		return;
+	}
+	CurrentLoadingScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
+	if (IsValid(CurrentLoadingScreen))
+	{
+		CurrentLoadingScreen->AddToViewport();
+		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetWorld()->GetFirstPlayerController(), CurrentLoadingScreen);
+	}
+}
+
+void UGI_GreenOne::RemoveLoadingScreen()
+{
+	if (CurrentLoadingScreen == nullptr)
+	{
+		return;
+	}
+	if (IsValid(CurrentLoadingScreen))
+	{
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetWorld()->GetFirstPlayerController());
+		if (UW_LoadingScreen* CurrentLScreen = Cast<UW_LoadingScreen>(CurrentLoadingScreen))
+		{
+			CurrentLScreen->RemoveLoading();
+		}
+	}
+}
+
+#pragma endregion
 
 #pragma region Save
 
@@ -129,7 +169,6 @@ void UGI_GreenOne::SaveGame()
 	UpdateSaveData();
 	if (UGameplayStatics::DoesSaveGameExist(SaveName, SaveIndex))
 	{
-		CurrentSave->bIsFirstTime = false;
 		UGameplayStatics::SaveGameToSlot(CurrentSave, SaveName, SaveIndex);
 	}
 	else
@@ -170,7 +209,11 @@ void UGI_GreenOne::DeleteSave()
 
 void UGI_GreenOne::UpdateSaveData()
 {
-	if (!CurrentSave) { return; }
+	if (!CurrentSave)
+	{
+		UE_LOG(LogTemp, Error, TEXT("La save c'est mal passer il y un pointeur vide ici"));
+		return;
+	}
 	CurrentSave->PlayerLocation = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation();
 	CurrentSave->PlayerRotation = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorRotation();
 
@@ -183,9 +226,15 @@ void UGI_GreenOne::UpdateSaveData()
 		}
 		if (CurrentLevel->IsLevelLoaded() && CurrentLevel->IsLevelVisible())
 		{
-			CurrentSave->MapName = CurrentLevel->GetWorldAssetPackageFName();
+			FName TargetMapName = CurrentLevel->GetWorldAssetPackageFName();
+			FString CurrentMapStringName;
+			TargetMapName.ToString(CurrentMapStringName);
+			if (CurrentMapStringName.Contains("Level"))
+			{
+				CurrentSave->MapName = TargetMapName;
+				break;
+			}
 			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *CurrentSave->MapName.ToString());
-			break;
 		}
 	}
 }
@@ -207,12 +256,7 @@ void UGI_GreenOne::ApplySaveData()
 	UE_LOG(LogTemp, Warning, TEXT("Apply Save."));
 	if (!CurrentSave) { return; }
 
-	if (CurrentSave->bIsFirstTime)
-	{
-		LoadOneLevel(CurrentSave->MapName, this, FName("RemoveLoadingScreen"), false);
-		return;
-	}
-	LoadOneLevel(CurrentSave->MapName, this, FName("ApplyLocation"), false);
+	LoadOneLevel(CurrentSave->MapName, this, FName("ApplyLocation"));
 }
 
 void UGI_GreenOne::DisplaySaveScreen()
@@ -238,9 +282,8 @@ void UGI_GreenOne::DeleteSaveScreen()
 
 void UGI_GreenOne::ApplyLocation()
 {
-	FTimerHandle RemoveLoadingScreenHandle;
-	GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&]()
-	{ 
+	//FTimerHandle SetLocatioHandle;
+	//GetWorld()->GetTimerManager().SetTimer(SetLocatioHandle, [&]() {
 		APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 		if (!PlayerRef)
 		{
@@ -248,8 +291,7 @@ void UGI_GreenOne::ApplyLocation()
 		}
 		PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
 		PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
-		RemoveLoadingScreen();
-	}, 2.f, false);
+	//}, 0.5f, false);
 }
 
 #pragma endregion
@@ -338,14 +380,14 @@ void UGI_GreenOne::CreateAudioSave()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("La creation du Sound Save � Fail!!!"));
 	}
-	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
+	UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex + 1);
 }
 
 void UGI_GreenOne::LoadAudioSave()
 {
-	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex))
+	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex + 1))
 	{
-		AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::LoadGameFromSlot(AudioSaveName, SaveIndex));
+		AudioSettingsRef = Cast<USG_AudioSettings>(UGameplayStatics::LoadGameFromSlot(AudioSaveName, SaveIndex + 1));
 		if (AudioSettingsRef == nullptr)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Le cast du get Sound Save � Fail!!!"));
@@ -359,11 +401,11 @@ void UGI_GreenOne::LoadAudioSave()
 
 void UGI_GreenOne::SavedAudioSettings()
 {
-	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex))
+	if (UGameplayStatics::DoesSaveGameExist(AudioSaveName, SaveIndex + 1))
 	{
 		if (AudioSettingsRef != nullptr)
 		{
-			UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex);
+			UGameplayStatics::SaveGameToSlot(AudioSettingsRef, AudioSaveName, SaveIndex + 1);
 			return;
 		}
 	}

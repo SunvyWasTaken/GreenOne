@@ -16,20 +16,7 @@ class GREENONE_API UW_LoadingScreen : public UUserWidget
 
 public:
 
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* TInfo;
-
 	UFUNCTION(BlueprintNativeEvent)
 	void RemoveLoading();
-
-	float GetLoadingPercent();
-
-	UFUNCTION(BlueprintCallable)
-		void CheckLoadingProcess();
-
-private:
-
-	UFUNCTION()
-		void BeginLoadingScreen(const FString Name);
 
 };
