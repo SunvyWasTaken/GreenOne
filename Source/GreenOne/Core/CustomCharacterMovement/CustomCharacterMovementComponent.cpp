@@ -15,6 +15,15 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObje
 	
 }
 
+void UCustomCharacterMovementComponent::BackToPreviousPosition()
+{
+	if ( PreviousLocation != FVector::ZeroVector )
+	{
+		GetOwneChara()->SetActorLocation(PreviousLocation);
+		PreviousLocation = FVector::ZeroVector;
+	}
+}
+
 void UCustomCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
@@ -28,10 +37,7 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 	ExecVerticalJump(DeltaTime);
 	CustomDashTick(DeltaTime);
     CooldownTick(DeltaTime);
-	
-    //DashTick(DeltaTime);
-	// Reset the DashDirectionVector
-	//DashDirectionVector2D = FVector2D::ZeroVector;
+	// if ( IsStaticPosition(DeltaTime) ) { BackToPreviousPosition(); } // A AMELIORER // TODO : PAS OUF
 }
 
 void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
@@ -299,9 +305,8 @@ void UCustomCharacterMovementComponent::CustomDash()
 		return;
 	}
 	if (bDashOnCooldown || bIsDashing) { return; }
+	if (IsToClose()) { return; }
 
-
-	bIsDashing = true;
 	CurrentLocation = GetOwneChara()->GetActorLocation();
 	CustomForwardVector = GetOwneChara()->GetActorForwardVector();
 	if (DashDirectionVector2D != FVector2D::ZeroVector)
@@ -312,14 +317,63 @@ void UCustomCharacterMovementComponent::CustomDash()
 	}
 	CustomEndLocation = CurrentLocation + (CustomForwardVector * CustomDashDistance);
 	CustomTraceParcourtDistance = 0.f;
+
+	StartLocation = CurrentLocation;
+	TheoricEndLocation = CurrentLocation + (CustomForwardVector * CustomDashDistance);
 	
 	PreviousVel = Velocity.Length();
+	bIsDashing = true;
+	CurrentCustomDashDistance = CustomDashDistance;
 }
+
+void UCustomCharacterMovementComponent::StopDash()
+{
+	bIsDashing = false;
+	DashDirectionVector2D = FVector2D::ZeroVector;
+	bDashOnCooldown = true;
+	CurrentDashCooldown = DashCooldown;
+}
+
+bool UCustomCharacterMovementComponent::CheckTheoricPosition()
+{
+	if ( TheoricEndLocation == FVector::ZeroVector ) { return false; }
+	if ( CurrentLocation == TheoricEndLocation ) { return false;	}
+
+	float const_between = FVector::DistXY(StartLocation, TheoricEndLocation);
+	float d_between = FVector::DistXY(CurrentLocation, TheoricEndLocation);
+
+	if ( d_between <= const_between ) { return true; }
+	
+	return false;
+}
+
+/** TODO : PAS OUF 
+bool UCustomCharacterMovementComponent::IsStaticPosition(float DeltaTime)
+{
+	const FVector CustomCurrentLocation = GetOwneChara()->GetActorLocation();
+
+	if (PreviousLocation == FVector::Zero())
+	{
+		return false;
+	}
+	
+	if (PreviousLocation == CustomCurrentLocation)
+	{
+		CurrentStaticPositionTime += DeltaTime;
+		if ( CurrentStaticPositionTime >= StaticPositionMaxTime)
+		{
+			CurrentStaticPositionTime = 0.f;
+			return true;
+		}
+	}
+
+	return false;
+}
+**/
 
 void UCustomCharacterMovementComponent::CustomDashTick(float Deltatime)
 {
-	if (!bIsDashing)
-		{ return; }
+	if (!bIsDashing) { return; }
 
 	TArray<AActor*> CustomActorToIgnore;
 	CustomActorToIgnore.Add(GetOwner());
@@ -331,33 +385,72 @@ void UCustomCharacterMovementComponent::CustomDashTick(float Deltatime)
 	Velocity = CustomDashDirection;
 	CustomEndLocation = CurrentLocation + CustomDashDirection;
 
-	if (CustomTraceParcourtDistance <= CustomDashDistance)
-	{
-		FHitResult CustomCurrentOuthit;
-		bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
-			UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, CustomActorToIgnore, EDrawDebugTrace::None, CustomCurrentOuthit, true);
+	float temp_distance = 0.f;
+	if ( InFrontOfWall(&temp_distance) ) { CurrentCustomDashDistance = temp_distance; }
 
-		if (bHasHit)
+	if (CheckTheoricPosition())
+	{
+		if (CustomTraceParcourtDistance <= CurrentCustomDashDistance - 25.f)
 		{
-			CustomTraceParcourtDistance += CustomCurrentOuthit.Distance;
-			CurrentLocation = CustomCurrentOuthit.Location + CustomCurrentOuthit.ImpactNormal;
-			CustomForwardVector = FVector::VectorPlaneProject(CustomForwardVector, CustomCurrentOuthit.ImpactNormal);
-			CustomForwardVector.Normalize();
+			FHitResult CustomCurrentOuthit;
+			bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
+				UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, CustomActorToIgnore, EDrawDebugTrace::None, CustomCurrentOuthit, true);
+
+			if (bHasHit)
+			{
+				CustomTraceParcourtDistance += CustomCurrentOuthit.Distance;
+				CurrentLocation = CustomCurrentOuthit.Location + CustomCurrentOuthit.ImpactNormal;
+				CustomForwardVector = FVector::VectorPlaneProject(CustomForwardVector, CustomCurrentOuthit.ImpactNormal);
+				CustomForwardVector.Normalize();
+			}
+			else
+			{
+				CustomTraceParcourtDistance += CustomDashDirection.Length();
+				CurrentLocation = CustomCurrentOuthit.TraceEnd;
+			}
+			GetOwner()->AddActorWorldOffset(CustomDashDirection);
+			GetOwner()->SetActorRotation(GetRotationToDirection(CustomDashDirection));
 		}
 		else
 		{
-			CustomTraceParcourtDistance += CustomDashDirection.Length();
-			CurrentLocation = CustomCurrentOuthit.TraceEnd;
+			StopDash();
 		}
-		GetOwner()->AddActorWorldOffset(CustomDashDirection);
-		GetOwner()->SetActorRotation(GetRotationToDirection(CustomDashDirection));
 	}
 	else
 	{
-		bIsDashing = false;
-		DashDirectionVector2D = FVector2D::ZeroVector;
-		CurrentDashCooldown = DashCooldown;
+		StopDash();
 	}
+}
+
+bool UCustomCharacterMovementComponent::IsToClose()
+{
+	float _distance = 50.f;
+	if (InFrontOfWall(&_distance))
+	{
+		if (_distance <= 25.f) { return true; }
+	}
+	return false;
+}
+
+bool UCustomCharacterMovementComponent::InFrontOfWall(float* Distance)
+{
+	const float CustomCapRadius = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const float CustomCapHeight = ( GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2 );
+
+	TArray<AActor*> CustomActorToIgnore;
+	CustomActorToIgnore.Add(GetOwner());
+	
+	FHitResult WallHitResult;
+	bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
+		UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, CustomActorToIgnore, EDrawDebugTrace::None, WallHitResult, true);
+
+	if (bHasHit)
+	{
+		Distance = &WallHitResult.Distance;
+		return true;
+	}
+	else
+		return false;
 }
 
 #pragma endregion
