@@ -24,7 +24,7 @@ AFlyingAICharacter::AFlyingAICharacter()
 	CurrentHeight = CreateDefaultSubobject<UTextRenderComponent>(TEXT("CurrentHeight"));
 	CurrentHeight->SetupAttachment(RootComponent);
 
-	static ConstructorHelpers::FObjectFinder<USoundBase> SoundObject(TEXT("/Game/GreenOne/SFX/S_AvancerKamikazeCisailleur"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundObject(TEXT("/Game/GreenOne/SFX/Cisailleur/MS_AvancerCissailleur"));
 	if (SoundObject.Object != NULL)
 	{
 		SoundClass = SoundObject.Object;
