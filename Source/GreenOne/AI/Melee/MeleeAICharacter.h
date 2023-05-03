@@ -5,7 +5,6 @@
 #include "Navigation/CrowdFollowingComponent.h"
 #include "CoreMinimal.h"
 #include "GreenOne/AI/BaseEnnemy.h"
-#include "GameFramework/Character.h"
 #include "MeleeAICharacter.generated.h"
 
 UCLASS()
@@ -34,7 +33,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Collision();
 
+	UFUNCTION(BlueprintCallable)
+	void EndCollision();
 
+
+	UFUNCTION(BlueprintCallable)
+	void SetCollision();
 
 
 
@@ -76,5 +80,51 @@ private:
 	//UFUNCTION()
 	//void OnDamage(float value);
 
+
+#pragma region AnimationValue
+public:
+
+	void StopMov();	
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool CanDash() { return !IsDashing; };
+
+	bool IsDashing = false;
+	
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	//UAnimMontage* LeftDash;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanLDash = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanRDash = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanM_Fighting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanMR_Fighting = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool Can_Fighting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanR_Fighting = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
+	bool CanCombo = false;
+	
+
+	
+private:
+	
+	UFUNCTION()
+	void OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* R_ArmCollider;
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* L_ArmCollider;
+
+
+#pragma endregion	
 	
 };
