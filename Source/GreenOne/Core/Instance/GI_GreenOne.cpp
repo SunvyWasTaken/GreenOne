@@ -8,6 +8,8 @@
 #include "GreenOne/Core/Audio/SG_AudioSettings.h"
 #include "Engine/LevelStreaming.h"
 #include "GreenOne/Widget/W_LoadingScreen.h"
+#include "MoviePlayer.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
@@ -24,6 +26,7 @@ void UGI_GreenOne::Init()
 	LoadAudioSave();
 	FTimerHandle AudioHandle;
 	GetWorld()->GetTimerManager().SetTimer(AudioHandle, this, &UGI_GreenOne::ApplyAudioSettings, 0.1f, false);
+	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGI_GreenOne::BeginLoadingScreen);
 }
 
 void UGI_GreenOne::DisplayLoadingScreen()
@@ -32,19 +35,24 @@ void UGI_GreenOne::DisplayLoadingScreen()
 	{
 		return;
 	}
-
 	CurrentLoadingScreen = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
-	if (CurrentLoadingScreen)
+	if (IsValid(CurrentLoadingScreen))
 	{
 		CurrentLoadingScreen->AddToViewport();
+		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetWorld()->GetFirstPlayerController(), CurrentLoadingScreen);
 	}
-
 }
 
 void UGI_GreenOne::RemoveLoadingScreen()
 {
+	if (CurrentLoadingScreen == nullptr)
+	{
+		return;
+	}
 	if (IsValid(CurrentLoadingScreen))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Retour à la normale"));
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetWorld()->GetFirstPlayerController());
 		if (UW_LoadingScreen* CurrentLScreen = Cast<UW_LoadingScreen>(CurrentLoadingScreen))
 		{
 			CurrentLScreen->RemoveLoading();
@@ -79,6 +87,34 @@ void UGI_GreenOne::LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, con
 	}
 	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelToLoad, true, true, LatentInfo);
 }
+
+void UGI_GreenOne::BeginLoadingScreen(const FString& MapName)
+{
+	if (MapMenuRef == nullptr)
+	{
+		return;
+	}
+	if (MapName == MapMenuRef->GetFName().ToString())
+	{
+		return;
+	}
+	UUserWidget* LoadingWidget = CreateWidget<UUserWidget>(GetWorld(), LoadingScreenClass);
+	if (LoadingWidget)
+	{
+		FLoadingScreenAttributes LoadingScreen;
+
+		TSharedRef<SWidget> LoadingScreenWidget = SNullWidget::NullWidget;
+
+		LoadingScreenWidget = LoadingWidget->TakeWidget();
+		LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
+		LoadingScreen.MinimumLoadingScreenDisplayTime = 1.5f;
+		LoadingScreen.bMoviesAreSkippable = false;
+
+		LoadingScreen.WidgetLoadingScreen = LoadingScreenWidget;
+		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
+	}
+}
+
 
 #pragma region Save
 
@@ -149,6 +185,7 @@ void UGI_GreenOne::UpdateSaveData()
 		{
 			CurrentSave->MapName = CurrentLevel->GetWorldAssetPackageFName();
 			UE_LOG(LogTemp, Warning, TEXT("Current Lvl : %s"), *CurrentSave->MapName.ToString());
+			break;
 		}
 	}
 }
@@ -201,16 +238,18 @@ void UGI_GreenOne::DeleteSaveScreen()
 
 void UGI_GreenOne::ApplyLocation()
 {
-	APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (!PlayerRef)
-	{
-		return;
-	}
-	PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
-	PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
-
 	FTimerHandle RemoveLoadingScreenHandle;
-	GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&](){ RemoveLoadingScreen();}, 2.f, false); 
+	GetWorld()->GetTimerManager().SetTimer(RemoveLoadingScreenHandle, [&]()
+	{ 
+		APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		if (!PlayerRef)
+		{
+			return;
+		}
+		PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
+		PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
+		RemoveLoadingScreen();
+	}, 2.f, false);
 }
 
 #pragma endregion

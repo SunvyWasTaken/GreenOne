@@ -25,7 +25,7 @@ ALoadingLevelBox::ALoadingLevelBox()
 void ALoadingLevelBox::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ALoadingLevelBox::OnComponentOverlap);
+	// CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ALoadingLevelBox::OnComponentOverlap);
 }
 
 #if WITH_EDITOR
@@ -40,8 +40,33 @@ void ALoadingLevelBox::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 
 #endif // WITH_EDITOR
 
-void ALoadingLevelBox::OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+
+// void ALoadingLevelBox::OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+// {
+// 	PlayerRef = Cast<AGreenOneCharacter>(OtherActor);
+// 	if (PlayerRef != nullptr)
+// 	{
+// 		UGI_GreenOne* GameInstanceRef = Cast<UGI_GreenOne>(GetWorld()->GetGameInstance());
+// 		if (GameInstanceRef != nullptr)
+// 		{
+// 			if (!LevelToLoad.IsNull())
+// 			{
+// 				const FName LevelName = FName(*FPackageName::ObjectPathToPackageName(LevelToLoad.ToString()));
+// 				UE_LOG(LogTemp, Warning, TEXT("Map to load %s"), *LevelName.ToString());
+// 				GameInstanceRef->LoadOneLevel(LevelName, this, FName("TpPlayer"));
+// 			}
+// 			else
+// 			{
+// 				UE_LOG(LogTemp, Warning, TEXT("Je sais pas pourquoi t'es vide"));
+// 			}
+// 		}
+// 	}
+// }
+
+//Methode temporaire
+void ALoadingLevelBox::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorBeginOverlap(OtherActor);
 	PlayerRef = Cast<AGreenOneCharacter>(OtherActor);
 	if (PlayerRef != nullptr)
 	{
@@ -72,7 +97,7 @@ void ALoadingLevelBox::TpPlayer()
 			{
 				FTimerHandle TimerTP;
 				GetWorld()->GetTimerManager().SetTimer(TimerTP, [=](){PlayerRef->SetActorLocation(TargetLocation->GetActorLocation()); }, 0.01f, false);
-				UE_LOG(LogTemp, Warning, TEXT("HHAHAHAHAHA ça n'a pas marcher."));
+				UE_LOG(LogTemp, Warning, TEXT("HHAHAHAHAHA ï¿½a n'a pas marcher."));
 			}
 		}
 		FTimerHandle LoadHandle;

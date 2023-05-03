@@ -24,6 +24,7 @@
 #include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
+#include "Interactible/InteractibleActorInterface.h"
 #include "Weapon/Fertilizer/FertilizerTankComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -95,6 +96,12 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 
 	MaxHealth = Health;
 	ShootCooldownRemaining = 1.f / ShootCooldown;
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundObject(TEXT("/Game/GreenOne/SFX/MainCharater/MS_Tire_graine"));
+	if (SoundObject.Object != nullptr)
+	{
+		ShootSound = SoundObject.Object;
+	}
 	
 }
 
@@ -204,13 +211,7 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
-{
-
-	if(GetCustomCharacterMovement()->bIsDashing)
-	{
-		GetCustomCharacterMovement()->CancelDash();
-	}
-	
+{	
 	if (Value.Get<bool>())
 	{
 		Jump();
@@ -250,7 +251,11 @@ void AGreenOneCharacter::ChangeFertilizerType()
 
 void AGreenOneCharacter::Interact()
 {
-	// TODO
+	UE_LOG(LogTemp, Warning, TEXT("Interact"));
+	
+	if(!InteractibleActorInterface) return;
+
+	InteractibleActorInterface->Action(this);
 }
 
 void AGreenOneCharacter::Respawn()
@@ -261,6 +266,22 @@ void AGreenOneCharacter::Respawn()
 		IEntityGame::Execute_EntityTakeDamage(this, MaxHealth*0.1f, FName("None"), this);
 	}
 	GetCharacterMovement()->StopMovementImmediately();
+}
+
+void AGreenOneCharacter::SetInteractibleActor(IInteractibleActorInterface* InteractibleActor)
+{
+	if(InteractibleActor)
+	{
+		InteractibleActorInterface = InteractibleActor;		
+	}else
+	{
+		InteractibleActorInterface = nullptr;
+	}
+}
+
+IInteractibleActorInterface* AGreenOneCharacter::GetInteractibleActor() const
+{
+	return InteractibleActorInterface;
 }
 
 void AGreenOneCharacter::TurnAtRate(float Rate)
@@ -331,14 +352,12 @@ void AGreenOneCharacter::ShootRafale()
 	}
 	
 	FHitResult OutHit;
-	const FVector  StartLocation = TargetMuzzle->GetComponentLocation();
+	const FVector StartLocation = TargetMuzzle->GetComponentLocation();
+	FVector EndLocation = LocationToAim - StartLocation;
+	EndLocation.Normalize();
+	EndLocation *= ShootDistance;
 
-	if (!IsTouchSomething)
-	{
-		LocationToAim = FollowCamera->GetComponentLocation() + (FollowCamera->GetForwardVector() * ShootDistance);
-	}
-
-	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, LocationToAim, ECC_Camera))
+	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera))
 	{
 		if(ShootParticule)
 		{
@@ -381,6 +400,7 @@ void AGreenOneCharacter::ShootRafale()
 		if(CurrentShootPart)
 		CurrentShootPart->SetFloatParameter("ShootDistance", ShootDistance);
 	}
+	UGameplayStatics::PlaySound2D(GetWorld(), ShootSound);
 }
 
 void AGreenOneCharacter::ShootTick(float deltatime)
@@ -399,20 +419,24 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 		APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 		FHitResult OutHit;
 
-		float DegreeRotation = UKismetMathLibrary::Lerp(0.f, 360.f, ShootBloom);
+		//float DegreeRotation = UKismetMathLibrary::Lerp(0.f, 360.f, ShootBloom);
 		FVector StartLocation = CameraRef->GetCameraLocation();
-		FVector EndLocation = StartLocation + UKismetMathLibrary::RandomUnitVectorInConeInDegrees(CameraRef->GetActorForwardVector(), DegreeRotation) * ShootDistance;
+		FVector EndLocation = StartLocation + (CameraRef->GetActorForwardVector() * ShootDistance); //UKismetMathLibrary::RandomUnitVectorInConeInDegrees(CameraRef->GetActorForwardVector(), DegreeRotation) * ShootDistance;
 		IsTouchSomething = GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera);
 		if (IsTouchSomething)
 		{
 			if (OutHit.GetActor() == this)
 			{
-				LocationToAim = TargetMuzzle->GetComponentLocation() + (GetActorForwardVector() * ShootDistance);
+				LocationToAim = TargetMuzzle->GetComponentLocation() + (GetActorForwardVector() * (ShootDistance + CameraBoom->TargetArmLength));
 			}
 			else
 			{
-				LocationToAim = (OutHit.Location - TargetMuzzle->GetComponentLocation()) * ShootDistance;
+				LocationToAim = OutHit.Location;
 			}
+		}
+		else
+		{
+			LocationToAim = FollowCamera->GetComponentLocation() + (FollowCamera->GetForwardVector() * (ShootDistance + CameraBoom->TargetArmLength));
 		}
 	}
 }
@@ -513,7 +537,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 void AGreenOneCharacter::Dash()
 {
-	GetCustomCharacterMovement()->Dash();
+	GetCustomCharacterMovement()->CustomDash();
 }
 
 void AGreenOneCharacter::CanRegenerate()

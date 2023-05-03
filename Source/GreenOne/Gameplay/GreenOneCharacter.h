@@ -8,6 +8,7 @@
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
 #include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
+#include "Interactible/InteractorInterface.h"
 #include "GreenOneCharacter.generated.h"
 
 enum class FertilizerType : uint8;
@@ -15,7 +16,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, FertilizerType, T
 
 class UInputAction;
 UCLASS(config=Game)
-class AGreenOneCharacter : public ACharacter, public IEntityGame
+class AGreenOneCharacter : public ACharacter, public IEntityGame, public IInteractorInterface
 {
 	GENERATED_BODY()
 
@@ -127,6 +128,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, BlueprintAssignable)
 	FOnPlayerDeath OnPlayerDeath;
 
+	class IInteractibleActorInterface* InteractibleActorInterface = nullptr;
+	
 protected:
 
 	void Move(const FInputActionValue& Value);
@@ -207,6 +210,11 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE UCameraComponent* GetOwnerFollowCamera() const { return FollowCamera; }
 
+#pragma region Interact
+	virtual void SetInteractibleActor(class IInteractibleActorInterface* InteractibleActor);
+	virtual IInteractibleActorInterface* GetInteractibleActor() const;
+#pragma endregion 
+
 #pragma region Shoot
 
 public:
@@ -239,6 +247,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
 	void StopShoot();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Animation")
+	const FVector GetLocationToAim() { return LocationToAim; };
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
 	float DamagePlayer = 10.f;
 
@@ -269,6 +280,8 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Combat")
 	float ShootCooldownRemaining;
+
+	class USoundBase* ShootSound;
 
 private:
 

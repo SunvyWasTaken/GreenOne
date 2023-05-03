@@ -26,15 +26,15 @@ void UW_LoadingScreen::CheckLoadingProcess()
 	{
 		//const ULevelStreaming* StreamingLevel = UGameplayStatics::GetStreamingLevel(GetWorld(), FName("L_Level1"));
 		//StreamingLevel->GetLoadedLevelPackageName()
-		TSet<int32> UIDS;
-		GetWorld()->GetLatentActionManager().GetActiveUUIDs(GetWorld(), UIDS);
-		UE_LOG(LogTemp, Warning, TEXT("Je charge."));
-		for (int32 UID : UIDS)
-		{
-			UE_LOG(LogTemp, Error, TEXT("UUID active : %d"), UID);
-		}
-		int32 NbrLoadingObject = GetWorld()->GetLatentActionManager().GetNumActionsForObject(GetGameInstance());
-		TInfo->SetText(FText::FromString(FString::FromInt(NbrLoadingObject)));
+		//TSet<int32> UIDS;
+		//GetWorld()->GetLatentActionManager().GetActiveUUIDs(GetWorld(), UIDS);
+		//UE_LOG(LogTemp, Warning, TEXT("Je charge."));
+		//for (int32 UID : UIDS)
+		//{
+		//	UE_LOG(LogTemp, Error, TEXT("UUID active : %d"), UID);
+		//}
+		//int32 NbrLoadingObject = GetWorld()->GetLatentActionManager().GetNumActionsForObject(GetGameInstance());
+		//TInfo->SetText(FText::FromString(FString::FromInt(NbrLoadingObject)));
 		//TInfo->SetText(FText::FromString(GetWorld()->GetLatentActionManager().GetDescription(GetWorld(), truc->LatentInfo.UUID)));
 
 		//if (StreamingLevel != nullptr && StreamingLevel->IsStreamingStatePending())

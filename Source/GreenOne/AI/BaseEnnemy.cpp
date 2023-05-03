@@ -69,28 +69,45 @@ void ABaseEnnemy::ResetEffect(UEffect* Effect, const float DelayToReset)
 	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [=]()
 		{
 			UpdateMaxSpeed(MaxSpeed);
-			if(const UNiagaraSystem* ParticleEffect = Effect->GetParticleEffect())
-			{
-				EffectsOnActor.FindRef(ParticleEffect)->DestroyComponent();
-				EffectsOnActor.Remove(ParticleEffect);
-			}
+			ResetParticleEffect(Effect->GetParticleEffect());
+			ResetMaterialEffect();
 		}, DelayToReset, false);
 }
 
-void ABaseEnnemy::AddParticle(UNiagaraSystem* Particle, UNiagaraComponent* ParticleComp)
+void ABaseEnnemy::ResetParticleEffect(const UNiagaraSystem* Particle) const
 {
-	if(!Particle) return;
-
-	EffectsOnActor.Add(Particle,ParticleComp);
+	TArray<UActorComponent*> UActorComponents;
+	GetComponents(UNiagaraComponent::StaticClass(),UActorComponents);
+	for (UActorComponent* ActorComponent : UActorComponents)
+	{
+		if(UNiagaraComponent* NiagaraComponent = Cast<UNiagaraComponent>(ActorComponent))
+		{
+			if(NiagaraComponent->GetAsset() == Particle)
+			{
+				NiagaraComponent->DestroyComponent();
+			}
+		}
+	}
 }
 
-bool ABaseEnnemy::bIsParticleExist(UNiagaraSystem* Particle) const
+void ABaseEnnemy::ResetMaterialEffect() const
 {
-	if(!Particle) return false;
-
-	return EffectsOnActor.Contains(Particle);
+	if(UMeshComponent* MeshComponent = FindComponentByClass<UMeshComponent>())
+	{
+		MeshComponent->SetOverlayMaterial(nullptr);
+	}
 }
 
+void ABaseEnnemy::ResetAllParticle() const
+{
+	TArray<UActorComponent*> UActorComponents;
+	GetComponents(UNiagaraComponent::StaticClass(),UActorComponents);
+	for (UActorComponent* ActorComponent : UActorComponents)
+	{
+		ActorComponent->SetActive(false);
+	}
+}
+	
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
 {
 	if (AAIController* AIController = Cast<AAIController>(Controller))
@@ -170,6 +187,7 @@ void ABaseEnnemy::DeadEntity()
 		SpawnerRef->RemoveEntityFromList(this);
 		FTimerHandle TimerHandle;
 		DrawLifeBar = false;
+		ResetAllParticle();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);

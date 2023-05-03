@@ -2,6 +2,7 @@
 
 #pragma once
 
+
 #include "CoreMinimal.h"
 #include "DEFINE.h"
 #include "MACRO.h"
@@ -38,7 +39,7 @@ class GREENONE_API UCustomCharacterMovementComponent : public UCharacterMovement
 	class AGreenOneCharacter* GreenOneCharacter;
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE AGreenOneCharacter* GetOwnerCharacter() const { return GreenOneCharacter; }
+	FORCEINLINE AGreenOneCharacter* GetOwneChara() const { return GreenOneCharacter; }
 
 protected:
 	virtual void InitializeComponent() override;
@@ -53,12 +54,17 @@ protected:
 public:
 	UCustomCharacterMovementComponent(const FObjectInitializer& ObjectInitializer);
 
+	void BackToPreviousPosition();
+	
 	UFUNCTION(BlueprintCallable)
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
+
+private:
+	FRotator TempRotationCharacter = FRotator::ZeroRotator;
 	
 #pragma region Jump/Falling
 	//Attributes//
-private:
+	private:
 	int32 MaxJump = 2;
 
 	EJumpState InJumpState = JS_None;
@@ -93,8 +99,8 @@ private:
 	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
 	float TargetDistance = 0;
 
-	FVector CurrentLocation;
-	FVector TargetJumpLocation;
+	FVector CurrentLocation = FVector::ZeroVector;
+	FVector TargetJumpLocation = FVector::ZeroVector;
 
 	float JumpTime = 0;
 
@@ -107,7 +113,7 @@ public:
 	float CustomGravityScale = 1.75f;
 
 	//Functions//
-private:
+	private:
 	virtual bool CheckFall(const FFindFloorResult& OldFloor, const FHitResult& Hit, const FVector& Delta, const FVector& OldLocation, float remainingTime, float timeTick, int32 Iterations, bool bMustJump) override;
 	bool VerticalJump();
 	bool HorizontalJump();
@@ -129,67 +135,76 @@ public:
 #pragma endregion 
 
 #pragma region Dash
+
 public:
-
-	// Dash dans la direction de l'input mouvement.
-	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
-		void Dash();
-
-	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
-		void CancelDash();
-
-	// Distance du dash
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ForceUnits = "cm", ClampMin = 0), Category = "Custom|Dash")
-		float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
-
-	// Vitesse du Dash
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ForceUnits = "cm/s", ClampMin = 0), Category = "Custom|Dash")
-		float DashSpeed = 2000.f; // CM/s
-
+	
 	// Temps que va prendre le dash a revenir apres utilisation.
 	// Le temps est en secondes.
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash", ForceUnits = "secs", ClampMin = 0), Category = "Custom|Dash")
-		float DashCooldown = 3.0f; // S
-
-	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
-		bool bIsDashing = false;
+		float DashCooldown = 1.0f; // S
 
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
 		bool bDashOnCooldown = false;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
+		bool bIsDashing = false;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Dash", meta = (ForceUnits = "cm"))
+		float CustomDashDistance = 800.f;
 
-	/**
-	 * Return the remaining time of the dash cooldown.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
-		float GetRemainingDashTime() { return CurrentDashCooldown; };
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Dash", meta = (ForceUnits = "cm/s"))
+		float CustomDashSpeed = 2500.f;
 
-	void SetDashDirectionVector(FVector2D& vector) { this->DashDirectionVector = vector; }
+	void CustomDash();
+
+	void StopDash();
+
+	void SetDashDirectionVector(FVector2D& vector) { DashDirectionVector2D = vector; }
 
 private:
-
-	// Utiliser pour placer le player pendant le Dash
-	void DashTick(float DeltaTime);
-
+	
 	// Cooldown du Dash
 	void CooldownTick(float DeltaTime);
 
-	FVector TargetDashLocation = FVector::ZeroVector;
+	// Dash Tick
+	void CustomDashTick(float Deltatime);
 
-	FVector StartDashLocation = FVector::ZeroVector;
+	bool InFrontOfWall(float *Distance);
 
-	FRotator BeforeRotationCharacter = FRotator::ZeroRotator;
+	bool IsToClose();
+	
+	bool CheckTheoricPosition();
 
-	FRotator TempRotationCharacter = FRotator::ZeroRotator;
+	/* TODO : PAS OUF A REFAIRE
+	// ** STATIC POSITION ** // .. // Personnage immobile
+	bool IsStaticPosition(float DeltaTime);
+	bool bIsStaticPosition = false;
+	float CurrentStaticPositionTime = 0.f;
+	float StaticPositionMaxTime = 0.5f;
+	// ********************* //
+	*/
+	
+	FVector2D DashDirectionVector2D = FVector2D::ZeroVector;
 
-	FVector2D DashDirectionVector = FVector2D::ZeroVector;
+	float PreviousVel;
 
-	FVector TempTargetLocation = FVector::ZeroVector;
+	FVector StartLocation = FVector::ZeroVector;
+	FVector TheoricEndLocation = FVector::ZeroVector;
+	FVector PreviousLocation = FVector::ZeroVector;
+	
+	FVector CustomForwardVector = FVector::ZeroVector;
 
-	float CurrentDashAlpha = 0.f;
+	FVector CustomEndLocation = FVector::ZeroVector;
 
+	float CustomTraceParcourtDistance = 0.f;
+
+	float CustomCurrentAlpha = 0;
+
+	float CurrentCustomDashDistance = 0.f;
+
+	TArray<FVector> CustomDashLocation;
+	
 	float CurrentDashCooldown = 0.f;
-
-	float DashTime = 0.f;
 
 #pragma endregion Dash
 

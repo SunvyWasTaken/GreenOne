@@ -15,9 +15,17 @@ public:
 	// Sets default values for this character's properties
 	AFlyingAICharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UTextRenderComponent* CurrentHeight;
+
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentHHH;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void DeadEntity() override;	
 
 public:	
 	// Called every frame
@@ -25,7 +33,15 @@ public:
 
 #pragma region Property
 
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
+		float MinFlyHeight = 180.f;
 
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
+		float MaxFlyHeight = 700.f;
+
+private:
+
+	void CheckHeight(float Deltatime);
 
 #pragma endregion
 
@@ -39,6 +55,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Custom|Tire")
 	void Shoot();
+
+	UFUNCTION(BlueprintCallable, Category = "Custom|Tire")
+	void CancelShoot();
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Distance min de tir", ClampMin = 0), Category = "Custom|Tire")
+	float MinShootDistance = 290.f;
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Distance max de tir", ClampMin = 0), Category = "Custom|Tire")
+	float MaxShootDistance = 500.f;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanShoot() { return !IsInCooldown; };
@@ -72,6 +97,9 @@ public:
 	 */
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = bUseTrace), Category = "Custom|Tire|UseTrace")
 	float ShootRange = 5000.f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Custom|Tire")
+	bool bCanCancelShoot = true;
 
 private:
 
@@ -131,6 +159,12 @@ private:
 
 	UFUNCTION()
 	void OnShinderu(float NbrDamage);
+
+	class USoundBase* SoundClass;
+
+	class UAudioComponent* AudioWarning;
+
+	bool IsAlreadyDead = false;
 
 #pragma endregion 
 

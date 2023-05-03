@@ -56,9 +56,11 @@ public:
 
 private:
 
-	UFUNCTION()
-		void OnComponentActivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	// UFUNCTION()
+	// 	void OnComponentActivate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	
 	/************************************************************************/
 	/* Spawner Property														*/
 	/************************************************************************/

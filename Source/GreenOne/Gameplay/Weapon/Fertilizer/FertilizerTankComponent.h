@@ -25,6 +25,7 @@ struct FertilizerTankStruct
 	TSubclassOf<UFertilizerBase> Effect;
 	
 	void UpdateGauge();
+	void AddFertilizer(float NewGaugeValue);
 	
 private:
 	void ClampGaugeValue();
@@ -32,8 +33,8 @@ private:
 };
 
 //TODO: preparer les delegates pour les UI
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateFertilizerTankGauge, float, GaugeValueUpdate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSwitchFertilizerType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateFertilizerTankGaugeSignature, float, GaugeValueUpdate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSwitchFertilizerTypeSignature);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GREENONE_API UFertilizerTankComponent : public UActorComponent
@@ -82,9 +83,12 @@ public:
 	class UFertilizerBase* GetEffect();
 	
 	FertilizerTankStruct* GetCurrentFertilizerTankActive();
-	//TODO: L'effet de l'engrais est propres a son réservoir, si le reservoir est vide alors on ne creer plus d'effet = ok
+	FertilizerTankStruct* GetFertilizerTankByType(FertilizerType Type);
 
 	/**Only Debug -> To Delete*/
 	FString GetFertilizerTypeName() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetFertilizerValue(float Value);
 	
 };

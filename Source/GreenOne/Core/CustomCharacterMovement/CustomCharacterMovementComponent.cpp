@@ -12,6 +12,16 @@ UCustomCharacterMovementComponent::UCustomCharacterMovementComponent(const FObje
 	GravityScale = CustomGravityScale;
 	JumpZVelocity = JumpVelocity;
 	MaxDistanceHorizontalJump = JumpZVelocity / 2;
+	
+}
+
+void UCustomCharacterMovementComponent::BackToPreviousPosition()
+{
+	if ( PreviousLocation != FVector::ZeroVector )
+	{
+		GetOwneChara()->SetActorLocation(PreviousLocation);
+		PreviousLocation = FVector::ZeroVector;
+	}
 }
 
 void UCustomCharacterMovementComponent::InitializeComponent()
@@ -25,12 +35,9 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	ExecHorizontalJump();
 	ExecVerticalJump(DeltaTime);
-    
-    DashTick(DeltaTime);
+	CustomDashTick(DeltaTime);
     CooldownTick(DeltaTime);
-	
-	// Reset the DashDirectionVector
-	DashDirectionVector = FVector2D::ZeroVector;
+	// if ( IsStaticPosition(DeltaTime) ) { BackToPreviousPosition(); } // A AMELIORER // TODO : PAS OUF
 }
 
 void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
@@ -49,7 +56,7 @@ void UCustomCharacterMovementComponent::OnMovementModeChanged(EMovementMode Prev
 	if (IsMovingOnGround() && !IsFalling())
 	{
 		InJumpState = JS_None;
-		GetOwnerCharacter()->JumpMaxCount = MaxJump;
+		GetOwneChara()->JumpMaxCount = MaxJump;
 		GravityScale = CustomGravityScale;
 		bVerticalJump = false;
 		bHorizontalJump = false;
@@ -71,6 +78,7 @@ bool UCustomCharacterMovementComponent::IsCustomMovementMode(ECustomMovementMode
 
 bool UCustomCharacterMovementComponent::DoJump(bool bReplayingMoves)
 {
+	bIsDashing = false;
 	if (CharacterOwner && CharacterOwner->CanJump())
 	{
 		bool bJumped = false;
@@ -95,9 +103,9 @@ bool UCustomCharacterMovementComponent::CheckFall(const FFindFloorResult& OldFlo
                                                   float timeTick, int32 Iterations,
                                                   bool bMustJump)
 {
-	GetOwnerCharacter()->JumpCurrentCount = 0;
+	GetOwneChara()->JumpCurrentCount = 0;
 	GetCharacterOwner()->JumpCurrentCountPreJump = 0;
-	GetOwnerCharacter()->JumpMaxCount = MaxJump + 1;
+	GetOwneChara()->JumpMaxCount = MaxJump + 1;
 	InJumpState = JS_None;
 	return Super::CheckFall(OldFloor, Hit, Delta, OldLocation, remainingTime, timeTick, Iterations, bMustJump);
 }
@@ -119,10 +127,10 @@ bool UCustomCharacterMovementComponent::VerticalJump()
 	{
 		SetMovementMode(MOVE_Falling);
 		InJumpState = JS_Vertical;
-		Velocity = GetOwnerCharacter()->GetVelocity();
+		Velocity = GetOwneChara()->GetVelocity();
+		CurrentLocation = GetOwneChara()->GetActorLocation();
 		bVerticalJump = true;
-		TargetJumpLocation = GetOwnerCharacter()->GetActorLocation() + FVector::UpVector * MaxVerticalHeight;
-		CurrentLocation = GetOwnerCharacter()->GetActorLocation();
+		TargetJumpLocation = CurrentLocation + FVector::UpVector * MaxVerticalHeight;
 		JumpTime = 0;
 		return true;
 	}
@@ -134,13 +142,13 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 	if (bHorizontalJump) return false;
 
 	bVerticalJump = false;
-	FVector Direction = GetOwnerCharacter()->GetActorForwardVector().GetSafeNormal2D();
+	FVector Direction = GetOwneChara()->GetActorForwardVector().GetSafeNormal2D();
 	FVector Target = Direction;
 
 	if (HorizontalJumpDirection != FVector2D::ZeroVector)
 	{
-		FVector Forward = GetOwnerCharacter()->GetActorForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
-		FVector Right = GetOwnerCharacter()->GetActorRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
+		FVector Forward = GetOwneChara()->GetActorForwardVector().GetSafeNormal2D() * HorizontalJumpDirection.Y;
+		FVector Right = GetOwneChara()->GetActorRightVector().GetSafeNormal2D() * HorizontalJumpDirection.X;
 		Direction = Forward.GetSafeNormal() + Right.GetSafeNormal();
 		Direction.Normalize();
 
@@ -164,18 +172,18 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 		DistanceHorizontalJump = MaxDistanceHorizontalJump;
 		GravityScale = 0.f;
 
-		TargetJumpLocation = GetOwnerCharacter()->GetActorLocation() + Direction * MaxDistanceHorizontalJump;
+		TargetJumpLocation = GetOwneChara()->GetActorLocation() + Direction * MaxDistanceHorizontalJump;
 
 		FHitResult ObstacleHit;
-		float CapsuleRadius = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleRadius();
-		float CapsuleHalfHeight = GetOwnerCharacter()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+		float CapsuleRadius = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleRadius();
+		float CapsuleHalfHeight = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
 		TArray<AActor*> ActorsIgnores;
-		ActorsIgnores.Push(GetOwnerCharacter());
+		ActorsIgnores.Push(GetOwneChara());
 
 		//Check if the horizontalJump preview hit an obstacle
 		bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(
-			GetWorld(), GetOwnerCharacter()->GetActorLocation(),
+			GetWorld(), GetOwneChara()->GetActorLocation(),
 			TargetJumpLocation, CapsuleRadius, CapsuleHalfHeight,
 			UEngineTypes::ConvertToTraceType(ECC_Visibility), false,
 			ActorsIgnores, EDrawDebugTrace::ForDuration, ObstacleHit, true, FLinearColor::Red, FLinearColor::Blue, 2);
@@ -186,8 +194,8 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 			DistanceHorizontalJump = ObstacleHit.Distance;
 		}
 
-		CurrentLocation = GetOwnerCharacter()->GetActorLocation();
-		GetOwnerCharacter()->LaunchCharacter(Target, true, true);
+		CurrentLocation = GetOwneChara()->GetActorLocation();
+		GetOwneChara()->LaunchCharacter(Target, true, true);
 		DrawDebugCapsule(GetWorld(), TargetJumpLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity,
 		                 FColor::Purple, false, 3);
 
@@ -201,6 +209,8 @@ bool UCustomCharacterMovementComponent::HorizontalJump()
 void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime) {
 	if (!bVerticalJump) return;
 
+	bIsDashing = false;
+
 	JumpTime += DeltaTime;
 
 	const float CurveDeltaTime = (VelocityTemp / MaxVerticalHeight) * JumpTime;
@@ -209,8 +219,8 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime) 
 	{
 		FHitResult VerticalJumpHitResult;
 		const bool bVerticalJumpHit = GetWorld()->LineTraceSingleByChannel(
-			VerticalJumpHitResult, GetOwnerCharacter()->GetActorLocation(),
-			GetOwnerCharacter()->GetActorLocation() + FVector::UpVector * 3, ECC_Visibility);
+			VerticalJumpHitResult, GetOwneChara()->GetActorLocation(),
+			GetOwneChara()->GetActorLocation() + FVector::UpVector * 3, ECC_Visibility);
 		if (bVerticalJumpHit)
 		{
 			DrawDebugSphere(GetWorld(), VerticalJumpHitResult.ImpactPoint, 8, 10, FColor::Red, false, 2);
@@ -227,14 +237,14 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime) 
 		return;
 	}
 	const float NewZLocation = UKismetMathLibrary::Ease(CurrentLocation.Z, TargetJumpLocation.Z, CurveDeltaTime, VerticalJumpCurve);
-	GetOwnerCharacter()->SetActorLocation(FVector(GetOwnerCharacter()->GetActorLocation().X, GetOwnerCharacter()->GetActorLocation().Y, NewZLocation), true);
+	GetOwneChara()->SetActorLocation(FVector(GetOwneChara()->GetActorLocation().X, GetOwneChara()->GetActorLocation().Y, NewZLocation), true);
 }
 
 void UCustomCharacterMovementComponent::ExecHorizontalJump()
 {
 	if (!bHorizontalJump) return;
 
-	TargetDistance += FVector::Distance(CurrentLocation, GetOwnerCharacter()->GetActorLocation());
+	TargetDistance += FVector::Distance(CurrentLocation, GetOwneChara()->GetActorLocation());
 
 	if (TargetDistance > DistanceHorizontalJump)
 	{
@@ -245,7 +255,7 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 		InJumpState = JS_None;
 	}
 	CurrentLocation = GetActorLocation();
-	GetOwnerCharacter()->SetActorRotation(TempRotationCharacter);
+	GetOwneChara()->SetActorRotation(TempRotationCharacter);
 }
 
 FRotator UCustomCharacterMovementComponent::GetRotationToDirection(FVector Direction)
@@ -275,118 +285,6 @@ void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& Ne
 
 #pragma region Dash
 
-void UCustomCharacterMovementComponent::Dash()
-{
-	if ( IsFalling() && GetCurrentJumpState() == JS_Vertical)
-	{
-		GetOwnerCharacter()->Jump();
-	}
-	
-	// Securite
-	if (GC == nullptr) { return; }
-	if (GC->GetCharacterMovement()->IsFalling()) { return; }
-	if (bDashOnCooldown || bIsDashing) { return; }
-	// 
-	
-	BeforeRotationCharacter = GC->GetActorRotation();
-	GC->GetCharacterMovement()->SetMovementMode(MOVE_Custom, CMOVE_DASH);
-	StartDashLocation = GC->GetActorLocation();
-
-	FVector DirectionVector = FVector::ZeroVector;
-	
-	// Récupération de la direction du joueur
-	FVector Direction = GC->GetActorForwardVector().GetSafeNormal2D();
-	
-	if ( DashDirectionVector != FVector2D::ZeroVector )
-	{
-		FVector Forward = GC->GetActorForwardVector().GetSafeNormal2D() * DashDirectionVector.Y;
-		FVector Right = GC->GetActorRightVector().GetSafeNormal2D() * DashDirectionVector.X;
-		Direction = Forward + Right;
-		Direction.Normalize();
-	}
-
-	TempRotationCharacter = GetRotationToDirection(Direction);
-
-	Direction = FVector(Direction.X, Direction.Y, 0.f);
-
-	if (Direction == FVector::ZeroVector)
-	{
-		DirectionVector = GC->GetActorForwardVector();
-	}
-	else
-	{
-		DirectionVector = Direction;
-	}
-	
-	FHitResult ObstacleHit;
-	float CapsuleRadius = GC->GetCapsuleComponent()->GetScaledCapsuleRadius();
-	float CapsuleHalfHeight = GC->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-
-	TArray<AActor*> ActorsIgnores;
-	ActorsIgnores.Push(GC);
-
-	TargetDashLocation = StartDashLocation + DirectionVector * DashDistance;
-
-	bool bObstacleHit = UKismetSystemLibrary::CapsuleTraceSingle(
-	GetWorld(), GetOwnerCharacter()->GetActorLocation(),
-	TargetDashLocation, CapsuleRadius, CapsuleHalfHeight,
-	UEngineTypes::ConvertToTraceType(ECC_Visibility), false,
-	ActorsIgnores, EDrawDebugTrace::ForDuration, ObstacleHit, true,
-	FLinearColor::Red, FLinearColor::Blue, 2);
-	
-	// Si le dash est en collision avec un objet, on reduit la distance du dash
-	if (bObstacleHit)
-	{
-		TargetDashLocation = StartDashLocation + (DirectionVector * (ObstacleHit.Distance - 50.f));
-	}
-	
-	DashTime = (DashDistance / DashSpeed) * 1000;
-
-	Velocity = (DirectionVector * DashSpeed);
-	
-	CurrentDashAlpha = 0.f;
-	bIsDashing = true;
-}
-
-void UCustomCharacterMovementComponent::CancelDash()
-{
-	if (bIsDashing)
-	{
-		bIsDashing = false;
-		bDashOnCooldown = true;
-		CurrentDashCooldown = DashCooldown;
-		DashDirectionVector = FVector2D::ZeroVector;
-		GC->SetActorLocation(TempTargetLocation);
-		GC->SetActorRotation(BeforeRotationCharacter);
-		GC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	}
-}
-
-void UCustomCharacterMovementComponent::DashTick(float DeltaTime)
-{
-	// Securite
-	if (!bIsDashing || bDashOnCooldown) { return; }
-	if (GC == nullptr) { return; }
-	//
-
-	CurrentDashAlpha += (DeltaTime * 1000) / (DashTime);
-
-	if (CurrentDashAlpha >= 1)
-	{
-		CurrentDashAlpha = 1;
-		CurrentDashCooldown = DashCooldown;
-		bIsDashing = false;
-		bDashOnCooldown = true;
-		GC->SetActorRotation(BeforeRotationCharacter);
-		GC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		DashDirectionVector = FVector2D::ZeroVector;
-	}
-
-	TempTargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
-	GC->SetActorLocation(TempTargetLocation);
-	GC->SetActorRotation(TempRotationCharacter);
-}
-
 void UCustomCharacterMovementComponent::CooldownTick(float DeltaTime)
 {
 	if (!bDashOnCooldown) { return; }
@@ -396,8 +294,163 @@ void UCustomCharacterMovementComponent::CooldownTick(float DeltaTime)
 	{
 		CurrentDashCooldown = 0.f;
 		bDashOnCooldown = false;
-		DashDirectionVector = FVector2D::ZeroVector;
 	}
+}
+
+void UCustomCharacterMovementComponent::CustomDash()
+{
+	if (IsFalling() && GetCurrentJumpState() == JS_Vertical)
+	{
+		GetOwneChara()->Jump();
+		return;
+	}
+	if (bDashOnCooldown || bIsDashing) { return; }
+	if (IsToClose()) { return; }
+
+	CurrentLocation = GetOwneChara()->GetActorLocation();
+	CustomForwardVector = GetOwneChara()->GetActorForwardVector();
+	if (DashDirectionVector2D != FVector2D::ZeroVector)
+	{
+		CustomForwardVector *= DashDirectionVector2D.Y;
+		CustomForwardVector += GetOwneChara()->GetActorRightVector() * DashDirectionVector2D.X;
+		CustomForwardVector.Normalize();
+	}
+	CustomEndLocation = CurrentLocation + (CustomForwardVector * CustomDashDistance);
+	CustomTraceParcourtDistance = 0.f;
+
+	StartLocation = CurrentLocation;
+	TheoricEndLocation = CurrentLocation + (CustomForwardVector * CustomDashDistance);
+	
+	PreviousVel = Velocity.Length();
+	bIsDashing = true;
+	CurrentCustomDashDistance = CustomDashDistance;
+}
+
+void UCustomCharacterMovementComponent::StopDash()
+{
+	bIsDashing = false;
+	DashDirectionVector2D = FVector2D::ZeroVector;
+	bDashOnCooldown = true;
+	CurrentDashCooldown = DashCooldown;
+}
+
+bool UCustomCharacterMovementComponent::CheckTheoricPosition()
+{
+	if ( TheoricEndLocation == FVector::ZeroVector ) { return false; }
+	if ( CurrentLocation == TheoricEndLocation ) { return false;	}
+
+	float const_between = FVector::DistXY(StartLocation, TheoricEndLocation);
+	float d_between = FVector::DistXY(CurrentLocation, TheoricEndLocation);
+
+	if ( d_between <= const_between ) { return true; }
+	
+	return false;
+}
+
+/** TODO : PAS OUF 
+bool UCustomCharacterMovementComponent::IsStaticPosition(float DeltaTime)
+{
+	const FVector CustomCurrentLocation = GetOwneChara()->GetActorLocation();
+
+	if (PreviousLocation == FVector::Zero())
+	{
+		return false;
+	}
+	
+	if (PreviousLocation == CustomCurrentLocation)
+	{
+		CurrentStaticPositionTime += DeltaTime;
+		if ( CurrentStaticPositionTime >= StaticPositionMaxTime)
+		{
+			CurrentStaticPositionTime = 0.f;
+			return true;
+		}
+	}
+
+	return false;
+}
+**/
+
+void UCustomCharacterMovementComponent::CustomDashTick(float Deltatime)
+{
+	if (!bIsDashing) { return; }
+
+	TArray<AActor*> CustomActorToIgnore;
+	CustomActorToIgnore.Add(GetOwner());
+
+	const float CustomCapRadius = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const float CustomCapHeight = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+	const FVector CustomDashDirection = CustomForwardVector * (Deltatime * (CustomDashSpeed + PreviousVel));
+	Velocity = CustomDashDirection;
+	CustomEndLocation = CurrentLocation + CustomDashDirection;
+
+	float temp_distance = 0.f;
+	if ( InFrontOfWall(&temp_distance) ) { CurrentCustomDashDistance = temp_distance; }
+
+	if (CheckTheoricPosition())
+	{
+		if (CustomTraceParcourtDistance <= CurrentCustomDashDistance - 25.f)
+		{
+			FHitResult CustomCurrentOuthit;
+			bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
+				UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, CustomActorToIgnore, EDrawDebugTrace::None, CustomCurrentOuthit, true);
+
+			if (bHasHit)
+			{
+				CustomTraceParcourtDistance += CustomCurrentOuthit.Distance;
+				CurrentLocation = CustomCurrentOuthit.Location + CustomCurrentOuthit.ImpactNormal;
+				CustomForwardVector = FVector::VectorPlaneProject(CustomForwardVector, CustomCurrentOuthit.ImpactNormal);
+				CustomForwardVector.Normalize();
+			}
+			else
+			{
+				CustomTraceParcourtDistance += CustomDashDirection.Length();
+				CurrentLocation = CustomCurrentOuthit.TraceEnd;
+			}
+			GetOwner()->AddActorWorldOffset(CustomDashDirection);
+			GetOwner()->SetActorRotation(GetRotationToDirection(CustomDashDirection));
+		}
+		else
+		{
+			StopDash();
+		}
+	}
+	else
+	{
+		StopDash();
+	}
+}
+
+bool UCustomCharacterMovementComponent::IsToClose()
+{
+	float _distance = 50.f;
+	if (InFrontOfWall(&_distance))
+	{
+		if (_distance <= 25.f) { return true; }
+	}
+	return false;
+}
+
+bool UCustomCharacterMovementComponent::InFrontOfWall(float* Distance)
+{
+	const float CustomCapRadius = GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const float CustomCapHeight = ( GetOwneChara()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2 );
+
+	TArray<AActor*> CustomActorToIgnore;
+	CustomActorToIgnore.Add(GetOwner());
+	
+	FHitResult WallHitResult;
+	bool bHasHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), CurrentLocation, CustomEndLocation, CustomCapRadius, CustomCapHeight,
+		UCollisionProfile::Get()->ConvertToTraceType(ECC_Visibility), false, CustomActorToIgnore, EDrawDebugTrace::None, WallHitResult, true);
+
+	if (bHasHit)
+	{
+		Distance = &WallHitResult.Distance;
+		return true;
+	}
+	else
+		return false;
 }
 
 #pragma endregion

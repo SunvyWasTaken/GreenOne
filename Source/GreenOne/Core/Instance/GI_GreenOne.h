@@ -26,12 +26,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload = true);
 
+	UFUNCTION()
+		void BeginLoadingScreen(const FString& MapName);
+
 	FLatentActionInfo LatentInfo;
 
 #pragma region Loading Screen
 
 	UPROPERTY(EditDefaultsOnly, Category = "Loading Screen")
 		TSubclassOf<class UUserWidget> LoadingScreenClass;
+
+	UPROPERTY(EditAnywhere, Category = "Reference")
+		TSoftObjectPtr<class UWorld> MapMenuRef;
 
 
 	/**
