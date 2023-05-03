@@ -14,15 +14,19 @@ struct FertilizerTankStruct
 
 	FertilizerTankStruct();
 	
-	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100))
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100), Category = "Custom|Fertilizer|Tank|Properties")
 	float MaxGaugeValue = 100.f;
+	UPROPERTY(VisibleAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
 	float GaugeValue = MaxGaugeValue;
 	
-	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100))
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100), Category = "Custom|Fertilizer|Tank|Properties")
 	float ReduceGaugeValue = 5.f;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UFertilizerBase> Effect;
+
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|UI")
+	FLinearColor ColorInfo;
 	
 	void UpdateGauge();
 	void AddFertilizer(float NewGaugeValue);
@@ -34,7 +38,7 @@ private:
 
 //TODO: preparer les delegates pour les UI
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateFertilizerTankGaugeSignature, float, GaugeValueUpdate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquipFertilizerSignature, int, index, float, GaugeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActionFertilizerSignature, int, index, float, GaugeValue, FLinearColor, ColorInfo);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSwitchFertilizerTypeSignature, int, index, float, GaugeValue);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -77,7 +81,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnUpdateFertilizerTankGaugeSignature OnUpdateFertilizerTankGaugeDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FOnEquipFertilizerSignature OnEquipFertilizerDelegate;
+	FOnActionFertilizerSignature OnActionFertilizerDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnSwitchFertilizerTypeSignature OnSwitchFertilizerTypeDelegate;
 	
@@ -103,6 +107,6 @@ public:
 	FString GetFertilizerTypeName() const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetFertilizerValue(float Value);
+	void SetFertilizerValueByType(const FertilizerType Type, float Value);
 	
 };
