@@ -91,6 +91,7 @@ void AMeleeAICharacter::StopMouv()
 			UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
 			if (BlackboardComp)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("StopMouv = true"));
 				BlackboardComp->SetValueAsBool("StopMouv", true);
 			}
 		}
@@ -102,6 +103,7 @@ void AMeleeAICharacter::StopMouv()
 			UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
 			if (BlackboardComp)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("StopMouv = false"));
 				BlackboardComp->SetValueAsBool("StopMouv", false);
 			}
 		}
@@ -116,7 +118,7 @@ void AMeleeAICharacter::OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* O
 	{
 		if(AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(OtherActor))
 		{
-			SetCollision();
+			
 			UE_LOG(LogTemp, Warning, TEXT("2eme hit"));
 			UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 			IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage, SweepResult.BoneName, this);

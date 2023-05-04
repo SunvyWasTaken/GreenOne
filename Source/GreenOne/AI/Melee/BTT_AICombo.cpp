@@ -75,6 +75,7 @@ void UBTT_AICombo::SetFight(UBehaviorTreeComponent& OwnerComp)
 	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("setfight"));
+		PlayerRef->SetCollision();
 		PlayerRef->Can_Fighting = true;
 		if (FightMStatus == -1)
 			{
