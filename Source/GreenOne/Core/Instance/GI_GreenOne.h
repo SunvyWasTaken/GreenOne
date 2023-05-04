@@ -74,6 +74,7 @@ public:
 
 private:
 
+	UPROPERTY()
 	class UUserWidget* CurrentLoadingScreen;
 
 #pragma endregion
@@ -236,6 +237,7 @@ private:
 	UFUNCTION()
 		void ApplyAudioSettings();
 
+	UPROPERTY()
 	class USG_AudioSettings* AudioSettingsRef;
 
 #pragma endregion
