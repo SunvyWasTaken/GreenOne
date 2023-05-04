@@ -183,7 +183,6 @@ void ABaseEnnemy::DeadEntity()
 	Cast<AAIController>(GetController())->GetBrainComponent()->StopLogic("Because");
 	if (SpawnerRef != nullptr)
 	{
-		UE_LOG(LogTemp,Warning, TEXT("OK"));
 		SpawnerRef->RemoveEntityFromList(this);
 		FTimerHandle TimerHandle;
 		DrawLifeBar = false;

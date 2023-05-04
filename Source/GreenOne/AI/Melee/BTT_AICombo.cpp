@@ -15,6 +15,13 @@ UBTT_AICombo::UBTT_AICombo()
 
 EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	if(IsValid(&OwnerComp))
+	{
+		// Log
+		UE_LOG(LogTemp, Warning, TEXT("BTT_AICombo::ExecuteTask"));
+		return EBTNodeResult::Failed;
+	}
+	
 	FightMStatus = (UKismetMathLibrary::RandomBool() ? (-1.f) : (1.f));
 	SetMoveFight(OwnerComp);
 	FTimerHandle Timer;
@@ -22,89 +29,86 @@ EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	{
 		//OnTaskFinished(OwnerComp, NodeMemory, EBTNodeResult::Succeeded);
 		//FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+		AMeleeAICharacter* IA_Ref = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn());
+		UE_LOG(LogTemp, Warning, TEXT("IA_Ref : %s"), *IA_Ref->GetName());
+		
+		if(IsValid(IA_Ref))
 		{
-			PlayerRef->CanM_Fighting = false;
-			PlayerRef->CanMR_Fighting = false;
+			IA_Ref->CanM_Fighting = false;
+			IA_Ref->CanMR_Fighting = false;
 			HitCheck(OwnerComp);
 		}
-		UE_LOG(LogTemp, Warning, TEXT("timer"));
+
 	},1.5f, false);
 	return EBTNodeResult::InProgress;
 }
 
 void UBTT_AICombo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
 {
-	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	if(AMeleeAICharacter* IA_Ref = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
 		FightStatus = 0;
-		PlayerRef->CanCombo = false;
-		PlayerRef->CanM_Fighting = false;
-		PlayerRef->CanMR_Fighting = false;
-		PlayerRef->Can_Fighting = false;
-		PlayerRef->CanR_Fighting = false;
-		PlayerRef->StopMov();
+		IA_Ref->CanCombo = false;
+		IA_Ref->CanM_Fighting = false;
+		IA_Ref->CanMR_Fighting = false;
+		IA_Ref->Can_Fighting = false;
+		IA_Ref->CanR_Fighting = false;
+		IA_Ref->StopMov();
 	}
 }
 
-
 void UBTT_AICombo::SetMoveFight(UBehaviorTreeComponent& OwnerComp)
 {
-	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	if(AMeleeAICharacter* IA_Ref = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		PlayerRef->CanM_Fighting = true;
+		IA_Ref->CanM_Fighting = true;
 		if(FightMStatus == -1)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("mouv gauche"));
 			FightStatus = -1;
 		}
 		else if(FightMStatus == 1)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("mouv droite"));
-			PlayerRef->CanMR_Fighting = true;
+			IA_Ref->CanMR_Fighting = true;
 			FightStatus = 1;
 		}
 		Check(OwnerComp);
 	}
 }
 
-
 void UBTT_AICombo::SetFight(UBehaviorTreeComponent& OwnerComp)
 {
-	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	if(AMeleeAICharacter* IA_Ref = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("setfight"));
-		PlayerRef->Can_Fighting = true;
+		IA_Ref->Can_Fighting = true;
 		if (FightMStatus == -1)
-			{
-				PlayerRef->CanR_Fighting = true;
-				UE_LOG(LogTemp, Warning, TEXT("id_fightR"));
-			}
+		{
+			IA_Ref->CanR_Fighting = true;
+		}
 		if (FightMStatus == 1)
-			{
-				
-				UE_LOG(LogTemp, Warning, TEXT("id_fightL"));
-			}
+		{
+			// LOG DE MERDE
+			UE_LOG(LogTemp, Warning, TEXT("id_fightL"));
+		}
 		FTimerHandle Timer;
 		GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
 		{
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		},2.0f, false);
 	}
-	
 }
-
 
 void UBTT_AICombo::Check(UBehaviorTreeComponent& OwnerComp)
 {
-	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	if(AMeleeAICharacter* IA_Ref = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		if(	PlayerRef->CanM_Fighting == false)
+		if(	IA_Ref->CanM_Fighting == false)
 		{
+			// Log de merde
 			UE_LOG(LogTemp, Warning, TEXT("mouvL faux"));
 		}
-		if(	PlayerRef->CanMR_Fighting == false)
+		if(	IA_Ref->CanMR_Fighting == false)
 		{
+			// Log de merde
 			UE_LOG(LogTemp, Warning, TEXT("mouvR faux"));
 		}
 	}
@@ -113,12 +117,11 @@ void UBTT_AICombo::Check(UBehaviorTreeComponent& OwnerComp)
 
 void UBTT_AICombo::HitCheck(UBehaviorTreeComponent& OwnerComp)
 {
-	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	if(AMeleeAICharacter* IA_Ref = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		if(	PlayerRef->CanCombo == true)
+		if(	IA_Ref->CanCombo == true)
 		{
-			PlayerRef->StopMov();
-			UE_LOG(LogTemp, Warning, TEXT("Can Combo"));
+			IA_Ref->StopMov();
 			SetFight(OwnerComp);
 		}
 	}
@@ -126,13 +129,11 @@ void UBTT_AICombo::HitCheck(UBehaviorTreeComponent& OwnerComp)
 
 void UBTT_AICombo::Reset(UBehaviorTreeComponent& OwnerComp)
 {
-
-	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	if(AMeleeAICharacter* IA_Ref = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Reset Value Mouv"));
-		PlayerRef->CanM_Fighting = false;
-		PlayerRef->CanMR_Fighting = false;
-		PlayerRef->StopMov();
+		IA_Ref->CanM_Fighting = false;
+		IA_Ref->CanMR_Fighting = false;
+		IA_Ref->StopMov();
 		HitCheck(OwnerComp);
 	}
 }

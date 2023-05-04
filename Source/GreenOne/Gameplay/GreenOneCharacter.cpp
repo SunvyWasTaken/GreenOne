@@ -542,13 +542,11 @@ void AGreenOneCharacter::Dash()
 
 void AGreenOneCharacter::CanRegenerate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
 	if(Health >= MaxHealth)
 		return;
 	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
 		IsCombatMode = false;
-		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
 	},CoolDown, false);
 }
 
@@ -557,9 +555,7 @@ void AGreenOneCharacter::Regenerate(float DeltaSeconds)
 	if(IsCombatMode) return;
 	if(Health < MaxHealth)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("+10 health"));
 		Health += 10*DeltaSeconds;
-		UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
 		if(Health >= MaxHealth)
 		{
 			Health = MaxHealth;

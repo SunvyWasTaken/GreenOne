@@ -162,7 +162,6 @@ void AMeleeAICharacter::StopMov()
 
 void AMeleeAICharacter::OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ouiiiii"));
 	if(CanCombo == true)
 	{
 		if(AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(OtherActor))
