@@ -13,11 +13,14 @@ struct FertilizerTankStruct
 	GENERATED_BODY()
 
 	FertilizerTankStruct();
+
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
+	FertilizerType Type;
 	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100), Category = "Custom|Fertilizer|Tank|Properties")
 	float MaxGaugeValue = 100.f;
-	UPROPERTY(VisibleAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
-	float GaugeValue = MaxGaugeValue;
+	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
+	float GaugeValue = 0.f;
 	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100), Category = "Custom|Fertilizer|Tank|Properties")
 	float ReduceGaugeValue = 5.f;
@@ -112,6 +115,6 @@ public:
 	FString GetFertilizerTypeName() const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetFertilizerValueByType(const FertilizerType Type, float Value);
+	void SetFertilizerValueByType(FertilizerType Type, float Value);
 	
 };
