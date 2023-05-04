@@ -162,7 +162,7 @@ void AFlyingAICharacter::SelfDestruction()
 		}
 	}
 #if WITH_EDITOR
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExploRadius, 12, FColor::Red, true, 5.f);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExploRadius, 12, FColor::Red, false, 5.f);
 #endif
 	//Check if the ExplosionParticule is not null
 	if (ExplosionParticule != nullptr)

@@ -134,7 +134,7 @@ void UGI_GreenOne::DisplayLoadingScreen()
 	if (IsValid(CurrentLoadingScreen))
 	{
 		CurrentLoadingScreen->AddToViewport();
-		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetWorld()->GetFirstPlayerController(), CurrentLoadingScreen);
+		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetWorld()->GetFirstPlayerController(), CurrentLoadingScreen, EMouseLockMode::DoNotLock, true);
 	}
 }
 
