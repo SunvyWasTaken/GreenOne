@@ -37,7 +37,7 @@ private:
 };
 
 //TODO: preparer les delegates pour les UI
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateFertilizerTankGaugeSignature, float, GaugeValueUpdate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateFertilizerTankGaugeSignature, int, index, float, GaugeValueUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActionFertilizerSignature, int, index, float, GaugeValue, FLinearColor, ColorInfo);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSwitchFertilizerTypeSignature, int, index, float, GaugeValue);
 
@@ -84,6 +84,9 @@ public:
 	FOnActionFertilizerSignature OnActionFertilizerDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnSwitchFertilizerTypeSignature OnSwitchFertilizerTypeDelegate;
+
+	UPROPERTY(EditAnywhere)
+	bool bFertilizerActive = false;
 	
 	UFUNCTION(BlueprintCallable)
 	void OnShoot();
@@ -92,6 +95,8 @@ public:
 	bool IsTankEmpty(const FertilizerType Type);
 
 	void UpdateFertilizerType(FertilizerType Type);
+	UFUNCTION(BlueprintCallable)
+	void InitUIFertilizer();
 	void Equip();
 	void SwitchFertilizerEquip();
 

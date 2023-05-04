@@ -47,7 +47,7 @@ UFertilizerTankComponent::UFertilizerTankComponent()
 void UFertilizerTankComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if(AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
 	{
 		//Character->OnShootDelegate.AddDynamic(this, &UFertilizerTankComponent::OnShoot);
@@ -96,11 +96,13 @@ bool UFertilizerTankComponent::IsTypeExist(const FertilizerType Type) const
 void UFertilizerTankComponent::OnShoot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnShoot Update Fertilizer Tank"));
-		
+
+	if(!bFertilizerActive) return;
+	
 	if(FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
 	{
 		CurrentFertilizerTankActive->UpdateGauge();
-		OnUpdateFertilizerTankGaugeDelegate.Broadcast(CurrentFertilizerTankActive->GaugeValue);
+		OnUpdateFertilizerTankGaugeDelegate.Broadcast(0, CurrentFertilizerTankActive->GaugeValue);
 		UE_LOG(LogTemp, Warning, TEXT("Current Fertilizer Tank gauge value : %f"),CurrentFertilizerTankActive->GaugeValue);	
 	}else
 	{
@@ -125,24 +127,44 @@ void UFertilizerTankComponent::UpdateFertilizerType(FertilizerType Type)
 	EFertilizerType = Type;
 }
 
-void UFertilizerTankComponent::Equip()
+void UFertilizerTankComponent::InitUIFertilizer()
 {
 	FertilizerPrimary = GetFertilizerTankByType(FertilizerType::SlowDown);
 	FertilizerSecondary = GetFertilizerTankByType(FertilizerType::AttackBonus);
+
 	if(FertilizerPrimary)
 		OnActionFertilizerDelegate.Broadcast(0,FertilizerPrimary->GaugeValue, FertilizerPrimary->ColorInfo);
-
+	
 	if(FertilizerSecondary)
 		OnActionFertilizerDelegate.Broadcast(1,FertilizerSecondary->GaugeValue, FertilizerSecondary->ColorInfo);
+}
+
+void UFertilizerTankComponent::Equip()
+{	
+	bFertilizerActive = !bFertilizerActive;	
 }
 
 void UFertilizerTankComponent::SwitchFertilizerEquip()
 {
 	if(!FertilizerPrimary || !FertilizerSecondary) return;
 	
-	FertilizerTankStruct* Temp = FertilizerPrimary;
-	FertilizerPrimary = FertilizerSecondary;
-	FertilizerSecondary = Temp;
+	FertilizerTankStruct* Temp = new FertilizerTankStruct();
+	Temp->GaugeValue = FertilizerPrimary->GaugeValue;
+	Temp->ColorInfo = FertilizerPrimary->ColorInfo;
+	Temp->ReduceGaugeValue = FertilizerPrimary->ReduceGaugeValue;
+	Temp->Effect = FertilizerPrimary->Effect;
+	
+	FertilizerPrimary->GaugeValue = FertilizerSecondary->GaugeValue;
+	FertilizerPrimary->ColorInfo = FertilizerSecondary->ColorInfo;
+	FertilizerPrimary->ReduceGaugeValue = FertilizerSecondary->ReduceGaugeValue;
+	FertilizerPrimary->Effect = FertilizerSecondary->Effect;
+
+	FertilizerSecondary->GaugeValue = Temp->GaugeValue;
+	FertilizerSecondary->ColorInfo = Temp->ColorInfo;
+	FertilizerSecondary->ReduceGaugeValue = Temp->ReduceGaugeValue;
+	FertilizerSecondary->Effect = Temp->Effect;
+
+	Temp = nullptr;
 	
 	OnActionFertilizerDelegate.Broadcast(0, FertilizerPrimary->GaugeValue, FertilizerPrimary->ColorInfo);
 	OnActionFertilizerDelegate.Broadcast(1, FertilizerSecondary->GaugeValue, FertilizerSecondary->ColorInfo);
