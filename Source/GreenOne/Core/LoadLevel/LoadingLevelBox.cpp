@@ -9,6 +9,7 @@
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/PlayerStart.h"
 #include "Engine/LevelStreaming.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ALoadingLevelBox::ALoadingLevelBox()
@@ -96,6 +97,7 @@ void ALoadingLevelBox::TpPlayer()
 			if (AActor* TargetLocation = Cast<AActor>(PlayerStartRef.LoadSynchronous()))
 			{
 				PlayerRef->SetActorLocation(TargetLocation->GetActorLocation());
+				PlayerRef->GetCharacterMovement()->StopMovementImmediately();
 			}
 		}
 	}

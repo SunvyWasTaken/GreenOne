@@ -49,6 +49,11 @@ void ABaseEnnemy::BeginPlay()
 	}
 }
 
+void ABaseEnnemy::FellOutOfWorld(const UDamageType& dmgType)
+{
+	DeadEntity();
+}
+
 float ABaseEnnemy::GetPercentHealth()
 {
 	return Health / MaxHealth;
