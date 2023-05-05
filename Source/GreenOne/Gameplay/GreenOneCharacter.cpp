@@ -228,11 +228,6 @@ void AGreenOneCharacter::EnableFertilizer()
 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer Enable"));
 
 	FertilizerTankComponent->Equip();
-	
-	if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::None)
-		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
-	else if(FertilizerTankComponent->GetCurrentFertilizerType() != FertilizerType::None)
-		FertilizerTankComponent->UpdateFertilizerType(FertilizerType::None);
 }
 
 void AGreenOneCharacter::ChangeFertilizerType()
@@ -240,17 +235,6 @@ void AGreenOneCharacter::ChangeFertilizerType()
 	if(!FertilizerTankComponent) return;
 
 	FertilizerTankComponent->SwitchFertilizerEquip();
-	
-	// if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::AttackBonus)
-	// {
-	// 	FertilizerTankComponent->UpdateFertilizerType(FertilizerType::SlowDown);
-	// 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer SlowDown"));
-	// }else if(FertilizerTankComponent->GetCurrentFertilizerType() == FertilizerType::SlowDown)
-	// {
-	// 	FertilizerTankComponent->UpdateFertilizerType(FertilizerType::AttackBonus);
-	// 	UE_LOG(LogTemp, Warning, TEXT("Fertilizer AttackBonus"));
-	// }
-	
 }
 
 void AGreenOneCharacter::Interact()
