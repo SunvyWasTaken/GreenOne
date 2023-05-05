@@ -55,6 +55,7 @@ void UFertilizerTankComponent::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Can't Cast GetOwner, GetOwner is maybe not find !"));
 	}
+	InitUIFertilizer();
 }
 
 
@@ -141,14 +142,10 @@ void UFertilizerTankComponent::UpdateFertilizerType(FertilizerType Type)
 
 void UFertilizerTankComponent::InitUIFertilizer()
 {
-	FertilizerPrimary = GetFertilizerTankByType(FertilizerType::SlowDown);
-	FertilizerSecondary = GetFertilizerTankByType(FertilizerType::AttackBonus);
+	FertilizerPrimaryType = FertilizerType::SlowDown;
+	FertilizerSecondaryType = FertilizerType::AttackBonus;
 
-	if (FertilizerPrimary)
-		OnActionFertilizerDelegate.Broadcast(0, FertilizerPrimary->GaugeValue, FertilizerPrimary->ColorInfo);
-
-	if (FertilizerSecondary)
-		OnActionFertilizerDelegate.Broadcast(1, FertilizerSecondary->GaugeValue, FertilizerSecondary->ColorInfo);
+	EventAction();
 }
 
 void UFertilizerTankComponent::Equip()
@@ -158,31 +155,12 @@ void UFertilizerTankComponent::Equip()
 
 void UFertilizerTankComponent::SwitchFertilizerEquip()
 {
-	if (!FertilizerPrimary || !FertilizerSecondary) return;
+	
+	const FertilizerType Temp = FertilizerPrimaryType;
+	FertilizerPrimaryType = FertilizerSecondaryType;
+	FertilizerSecondaryType = Temp;
 
-	FertilizerTankStruct Temp;
-	Temp.GaugeValue = FertilizerPrimary->GaugeValue;
-	Temp.ColorInfo = FertilizerPrimary->ColorInfo;
-	Temp.ReduceGaugeValue = FertilizerPrimary->ReduceGaugeValue;
-	Temp.Effect = FertilizerPrimary->Effect;
-	Temp.Type = FertilizerPrimary->Type;
-
-	FertilizerPrimary->GaugeValue = FertilizerSecondary->GaugeValue;
-	FertilizerPrimary->ColorInfo = FertilizerSecondary->ColorInfo;
-	FertilizerPrimary->ReduceGaugeValue = FertilizerSecondary->ReduceGaugeValue;
-	FertilizerPrimary->Effect = FertilizerSecondary->Effect;
-	FertilizerPrimary->Type = FertilizerSecondary->Type;
-
-
-	FertilizerSecondary->GaugeValue = Temp.GaugeValue;
-	FertilizerSecondary->ColorInfo = Temp.ColorInfo;
-	FertilizerSecondary->ReduceGaugeValue = Temp.ReduceGaugeValue;
-	FertilizerSecondary->Effect = Temp.Effect;
-	FertilizerSecondary->Type = Temp.Type;
-
-
-	OnActionFertilizerDelegate.Broadcast(0, FertilizerPrimary->GaugeValue, FertilizerPrimary->ColorInfo);
-	OnActionFertilizerDelegate.Broadcast(1, FertilizerSecondary->GaugeValue, FertilizerSecondary->ColorInfo);
+	EventAction();
 }
 
 FertilizerType UFertilizerTankComponent::GetCurrentFertilizerType() const
@@ -194,11 +172,11 @@ UFertilizerBase* UFertilizerTankComponent::GetEffect()
 {
 	if (!IsTypeExist(EFertilizerType)) return nullptr;
 
-	if (FertilizerPrimary)
+	if (const FertilizerTankStruct* Primary = GetFertilizerTankByType(FertilizerPrimaryType))
 	{
-		if (!FertilizerPrimary->Effect) return nullptr;
+		if (!Primary->Effect) return nullptr;
 
-		return FertilizerFactory::Factory(this, EFertilizerType, FertilizerPrimary->Effect);
+		return FertilizerFactory::Factory(this, EFertilizerType, Primary->Effect);
 	}
 
 	return nullptr;
@@ -206,9 +184,12 @@ UFertilizerBase* UFertilizerTankComponent::GetEffect()
 
 FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive()
 {
-	if (!FertilizerPrimary) return nullptr;
+	if (FertilizerTankStruct* CurrentFertilizerActive =  GetFertilizerTankByType(FertilizerPrimaryType))
+	{
+		return CurrentFertilizerActive;
+	}
 
-	return FertilizerPrimary;
+	return nullptr;
 }
 
 FertilizerTankStruct* UFertilizerTankComponent::GetFertilizerTankByType(FertilizerType Type)
@@ -242,10 +223,19 @@ void UFertilizerTankComponent::SetFertilizerValueByType(FertilizerType Type, flo
 	{
 		FertilizerTank->AddFertilizer(Value);
 
-		if(Type == FertilizerPrimary->Type)
+		if(Type == FertilizerPrimaryType)
 			OnUpdateFertilizerTankGaugeDelegate.Broadcast(0, FertilizerTank->GaugeValue);
-		else if(Type == FertilizerSecondary->Type)
+		else if(Type == FertilizerSecondaryType)
 			OnUpdateFertilizerTankGaugeDelegate.Broadcast(1, FertilizerTank->GaugeValue);
 
 	}
+}
+
+void UFertilizerTankComponent::EventAction()
+{
+	if(const FertilizerTankStruct* Primary = GetFertilizerTankByType(FertilizerPrimaryType))
+		OnActionFertilizerDelegate.Broadcast(0, Primary->GaugeValue, Primary->ColorInfo);
+
+	if(const FertilizerTankStruct* Secondary = GetFertilizerTankByType(FertilizerSecondaryType))
+		OnActionFertilizerDelegate.Broadcast(1, Secondary->GaugeValue, Secondary->ColorInfo);
 }

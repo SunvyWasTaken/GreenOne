@@ -65,8 +65,10 @@ private:
 	UPROPERTY(EditAnywhere)
 	TMap<FertilizerType,FertilizerTankStruct> FertilizerTanks;
 
-	FertilizerTankStruct* FertilizerPrimary;
-	FertilizerTankStruct* FertilizerSecondary;
+	// FertilizerTankStruct* FertilizerPrimary;
+	// FertilizerTankStruct* FertilizerSecondary;
+	FertilizerType FertilizerPrimaryType;
+	FertilizerType FertilizerSecondaryType;
 	
 	bool IsTypeExist(const FertilizerType Type) const;
 
@@ -85,8 +87,6 @@ public:
 	FOnUpdateFertilizerTankGaugeSignature OnUpdateFertilizerTankGaugeDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnActionFertilizerSignature OnActionFertilizerDelegate;
-	UPROPERTY(BlueprintAssignable)
-	FOnSwitchFertilizerTypeSignature OnSwitchFertilizerTypeDelegate;
 
 	UPROPERTY(EditAnywhere)
 	bool bFertilizerActive = false;
@@ -116,5 +116,5 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetFertilizerValueByType(FertilizerType Type, float Value);
-	
+	void EventAction();
 };
