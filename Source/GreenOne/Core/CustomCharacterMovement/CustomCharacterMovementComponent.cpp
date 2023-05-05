@@ -210,7 +210,7 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime) 
 	if (!bVerticalJump) return;
 
 	bIsDashing = false;
-
+	BlockCheckHandle.Invalidate();
 	JumpTime += DeltaTime;
 
 	const float CurveDeltaTime = (VelocityTemp / MaxVerticalHeight) * JumpTime;
