@@ -55,7 +55,7 @@ void UFertilizerTankComponent::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Can't Cast GetOwner, GetOwner is maybe not find !"));
 	}
-	InitUIFertilizer();
+	//InitUIFertilizer();
 }
 
 
@@ -113,7 +113,7 @@ void UFertilizerTankComponent::OnShoot()
 	if (FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
 	{
 		CurrentFertilizerTankActive->UpdateGauge();
-		OnUpdateFertilizerTankGaugeDelegate.Broadcast(0, CurrentFertilizerTankActive->GaugeValue);
+		OnActionFertilizerDelegate.Broadcast(0, CurrentFertilizerTankActive->GaugeValue, CurrentFertilizerTankActive->ColorInfo);
 		UE_LOG(LogTemp, Warning, TEXT("Current Fertilizer Tank gauge value : %f"),
 		       CurrentFertilizerTankActive->GaugeValue);
 	}
@@ -151,6 +151,7 @@ void UFertilizerTankComponent::InitUIFertilizer()
 void UFertilizerTankComponent::Equip()
 {
 	bFertilizerActive = !bFertilizerActive;
+	OnActiveFertilizerDelegate.Broadcast(bFertilizerActive);
 }
 
 void UFertilizerTankComponent::SwitchFertilizerEquip()
@@ -224,10 +225,9 @@ void UFertilizerTankComponent::SetFertilizerValueByType(FertilizerType Type, flo
 		FertilizerTank->AddFertilizer(Value);
 
 		if(Type == FertilizerPrimaryType)
-			OnUpdateFertilizerTankGaugeDelegate.Broadcast(0, FertilizerTank->GaugeValue);
+			OnActionFertilizerDelegate.Broadcast(0, FertilizerTank->GaugeValue, FertilizerTank->ColorInfo);
 		else if(Type == FertilizerSecondaryType)
-			OnUpdateFertilizerTankGaugeDelegate.Broadcast(1, FertilizerTank->GaugeValue);
-
+			OnActionFertilizerDelegate.Broadcast(1, FertilizerTank->GaugeValue, FertilizerTank->ColorInfo);
 	}
 }
 

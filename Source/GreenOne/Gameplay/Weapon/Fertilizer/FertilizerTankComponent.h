@@ -40,9 +40,8 @@ private:
 };
 
 //TODO: preparer les delegates pour les UI
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateFertilizerTankGaugeSignature, int, index, float, GaugeValueUpdate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActionFertilizerSignature, int, index, float, GaugeValue, FLinearColor, ColorInfo);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSwitchFertilizerTypeSignature, int, index, float, GaugeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActiveFertilizerSignature, bool, IsActive);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GREENONE_API UFertilizerTankComponent : public UActorComponent
@@ -84,9 +83,9 @@ private:
 	
 public:
 	UPROPERTY(BlueprintAssignable)
-	FOnUpdateFertilizerTankGaugeSignature OnUpdateFertilizerTankGaugeDelegate;
-	UPROPERTY(BlueprintAssignable)
 	FOnActionFertilizerSignature OnActionFertilizerDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnActiveFertilizerSignature OnActiveFertilizerDelegate;
 
 	UPROPERTY(EditAnywhere)
 	bool bFertilizerActive = false;

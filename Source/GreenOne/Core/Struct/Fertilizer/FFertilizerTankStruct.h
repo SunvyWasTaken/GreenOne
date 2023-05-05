@@ -1,15 +1,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FInteractibleFertilizerTankStruct.generated.h"
+#include "FFertilizerTankStruct.generated.h"
 
 enum class FertilizerType : uint8;
 USTRUCT(BlueprintType)
-struct FInteractibleFertilizerTankStruct
+struct FFertilizerTankStruct
 {
 	GENERATED_BODY()
 
-	FInteractibleFertilizerTankStruct();
+	FFertilizerTankStruct();
 	
 	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties", DisplayName = "Capacite max du reservoir", meta = (ClampMin = 0, ClampMax = 100))
 	float MaxGaugeValue = 100.f;
