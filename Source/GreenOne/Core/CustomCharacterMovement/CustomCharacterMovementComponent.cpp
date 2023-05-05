@@ -246,6 +246,19 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 
 	TargetDistance += FVector::Distance(CurrentLocation, GetOwneChara()->GetActorLocation());
 
+	if (TargetDistance == 0.0f && !BlockCheckHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().SetTimer(BlockCheckHandle, [&]()
+		{
+			GetOwneChara()->LaunchCharacter(GetOwneChara()->GetForwardDirection() * -150.f, false, false);
+		},DelayToBlockCheck,false);	
+		
+	}
+	else if(TargetDistance > 0.0f)
+	{
+		BlockCheckHandle.Invalidate();
+	}
+	
 	if (TargetDistance > DistanceHorizontalJump)
 	{
 		bHorizontalJump = false;

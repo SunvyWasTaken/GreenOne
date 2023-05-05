@@ -104,6 +104,10 @@ private:
 
 	float JumpTime = 0;
 
+	FTimerHandle BlockCheckHandle;
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump/Falling|BlockingCheck")
+	float DelayToBlockCheck = .3f;
+	
 public:
 	/** Commun a tous les jumps **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Jump/Falling", DisplayName = "Velocité général", meta = (ForceUnits = "cm/s"))
