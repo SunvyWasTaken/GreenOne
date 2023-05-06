@@ -317,6 +317,7 @@ void UCustomCharacterMovementComponent::CustomDash()
 		GetOwneChara()->Jump();
 		return;
 	}
+	if (IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }
 	if (IsToClose()) { return; }
 
