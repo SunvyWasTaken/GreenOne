@@ -189,13 +189,13 @@ void ABaseEnnemy::DeadEntity()
 	if (SpawnerRef != nullptr)
 	{
 		SpawnerRef->RemoveEntityFromList(this);
-		FTimerHandle TimerHandle;
 		DrawLifeBar = false;
 		ResetAllParticle();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);
 	}
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);
 }
 
 void ABaseEnnemy::DestroyActor()

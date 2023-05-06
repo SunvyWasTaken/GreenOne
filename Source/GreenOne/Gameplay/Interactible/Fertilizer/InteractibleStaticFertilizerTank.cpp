@@ -2,7 +2,6 @@
 
 
 #include "InteractibleStaticFertilizerTank.h"
-
 #include "GreenOne/Gameplay/Weapon/Fertilizer/FertilizerTankComponent.h"
 
 AInteractibleStaticFertilizerTank::AInteractibleStaticFertilizerTank()
@@ -15,10 +14,9 @@ void AInteractibleStaticFertilizerTank::Action(AActor* Interactor)
 
 	if(UFertilizerTankComponent* FertilizerTankComponent = Interactor->FindComponentByClass<UFertilizerTankComponent>())
 	{
-		if(FertilizerTankStruct* FertilizerTankStruct = FertilizerTankComponent->GetFertilizerTankByType(InteractibleFertilizerTankStruct.FertilizerType)
-)
+		if(const FertilizerTankStruct* FertilizerTankStruct = FertilizerTankComponent->GetFertilizerTankByType(InteractibleFertilizerTankStruct.FertilizerType))
 		{
-			FertilizerTankStruct->AddFertilizer(InteractibleFertilizerTankStruct.GetFertilizerValue(FertilizerTankStruct->GaugeValue));
+			FertilizerTankComponent->SetFertilizerValueByType(InteractibleFertilizerTankStruct.FertilizerType, InteractibleFertilizerTankStruct.GetFertilizerValue(FertilizerTankStruct->GaugeValue));
 		}
 	}
 }

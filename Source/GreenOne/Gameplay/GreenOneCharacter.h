@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
+#include "Collectible/CollectorInterface.h"
 #include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
 #include "Interactible/InteractorInterface.h"
 #include "GreenOneCharacter.generated.h"
@@ -16,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, FertilizerType, T
 
 class UInputAction;
 UCLASS(config=Game)
-class AGreenOneCharacter : public ACharacter, public IEntityGame, public IInteractorInterface
+class AGreenOneCharacter : public ACharacter, public IEntityGame, public IInteractorInterface, public ICollectorInterface
 {
 	GENERATED_BODY()
 

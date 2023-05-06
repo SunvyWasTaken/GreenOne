@@ -49,9 +49,8 @@ void AFlyingAICharacter::BeginPlay()
 
 void AFlyingAICharacter::DeadEntity()
 {
-	if(AudioWarning != nullptr)
+	if(AudioWarning)
 		AudioWarning->FadeOut(0.1f, 0.f, EAudioFaderCurve::Linear);
-
 	Super::DeadEntity();
 }
 

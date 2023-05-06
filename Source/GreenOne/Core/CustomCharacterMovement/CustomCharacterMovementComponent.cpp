@@ -210,7 +210,7 @@ void UCustomCharacterMovementComponent::ExecVerticalJump(const float DeltaTime) 
 	if (!bVerticalJump) return;
 
 	bIsDashing = false;
-
+	BlockCheckHandle.Invalidate();
 	JumpTime += DeltaTime;
 
 	const float CurveDeltaTime = (VelocityTemp / MaxVerticalHeight) * JumpTime;
@@ -246,6 +246,19 @@ void UCustomCharacterMovementComponent::ExecHorizontalJump()
 
 	TargetDistance += FVector::Distance(CurrentLocation, GetOwneChara()->GetActorLocation());
 
+	if (TargetDistance == 0.0f && !BlockCheckHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().SetTimer(BlockCheckHandle, [&]()
+		{
+			GetOwneChara()->LaunchCharacter(GetOwneChara()->GetForwardDirection() * -150.f, false, false);
+		},DelayToBlockCheck,false);	
+		
+	}
+	else if(TargetDistance > 0.0f)
+	{
+		BlockCheckHandle.Invalidate();
+	}
+	
 	if (TargetDistance > DistanceHorizontalJump)
 	{
 		bHorizontalJump = false;
@@ -304,6 +317,7 @@ void UCustomCharacterMovementComponent::CustomDash()
 		GetOwneChara()->Jump();
 		return;
 	}
+	if (IsFalling()) { return; }
 	if (bDashOnCooldown || bIsDashing) { return; }
 	if (IsToClose()) { return; }
 
